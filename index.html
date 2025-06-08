@@ -22,14 +22,14 @@
     <style>
         /* --- CUTE CAT THEME --- */
         :root {
-            --theme-bg: #FFF9F2; /* Light cream background */
+            --theme-bg: #F5FBEF; /* Light Green background */
             --container-bg: #ffffff;
-            --primary-color: #FF8A5B; /* Playful Orange */
-            --primary-hover: #E57A50;
+            --primary-color: #76BC43; /* Main Green */
+            --primary-hover: #65a33a; /* Darker Green */
             --secondary-color: #7DD8C9; /* Soft Teal */
-            --text-color: #5C3A21; /* Dark Brown */
-            --border-color: #FFE8D6; /* Light Peach */
-            --weekend-bg: #FFE8D6;
+            --text-color: #384C27; /* Dark Green-Brown */
+            --border-color: #E8F5E9; /* Light Green */
+            --weekend-bg: #E8F5E9;
             --reminder-bg: #01A6BA; 
             --reminder-text: #ffffff; 
             --holiday-red: #ff8e8e;
@@ -88,7 +88,7 @@
             padding: 20px;
             margin-top: 40px;
             border-radius: 20px;
-            background-color: #fffdfa;
+            background-color: #fafff5;
             border: 1px solid var(--border-color);
         }
         .filter-grid {
@@ -233,7 +233,7 @@
             padding: 5px 8px; border-radius: 8px !important; color: white !important;
         }
         .fc-daygrid-day.fc-day-today { background-color: var(--today-bg-tint) !important; }
-        .fc-toolbar-title { font-size: 2em !important; color: var(--text-color); font-weight: 500; }
+        .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
         .fc-button {
             background-color: var(--primary-color) !important; border: none !important;
             text-transform: capitalize !important; box-shadow: none !important;
@@ -281,34 +281,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
         
-        .radio-group-horizontal {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 5px !important;
-            margin-bottom: 15px !important;
-            padding: 0 10%;
-        }
-        .radio-option input[type="radio"] {
-            display: none;
-        }
-        .radio-option span {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 400;
-        }
-        .radio-option input[type="radio"]:checked + span {
-            background-color: var(--secondary-color);
-            border-color: var(--primary-hover);
-            color: white;
-            font-weight: 500;
-        }
-        
         footer {
             text-align: center;
             padding: 25px 0 10px 0;
@@ -321,6 +293,33 @@
         footer p {
             margin: 0;
         }
+
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .fc-toolbar.fc-header-toolbar {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 5px;
+            }
+            .fc-toolbar-title {
+                font-size: 1.2em !important;
+            }
+            .fc .fc-button {
+                padding: 5px 8px !important;
+                font-size: 0.8em !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -375,7 +374,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.0</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.2</p>
     </footer>
 
     <script type="module">
