@@ -3,365 +3,915 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตารางเวรแมวมีมเภสัข (ระบบล็อกอิน Username)</title>
+    <title>แมวมีมเภสัช</title>
     
+    <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
+    <!-- FullCalendar v6 CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     
+    <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
+        /* --- CUTE CAT THEME --- */
         :root {
-            --theme-bg: #FFF9F2; --container-bg: #ffffff; --primary-color: #FF8A5B;
-            --primary-hover: #E57A50; --secondary-color: #7DD8C9; --text-color: #5C3A21;
-            --border-color: #FFE8D6; --weekend-bg: #fff5ec; --reminder-bg: #a3cfbb;
-            --reminder-text: #0a3d21; --holiday-red: #ff8e8e; --cancelled-color: #c3c3c3;
-            --post-night-shift-color: #a0a0a0; --clear-btn-red: #ff6b6b; --clear-btn-red-hover: #e05d5d;
+            --theme-bg: #F5FBEF; /* Light Green background */
+            --container-bg: #ffffff;
+            --primary-color: #76BC43; /* New Green */
+            --primary-hover: #65a33a; /* Darker Green */
+            --secondary-color: #7DD8C9; /* Soft Teal */
+            --text-color: #384C27; /* Dark Green-Brown */
+            --border-color: #E8F5E9; /* Light Green */
+            --weekend-bg: #E8F5E9;
+            --reminder-bg: #01A6BA; /* NEW Reminder Color */
+            --reminder-text: #ffffff; /* NEW Reminder Text Color */
+            --holiday-red: #ff8e8e;
+            --cancelled-color: #c3c3c3;
+            --post-night-shift-color: #a0a0a0;
+            --clear-btn-red: #ff6b6b;
+            --clear-btn-red-hover: #e05d5d;
+            --today-color: #219DFF; /* NEW Today Color */
+            --today-bg-tint: rgba(33, 157, 255, 0.15); /* NEW Today Tint */
         }
+
         body {
-            font-family: 'Mitr', sans-serif; background-color: var(--theme-bg);
-            color: var(--text-color); margin: 0; padding: 20px;
-            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            font-family: 'Mitr', sans-serif;
+            background-color: var(--theme-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        #login-container {
-            background-color: var(--container-bg); padding: 40px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); width: 100%; max-width: 400px;
-            text-align: center; margin: 5vh auto 0;
-        }
-        #login-container h2 { color: var(--primary-color); margin-bottom: 25px; font-size: 2em; }
-        .form-input {
-            width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 10px;
-            border: 1px solid var(--border-color); font-family: 'Mitr', sans-serif; font-size: 1em;
-        }
-        .form-input:focus {
-            outline: none; border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(255, 138, 91, 0.2);
-        }
-        .form-button {
-            width: 100%; padding: 12px; border: none; border-radius: 10px;
-            font-family: 'Mitr', sans-serif; font-size: 1.1em; cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        #submit-btn { background-color: var(--primary-color); color: white; margin-bottom: 10px; }
-        #submit-btn:hover { background-color: var(--primary-hover); }
-        #toggle-form-btn {
-            background: none; border: none; color: var(--primary-color);
-            cursor: pointer; margin-top: 15px; padding: 5px; font-size: 0.9em;
-        }
-        .form-button:active { transform: scale(0.98); }
-        
+
         #app-container {
-            max-width: 1200px; margin: auto; background: var(--container-bg);
-            padding: 30px 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            max-width: 1200px;
+            margin: auto;
+            background: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
         }
+
         h1, h2 {
-            color: var(--primary-color); text-align: center; font-weight: 500;
-            margin-top: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 500;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
         }
-        h1 { font-size: 2.8em; margin-bottom: 30px; border-bottom: 2px dashed var(--border-color); padding-bottom: 25px; }
-        h2 { font-size: 1.8em; margin-top: 40px; padding-bottom: 15px; border-bottom: none; }
+        
+        h1 { 
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 25px;
+        }
+        h2 { 
+            font-size: 1.8em; 
+            margin-top: 40px; 
+            padding-bottom: 15px;
+            border-bottom: none;
+        }
+        
         #calendar { max-width: 100%; margin: 25px auto 0; }
-        
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.8); z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column; gap: 20px;
+
+        #filter-container {
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 20px;
+            background-color: #fafff5;
+            border: 1px solid var(--border-color);
         }
-        .spinner {
-            border: 8px solid var(--border-color); border-top: 8px solid var(--primary-color);
-            border-radius: 50%; width: 60px; height: 60px;
-            animation: spin 1s linear infinite;
+        .filter-grid {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 15px; 
+            align-items: flex-end;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Styles from previous versions */
-        #filter-container { padding: 20px; margin-top: 40px; border-radius: 20px; background-color: #fffdfa; border: 1px solid var(--border-color); }
-        .filter-grid { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .filter-group { flex: 1 1 180px; display: flex; flex-direction: column; }
-        .filter-group label { margin-bottom: 8px; font-size: 0.9em; font-weight: 400; color: var(--text-color); opacity: 0.8; }
-        .filter-group select, .filter-group input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--container-bg); font-family: 'Mitr', sans-serif; font-size: 0.95em; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(255, 138, 91, 0.2); }
-        #clear-filters-btn { width: 100%; padding: 10px 12px; background-color: var(--clear-btn-red); color: white; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.2s, transform 0.1s; font-family: 'Mitr', sans-serif; font-size: 0.95em; font-weight: 400; }
+        .filter-group {
+            flex: 1 1 180px; 
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            margin-bottom: 8px; font-size: 0.9em;
+            font-weight: 400; color: var(--text-color);
+            opacity: 0.8;
+        }
+        .filter-group select,
+        .filter-group input {
+            width: 100%; padding: 10px 12px; border-radius: 10px;
+            border: 1px solid var(--border-color); background-color: var(--container-bg);
+            font-family: 'Mitr', sans-serif; font-size: 0.95em;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box; 
+        }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(118, 188, 67, 0.2);
+        }
+
+        #clear-filters-btn {
+            width: 100%; padding: 10px 12px; 
+            background-color: var(--clear-btn-red);
+            color: white;
+            border: none;
+            border-radius: 10px; cursor: pointer; 
+            transition: background-color 0.2s, transform 0.1s;
+            font-family: 'Mitr', sans-serif; font-size: 0.95em; font-weight: 400;
+        }
         #clear-filters-btn:hover { background-color: var(--clear-btn-red-hover); }
         #clear-filters-btn:active { transform: scale(0.97); }
+
         #summary-container { margin-top: 20px; padding-top: 20px; }
-        .summary-item { background-color: var(--container-bg); padding: 15px 20px; margin-bottom: 12px; border-radius: 16px; font-size: 1em; border: 1px solid var(--border-color); border-left: 6px solid var(--secondary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+
+        .summary-item {
+            background-color: var(--container-bg); padding: 15px 20px; margin-bottom: 12px;
+            border-radius: 16px; font-size: 1em; 
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
         .summary-item:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
         .summary-item strong { color: var(--text-color); font-weight: 500; }
-        .summary-item .notes { font-size: 0.9em; color: var(--text-color); opacity: 0.7; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-color); }
-        #pagination-container { display: flex; justify-content: center; align-items: center; padding: 20px 0 10px 0; }
-        .pagination-btn { background-color: transparent; border: 2px solid var(--border-color); color: var(--text-color); opacity: 0.7; padding: 8px 14px; margin: 0 4px; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; font-family: 'Mitr', sans-serif; font-size: 0.9em; }
-        .pagination-btn:hover { background-color: var(--border-color); opacity: 1; }
-        .pagination-btn.active { background-color: var(--primary-color); border-color: var(--primary-color); color: white; opacity: 1; font-weight: 500; }
-        .pagination-btn.disabled { cursor: not-allowed; opacity: 0.4; }
+        .summary-item .notes {
+            font-size: 0.9em; color: var(--text-color); opacity: 0.7; margin-top: 8px;
+            padding-top: 8px; border-top: 1px dashed var(--border-color);
+        }
+        #pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0 10px 0;
+        }
+        .pagination-btn {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            opacity: 0.7;
+            padding: 8px 14px;
+            margin: 0 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Mitr', sans-serif;
+            font-size: 0.9em;
+        }
+        .pagination-btn:hover {
+            background-color: var(--border-color);
+            opacity: 1;
+        }
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            opacity: 1;
+            font-weight: 500;
+        }
+        .pagination-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+
+        .fc { font-size: 1em; --fc-border-color: var(--border-color);}
+        .fc .fc-col-header-cell { background-color: transparent; border-color: var(--border-color); }
+        .fc .fc-col-header-cell a { color: var(--text-color) !important; font-weight: 400; }
+        .fc-event {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.85em !important; border: none !important;
+            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+        }
+        .fc-daygrid-day.fc-day-today { background-color: var(--today-bg-tint) !important; }
+        .fc-toolbar-title { font-size: 2em !important; color: var(--text-color); font-weight: 500; }
+        .fc-button {
+            background-color: var(--primary-color) !important; border: none !important;
+            text-transform: capitalize !important; box-shadow: none !important;
+            border-radius: 12px !important; transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .fc-button:hover { background-color: var(--primary-hover) !important; }
+        .fc-button:active { transform: scale(0.96); }
+        .fc .fc-button-group > .fc-button {
+            margin: 0 2px;
+        }
+        
+        .weekend-cell { background-color: var(--weekend-bg); }
+        .holiday-cell .fc-daygrid-day-number {
+            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
+            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            text-align: center; box-shadow: none; font-weight: 500; 
+        }
+        /* <<<< REMOVED: highlight for today's number >>>> */
+        .fc-day-today .fc-daygrid-day-number {
+            background-color: transparent;
+            color: var(--today-color) !important;
+            font-weight: 700;
+        }
+        
+        .swal2-popup { font-family: 'Mitr', sans-serif !important; border-radius: 20px !important; }
+        .swal2-title { color: var(--text-color) !important; font-weight: 500; }
+        .swal2-input-label {
+            font-weight: 400; margin: 1em 0 0.5em !important; color: var(--text-color) !important;
+            text-align: left; width: 80%; margin-left: 10%;
+        }
+        .swal2-select, .swal2-input {
+            width: 80% !important; margin: 0 auto !important; padding: 12px;
+            font-size: 1em; border-radius: 10px; border: 1px solid var(--border-color);
+        }
+        .swal2-confirm { border-radius: 10px !important; background-color: var(--primary-color) !important; }
+        .swal2-deny, .swal2-cancel { border-radius: 10px !important; }
+        .swal2-html-container { text-align: center !important; margin: 20px !important; }
+
+        .post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
+        .reminder-event {
+            background-color: transparent !important; border: none !important;
+            color: var(--reminder-text) !important; font-size: 0.8em !important;
+            font-weight: 500; padding-top: 2px !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
-    <div id="login-container" class="hidden">
-        <h2>🐾 ตารางเวรเหมียว 🐾</h2>
-        <div id="form-fields">
-            <!-- Fields will be dynamically inserted here -->
-        </div>
-        <button id="submit-btn" class="form-button"></button>
-        <button id="toggle-form-btn"></button>
-    </div>
-
-    <div id="app-container" class="hidden">
-        <div class="flex justify-between items-center mb-4">
-             <span id="user-info" class="text-md text-gray-600"></span>
-             <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition">ออกจากระบบ</button>
-        </div>
-        <h1>🐾 แมวมีมเภสัข 🐾</h1>
+    <div id="app-container">
+        <h1>🐾 แมวมีมเภสัช 🐾</h1>
         <div id='calendar'></div>
         
-        <!-- COMPLETE HTML STRUCTURE -->
         <div id="filter-container">
             <div class="filter-grid">
-                <div class="filter-group"> <label for="filter-person">เภสัชกร</label> <select id="filter-person"></select> </div>
-                <div class="filter-group"> <label for="filter-start-date">ตั้งแต่วันที่</label> <input type="date" id="filter-start-date"> </div>
-                <div class="filter-group"> <label for="filter-end-date">ถึงวันที่</label> <input type="date" id="filter-end-date"> </div>
-                <div class="filter-group"> <label for="filter-shift">ช่วงเวลา</label> <select id="filter-shift"></select> </div>
-                <div class="filter-group"> <label for="filter-room">เวร</label> <select id="filter-room"></select> </div>
-                <div class="filter-group"> <label>&nbsp;</label> <button id="clear-filters-btn">ล้างตัวกรอง</button> </div>
+                <div class="filter-group">
+                    <label for="filter-person">เภสัชกร</label>
+                    <select id="filter-person"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-start-date">ตั้งแต่วันที่</label>
+                    <input type="date" id="filter-start-date">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-end-date">ถึงวันที่</label>
+                    <input type="date" id="filter-end-date">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-shift">ช่วงเวลา</label>
+                    <select id="filter-shift"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-room">เวร</label>
+                    <select id="filter-room"></select>
+                </div>
+                <div class="filter-group">
+                     <label>&nbsp;</label>
+                     <button id="clear-filters-btn">ล้างตัวกรอง</button>
+                </div>
             </div>
         </div>
         
         <div id="summary-container">
             <h2>สรุปรายการเวร</h2>
-            <div id="summary-list"> <p style="text-align:center; color:#888;">กำลังโหลดข้อมูล หรือยังไม่มีข้อมูล...</p> </div>
+            <div id="summary-list">
+                <p style="text-align:center; color:#888;">กำลังโหลดข้อมูล หรือยังไม่มีข้อมูล...</p>
+            </div>
             <div id="pagination-container"></div>
         </div>
     </div>
-    
-    <div id="loader">
-        <div class="spinner"></div>
-        <p>กำลังโหลด...</p>
-    </div>
+
+    <!-- <<<< NEW: Footer Element >>>> -->
+    <footer id="page-footer">
+        <p>เวอร์ชั่น 2.0.4</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด</p>
+    </footer>
 
     <script type="module">
         // --- 1. FIREBASE SETUP ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, onAuthStateChanged, createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, signOut 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getDatabase, ref, onValue, set, get, update
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { initializeApp as initializeFirebaseApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBfmqKOzBfIr0fhpyTR3yVduHVV1f378Dc",
-            authDomain: "utths1.firebaseapp.com",
-            databaseURL: "https://utths1-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "utths1",
-            storageBucket: "utths1.appspot.com",
-            messagingSenderId: "3675660260",
-            appId: "1:3675660260:web:910c730c1829d9a0b671f1"
+            apiKey: "AIzaSyBiiXFhlwYdfC7IddBcBu-Sq3vJanTQNR0",
+            authDomain: "utth-shift.firebaseapp.com",
+            databaseURL: "https://utth-shift-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "utth-shift",
+            storageBucket: "utth-shift.appspot.com",
+            messagingSenderId: "615647177323",
+            appId: "1:615647177323:web:e905ef70f223d898285f2e",
+            measurementId: "G-RYDN5M4PLB"
         };
+
+        const app = initializeFirebaseApp(firebaseConfig);
+        const database = getDatabase(app);
+        const shiftsRef = ref(database, 'shifts');
+        const remindersRef = ref(database, 'reminders');
+
+        // --- 2. APPLICATION CONSTANTS & STATE ---
+        let allShiftsData = {}; 
+        let allRemindersData = {};
+        let fullSummaryData = [];
+        let currentPage = 1; 
+        const itemsPerPage = 10; 
+
+        const SHIFTS = {
+            'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
+            'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
+        };
+        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'Nanti', color: '#FEB9D0' } };
+        const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
         
-        // --- 2. INITIALIZE ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const appId = 'default-app-id';
-        let currentUserId = null;
-        let currentUserData = null;
-        let unsubscribeShifts = () => {};
-        let unsubscribeReminders = () => {};
+        const THAI_HOLIDAYS = new Map([
+            ['2024-12-31', 'วันสิ้นปี'],
+            ['2025-01-01', 'วันขึ้นปีใหม่'],
+            ['2025-02-12', 'วันมาฆบูชา'],
+            ['2025-04-07', 'ชดเชยวันจักรี'],
+            ['2025-04-14', 'วันสงกรานต์'],
+            ['2025-04-15', 'วันสงกรานต์'],
+            ['2025-05-01', 'วันแรงงาน'],
+            ['2025-05-05', 'ชดเชยวันฉัตรมงคล'],
+            ['2025-05-09', 'วันพืชมงคล'],
+            ['2025-05-12', 'ชดเชยวันวิสาขบูชา'],
+            ['2025-06-02', 'วันหยุดพิเศษ'],
+            ['2025-06-03', 'วันเฉลิมฯ พระราชินี'],
+            ['2025-07-10', 'วันอาสาฬหบูชา'],
+            ['2025-07-11', 'วันเข้าพรรษา'],
+            ['2025-07-28', 'วันเฉลิมฯ ร.10'],
+            ['2025-08-11', 'วันหยุดพิเศษ'],
+            ['2025-08-12', 'วันแม่แห่งชาติ'],
+            ['2025-10-13', 'วันคล้ายวันสวรรคต ร.9'],
+            ['2025-10-23', 'วันปิยมหาราช'],
+            ['2025-12-05', 'วันพ่อแห่งชาติ'],
+            ['2025-12-10', 'วันรัฐธรรมนูญ'],
+            ['2025-12-31', 'วันสิ้นปี'],
+            ['2026-01-02', 'วันหยุดพิเศษ']
+        ]);
 
-        // --- 3. UI ELEMENTS ---
-        const loginContainer = document.getElementById('login-container');
-        const appContainer = document.getElementById('app-container');
-        const loader = document.getElementById('loader');
-        const formFields = document.getElementById('form-fields');
-        const submitBtn = document.getElementById('submit-btn');
-        const toggleFormBtn = document.getElementById('toggle-form-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userInfoEl = document.getElementById('user-info');
-        
-        let isLoginMode = true; // Default to login mode
 
-        // --- 4. AUTH & UI LOGIC ---
-
-        function updateFormUI() {
-            if (isLoginMode) {
-                formFields.innerHTML = `
-                    <input type="text" id="username-input" class="form-input" placeholder="ชื่อผู้ใช้">
-                    <input type="password" id="password-input" class="form-input" placeholder="รหัสผ่าน">
-                `;
-                submitBtn.textContent = 'เข้าสู่ระบบ';
-                toggleFormBtn.textContent = 'ยังไม่มีบัญชี? สร้างบัญชีใหม่';
-            } else {
-                formFields.innerHTML = `
-                    <input type="email" id="email-input" class="form-input" placeholder="อีเมล">
-                    <input type="text" id="username-input" class="form-input" placeholder="ชื่อผู้ใช้ (สำหรับล็อกอิน)">
-                    <input type="password" id="password-input" class="form-input" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)">
-                    <input type="password" id="confirm-password-input" class="form-input" placeholder="ยืนยันรหัสผ่าน">
-                `;
-                submitBtn.textContent = 'สร้างบัญชีใหม่';
-                toggleFormBtn.textContent = 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ';
+        // --- 3. FULLCALENDAR SETUP ---
+        const calendarEl = document.getElementById('calendar');
+        const summaryListEl = document.getElementById('summary-list');
+        const paginationContainer = document.getElementById('pagination-container');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth', locale: 'th',
+            buttonText: { today: 'วันนี้', month: 'เดือน', week: 'สัปดาห์' },
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+            dateClick: handleDateClick, eventClick: handleEventClick,
+            events: [], eventDisplay: 'block',
+            dayCellDidMount: function(arg) {
+                const year = arg.date.getFullYear();
+                const month = String(arg.date.getMonth() + 1).padStart(2, '0');
+                const day = String(arg.date.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                const dayOfWeek = arg.date.getDay();
+                if (isHoliday(dateStr)) { arg.el.classList.add('holiday-cell'); } 
+                else if (dayOfWeek === 0 || dayOfWeek === 6) { arg.el.classList.add('weekend-cell'); }
             }
-        }
-        
-        toggleFormBtn.addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            updateFormUI();
         });
+        calendar.render();
 
-        submitBtn.addEventListener('click', () => {
-            isLoginMode ? handleLogin() : handleRegister();
-        });
-        
-        logoutBtn.addEventListener('click', () => signOut(auth));
+        // --- 4. HELPER & RENDER FUNCTIONS ---
+        // ... (All helper and render functions remain the same) ...
+        function toYYYYMMDD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                const userRef = ref(db, `users/${currentUserId}`);
-                const snapshot = await get(userRef);
-                currentUserData = snapshot.val();
-                
-                userInfoEl.textContent = `สวัสดี, ${currentUserData?.username || user.email}`;
-                
-                loginContainer.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                
-                initializeFullApp();
+        function isHoliday(dateString) { return THAI_HOLIDAYS.has(dateString); }
+        function isSpecialDay(dateString) {
+            const date = new Date(dateString);
+            const dayOfWeek = date.getDay();
+            return (dayOfWeek === 0 || dayOfWeek === 6) || isHoliday(dateString);
+        }
+
+        function isPersonPostNightShift(person, dateStr) {
+            const currentDate = new Date(dateStr + "T00:00:00");
+            currentDate.setDate(currentDate.getDate() - 1);
+            const yesterdayStr = toYYYYMMDD(currentDate);
+            return Object.values(allShiftsData).some(s => s.date === yesterdayStr && s.person === person && s.shift === 'ดึก' && !s.isCancelled);
+        }
+
+        function saveShiftToFirebase(data) {
+            set(push(shiftsRef), data)
+                .then(() => Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเวรเรียบร้อยแล้ว', 'success'))
+                .catch(error => Swal.fire('ผิดพลาด!', `ไม่สามารถบันทึกข้อมูลได้: ${error.message}`, 'error'));
+        }
+
+        function renderSummaryList(itemsToRender) {
+            summaryListEl.innerHTML = '';
+            if (itemsToRender.length > 0) {
+                 itemsToRender.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'summary-item';
+                    let itemColor, mainInfo, notesHTML = '';
+                    if (item.isPostNightShift) {
+                        itemColor = 'var(--post-night-shift-color)';
+                        mainInfo = `⬇️ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>ลงดึก</strong>`;
+                        notesHTML = `<div class="notes">พักผ่อนหลังปฏิบัติงานเวรดึก</div>`;
+                    } else if (item.isCancelled) {
+                        itemColor = 'var(--cancelled-color)';
+                        mainInfo = `❌ <strong style="color: #7f8c8d;">ยกเลิกเวร</strong> ของ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <span style="text-decoration: line-through;">${item.shift} / ${item.room}</span> | เหตุผล: <strong>${item.notes || ''}</strong>`;
+                    } else {
+                        itemColor = PERSONS[item.person]?.color || '#777777';
+                        mainInfo = `👩‍⚕️ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>${item.shift}</strong> (${SHIFTS[item.shift].time}) ที่ห้อง <strong>${item.room}</strong>`;
+                        if(item.medOption){ mainInfo += ` | <strong style="color: #c0392b;">สถานะ: ${item.medOption}</strong>`; }
+                        if (item.notes) { notesHTML = `<div class="notes"><strong>หมายเหตุ:</strong> ${item.notes}</div>`; }
+                    }
+                    itemEl.innerHTML = `<div><span>${mainInfo}</span>${notesHTML}</div>`;
+                    itemEl.style.borderLeftColor = itemColor;
+                    summaryListEl.appendChild(itemEl);
+                });
             } else {
-                currentUserId = null;
-                currentUserData = null;
-                
-                updateFormUI(); // Set form to login or register
-                loginContainer.classList.remove('hidden');
-                appContainer.classList.add('hidden');
-                
-                if (typeof unsubscribeShifts === 'function') unsubscribeShifts();
-                if (typeof unsubscribeReminders === 'function') unsubscribeReminders();
-            }
-            loader.classList.add('hidden');
-        });
-
-        async function handleRegister() {
-            const email = document.getElementById('email-input').value;
-            const username = document.getElementById('username-input').value.trim().toLowerCase();
-            const password = document.getElementById('password-input').value;
-            const confirmPassword = document.getElementById('confirm-password-input').value;
-            
-            if (!email || !username || !password || !confirmPassword) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบทุกช่อง', 'warning');
-            if (password !== confirmPassword) return Swal.fire('รหัสผ่านไม่ตรงกัน', 'กรุณาตรวจสอบรหัสผ่านอีกครั้ง', 'warning');
-            if (password.length < 6) return Swal.fire('รหัสผ่านสั้นไป', 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'warning');
-
-            loader.classList.remove('hidden');
-            try {
-                const usernameRef = ref(db, `usernames/${username}`);
-                const usernameSnapshot = await get(usernameRef);
-                if (usernameSnapshot.exists()) throw new Error('ชื่อผู้ใช้งานนี้มีคนใช้แล้ว');
-
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                const updates = {};
-                updates[`/users/${user.uid}`] = { username, email };
-                updates[`/usernames/${username}`] = user.uid;
-                await update(ref(db), updates);
-                
-                Swal.fire('สำเร็จ!', 'สร้างบัญชีเรียบร้อยแล้ว', 'success');
-            } catch (error) {
-                console.error("Error creating account:", error);
-                const errorMessage = error.code === 'auth/email-already-in-use' ? 'อีเมลนี้มีผู้ใช้งานแล้ว' : error.message;
-                Swal.fire('เกิดข้อผิดพลาด', errorMessage, 'error');
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
-
-        async function handleLogin() {
-            const username = document.getElementById('username-input').value.trim().toLowerCase();
-            const password = document.getElementById('password-input').value;
-
-            if (!username || !password) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน', 'warning');
-            
-            loader.classList.remove('hidden');
-            try {
-                const usernameRef = ref(db, `usernames/${username}`);
-                const usernameSnapshot = await get(usernameRef);
-                if (!usernameSnapshot.exists()) throw new Error('ไม่พบชื่อผู้ใช้งานนี้');
-                
-                const uid = usernameSnapshot.val();
-                const emailRef = ref(db, `users/${uid}/email`);
-                const emailSnapshot = await get(emailRef);
-                if (!emailSnapshot.exists()) throw new Error('เกิดข้อผิดพลาด: ไม่พบข้อมูลอีเมลของผู้ใช้');
-                
-                const email = emailSnapshot.val();
-                await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged handles the rest
-            } catch (error) {
-                console.error("Error logging in:", error);
-                Swal.fire('เกิดข้อผิดพลาด', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
-                loader.classList.add('hidden');
+                 summaryListEl.innerHTML = '<p style="text-align:center; color:#888; padding: 20px 0;">เมี๊ยววว~ ไม่เจอข้อมูลเลยนะ</p>';
             }
         }
         
-        // --- COMPLETE APP LOGIC (INITIALIZED AFTER LOGIN) ---
-        
-        let calendar; // To hold the calendar instance
-        
-        function initializeFullApp() {
-            const calendarEl = document.getElementById('calendar');
-            // Check if calendar is already initialized to prevent errors
-            if (calendar) {
-                calendar.refetchEvents(); // Or just let onValue handle it
-            } else {
-                 calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth', locale: 'th', timeZone: 'Asia/Bangkok',
-                    buttonText: { today: 'วันนี้', month: 'เดือน', week: 'สัปดาห์' },
-                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                    // Event handlers will be added here or are defined globally
-                 });
-                 calendar.render();
+        function renderPaginationControls(totalPages) {
+            paginationContainer.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'pagination-btn';
+                pageBtn.textContent = i;
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    applyAndRenderFilters();
+                });
+                paginationContainer.appendChild(pageBtn);
             }
-            initializeFilters(); // Set up the filter dropdowns
-            setupDataListeners(); // Start listening to database changes
         }
 
-        function setupDataListeners() {
-            if (typeof unsubscribeShifts === 'function') unsubscribeShifts();
-            if (typeof unsubscribeReminders === 'function') unsubscribeReminders();
-            
-            const shiftsRef = ref(db, `artifacts/${appId}/public/data/shifts`);
-            const remindersRef = ref(db, `artifacts/${appId}/public/data/reminders`);
-            
-            const snapshotToArray = (snapshot) => {
-                const data = snapshot.val();
-                return data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-            };
+        function applyAndRenderFilters() {
+            const personFilter = document.getElementById('filter-person').value;
+            const startDateFilter = document.getElementById('filter-start-date').value;
+            const endDateFilter = document.getElementById('filter-end-date').value;
+            const shiftFilter = document.getElementById('filter-shift').value;
+            const roomFilter = document.getElementById('filter-room').value;
 
-            unsubscribeShifts = onValue(shiftsRef, (snapshot) => {
-                // This logic and renderCalendarAndSummary would be fully implemented here
-                console.log("Shifts data updated.");
+            let filteredData = fullSummaryData.filter(item => {
+                const itemDate = new Date(item.date);
+                const startDate = startDateFilter ? new Date(startDateFilter + "T00:00:00") : null;
+                const endDate = endDateFilter ? new Date(endDateFilter + "T00:00:00") : null;
+                if(startDate) startDate.setHours(0,0,0,0);
+                if(endDate) endDate.setHours(23,59,59,999);
+
+                const personMatch = personFilter === 'all' || item.person === personFilter;
+                const startDateMatch = !startDate || itemDate >= startDate;
+                const endDateMatch = !endDate || itemDate <= endDate;
+                const roomMatch = roomFilter === 'all' || item.room === roomFilter || item.isPostNightShift;
+                let shiftMatch = shiftFilter === 'all' || (shiftFilter === 'post_night' ? item.isPostNightShift : item.shift === shiftFilter);
+                
+                return personMatch && startDateMatch && endDateMatch && shiftMatch && roomMatch;
             });
 
-            unsubscribeReminders = onValue(remindersRef, (snapshot) => {
-                // This logic and renderCalendarAndSummary would be fully implemented here
-                console.log("Reminders data updated.");
-            });
+            if (roomFilter !== 'all') {
+                filteredData = filteredData.filter(item => !item.isPostNightShift);
+            }
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            } else if (totalPages === 0) {
+                currentPage = 1;
+            }
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
+            renderSummaryList(paginatedData);
+            renderPaginationControls(totalPages);
         }
         
+        function renderCalendarAndSummary() {
+            const allEvents = [];
+            fullSummaryData = [];
+            calendar.getEvents().forEach(event => event.remove());
+            
+            for (let key in allShiftsData) {
+                const shiftData = allShiftsData[key];
+                fullSummaryData.push({ ...shiftData, key });
+                let title, eventColor;
+                if (shiftData.isCancelled) {
+                    title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}, ${shiftData.room}`;
+                    eventColor = 'var(--cancelled-color)';
+                } else {
+                    title = `${shiftData.person}, ${shiftData.shift}, ${shiftData.room}`;
+                    if (shiftData.medOption) { title += ` (${shiftData.medOption})`; }
+                    if (shiftData.notes) { title += ' 📝'; }
+                    eventColor = PERSONS[shiftData.person]?.color || '#777777';
+                }
+                allEvents.push({ id: key, title, start: shiftData.date, backgroundColor: eventColor, borderColor: eventColor, extendedProps: { ...shiftData } });
+
+                if (shiftData.shift === 'ดึก' && !shiftData.isCancelled) {
+                    const nightShiftDate = new Date(shiftData.date + "T00:00:00");
+                    nightShiftDate.setDate(nightShiftDate.getDate() + 1);
+                    const nextDayStr = toYYYYMMDD(nightShiftDate);
+                    allEvents.push({
+                        id: `${key}_off`, title: `⬇️ ${shiftData.person} (ลงดึก)`, start: nextDayStr, allDay: true,
+                        backgroundColor: 'var(--post-night-shift-color)', borderColor: 'var(--post-night-shift-color)', classNames: ['post-night-shift-event'] 
+                    });
+                    fullSummaryData.push({ key: `${key}_off`, isPostNightShift: true, date: nextDayStr, person: shiftData.person, createdAt: shiftData.createdAt });
+                }
+            }
+
+            for (let key in allRemindersData) {
+                const reminderData = allRemindersData[key];
+                allEvents.push({
+                    id: key, title: `📌 ${reminderData.note}`, start: reminderData.startDate,
+                    classNames: ['reminder-event'], extendedProps: { ...reminderData, isReminder: true }
+                });
+
+                const startDate = new Date(reminderData.startDate + "T00:00:00");
+                const endDate = reminderData.endDate ? new Date(reminderData.endDate + "T00:00:00") : startDate;
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    allEvents.push({
+                        id: `${key}_bg_${toYYYYMMDD(d)}`, display: 'background',
+                        start: toYYYYMMDD(d), backgroundColor: 'var(--reminder-bg)',
+                    });
+                }
+            }
+            
+            fullSummaryData.sort((a, b) => {
+                const dateComparison = new Date(b.date) - new Date(a.date);
+                if (dateComparison !== 0) return dateComparison;
+                return b.createdAt - a.createdAt;
+            });
+
+            calendar.addEventSource(allEvents);
+            applyAndRenderFilters();
+        }
+
+        // --- 5. EVENT HANDLER FUNCTIONS ---
+        // ... (All event handler functions remain the same) ...
+        async function promptAddShift(dateStr) {
+            const clickedDate = new Date(dateStr + "T00:00:00");
+            const reminderOnDay = Object.values(allRemindersData).find(r => {
+                const startDate = new Date(r.startDate + "T00:00:00");
+                const endDate = r.endDate ? new Date(r.endDate + "T00:00:00") : startDate;
+                return clickedDate >= startDate && clickedDate <= endDate;
+            });
+
+            if (reminderOnDay) {
+                const confirmation = await Swal.fire({
+                    title: 'เดี๋ยวก่อนนะเหมียว!',
+                    html: `วันนี้มีบันทึกว่า: "<b>${reminderOnDay.note}</b>"<br>จะเพิ่มเวรจริงๆ เหรอ?`,
+                    icon: 'warning', showCancelButton: true,
+                    confirmButtonText: 'ใช่, เพิ่มเวรเลย', cancelButtonText: 'ไม่ดีกว่า',
+                });
+                if (!confirmation.isConfirmed) return;
+            }
+            
+            const dateIsSpecial = isSpecialDay(dateStr);
+            const availableShifts = {...SHIFTS};
+            if(dateIsSpecial) { 
+                delete availableShifts['รุ่งอรุณ'];
+            } else {
+                delete availableShifts['เช้า'];
+            }
+
+            const { value: formValues } = await Swal.fire({
+                title: `เพิ่มเวรวันที่ ${new Date(dateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}`,
+                html: `
+                    <label class="swal2-input-label">เภสัชกร</label>
+                    <select id="swal-person" class="swal2-select">${Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('')}</select>
+                    <label for="swal-shift" class="swal2-input-label">เลือกช่วงเวลา</label>
+                    <select id="swal-shift" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}">${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <label for="swal-room" class="swal2-input-label">เวร</label>
+                    <select id="swal-room" class="swal2-select"></select>
+                    <div id="med-options-container" style="display: none; margin-top: 1em;">
+                        <label for="swal-med-option" class="swal2-input-label">ตัวเลือก (MED เช้าวันหยุด)</label>
+                        <select id="swal-med-option" class="swal2-select"><option value="Cont">Cont</option><option value="D/C">D/C</option></select>
+                    </div>
+                    <label for="swal-notes" class="swal2-input-label">หมายเหตุ</label>
+                    <input type="text" id="swal-notes" class="swal2-input" placeholder="ไม่บังคับ">
+                `,
+                focusConfirm: false,
+                didOpen: () => {
+                    const shiftSelect = document.getElementById('swal-shift');
+                    const roomSelect = document.getElementById('swal-room');
+                    const medContainer = document.getElementById('med-options-container');
+                    const updateFormFields = () => {
+                        const selectedShift = shiftSelect.value;
+                        const currentRoomValue = roomSelect.value;
+                        let availableRooms = [];
+                        const dayOfWeek = new Date(dateStr).getDay();
+                        if (selectedShift === 'รุ่งอรุณ') {
+                            if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                        } else if (selectedShift === 'เช้า') {
+                            availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
+                            if (isSpecialDay(dateStr)) availableRooms.push('CHEMO');
+                        } else if (selectedShift === 'บ่าย') {
+                            if (isSpecialDay(dateStr)) { availableRooms = ['ER', 'MED']; } else {
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC');}
+                            }
+                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                        roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoomValue ? 'selected' : ''}>${r}</option>`).join('');
+                        if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        const showMedField = isSpecialDay(dateStr) && selectedShift === 'เช้า' && roomSelect.value === 'MED';
+                        medContainer.style.display = showMedField ? 'block' : 'none';
+                    };
+                    shiftSelect.addEventListener('change', updateFormFields);
+                    roomSelect.addEventListener('change', updateFormFields);
+                    updateFormFields();
+                },
+                preConfirm: () => {
+                    const person = document.getElementById('swal-person').value;
+                    const shift = document.getElementById('swal-shift').value;
+                    for (const key in allShiftsData) {
+                        const existingShift = allShiftsData[key];
+                        if (existingShift.date === dateStr && existingShift.person === person && existingShift.shift === shift && !existingShift.isCancelled) {
+                            Swal.showValidationMessage(`เพิ่มไม่ได้นะ! ${person} มีเวร ${shift} ที่โซน ${existingShift.room} อยู่แล้ว`);
+                            return false;
+                        }
+                    }
+                    return {
+                        person, shift, room: document.getElementById('swal-room').value,
+                        notes: document.getElementById('swal-notes').value.trim(),
+                        medOption: document.getElementById('med-options-container').style.display === 'block' ? document.getElementById('swal-med-option').value : null
+                    }
+                },
+                showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก'
+            });
+
+            if (formValues) {
+                const personToAdd = formValues.person;
+                if (isPersonPostNightShift(personToAdd, dateStr)) {
+                    const confirmation = await Swal.fire({
+                        title: 'แน่ใจนะเหมียว?', html: `<strong>${personToAdd}</strong> เพิ่งลงเวรดึกมานะ<br>จะให้เพิ่มเวรอีกเหรอ?`,
+                        icon: 'warning', showCancelButton: true, confirmButtonText: 'จัดไป!',
+                        cancelButtonText: 'โอ๊ะ ไม่ดีกว่า', confirmButtonColor: '#28a745',
+                    });
+                    if (confirmation.isConfirmed) { saveShiftToFirebase({ date: dateStr, ...formValues, createdAt: serverTimestamp() }); }
+                } else {
+                    saveShiftToFirebase({ date: dateStr, ...formValues, createdAt: serverTimestamp() });
+                }
+            }
+        }
+
+        async function promptAddOrEditReminder(dateStr) {
+            const clickedDate = new Date(dateStr + "T00:00:00");
+            const existingReminderKey = Object.keys(allRemindersData).find(key => {
+                const reminder = allRemindersData[key];
+                const startDate = new Date(reminder.startDate + "T00:00:00");
+                const endDate = reminder.endDate ? new Date(reminder.endDate + "T00:00:00") : startDate;
+                return clickedDate >= startDate && clickedDate <= endDate;
+            });
+            const existingReminder = existingReminderKey ? allRemindersData[existingReminderKey] : null;
+
+            const { value: formValues, isConfirmed, isDenied } = await Swal.fire({
+                title: existingReminder ? 'แก้ไข/ลบบันทึกช่วยเตือน' : 'เพิ่มบันทึกช่วยเตือน',
+                html: `
+                    <label for="swal-reminder-note" class="swal2-input-label">หมายเหตุ</label>
+                    <input id="swal-reminder-note" class="swal2-input" value="${existingReminder ? existingReminder.note : ''}" placeholder="ไปเที่ยว, ลาพักร้อน...">
+                    <label for="swal-reminder-start" class="swal2-input-label">วันที่เริ่มต้น</label>
+                    <input type="date" id="swal-reminder-start" class="swal2-input" value="${existingReminder ? existingReminder.startDate : dateStr}">
+                    <label for="swal-reminder-end" class="swal2-input-label">วันที่สิ้นสุด (ไม่บังคับ)</label>
+                    <input type="date" id="swal-reminder-end" class="swal2-input" value="${existingReminder && existingReminder.endDate ? existingReminder.endDate : ''}">
+                `,
+                focusConfirm: false, showCancelButton: true,
+                showDenyButton: !!existingReminder,
+                confirmButtonText: existingReminder ? 'อัปเดต' : 'บันทึก',
+                denyButtonText: 'ลบ', cancelButtonText: 'ยกเลิก', denyButtonColor: '#d33',
+                preConfirm: () => {
+                    const note = document.getElementById('swal-reminder-note').value;
+                    const startDate = document.getElementById('swal-reminder-start').value;
+                    let endDate = document.getElementById('swal-reminder-end').value;
+                    if (!note) { Swal.showValidationMessage('ต้องใส่หมายเหตุก่อนนะ'); return false; }
+                    if (!startDate) { Swal.showValidationMessage('ต้องใส่วันที่เริ่มต้นด้วยนะ'); return false; }
+                    if (endDate && endDate < startDate) { Swal.showValidationMessage('วันที่สิ้นสุดจะอยู่ก่อนวันเริ่มต้นไม่ได้นะ'); return false; }
+                    if (endDate === startDate) { endDate = ''; }
+                    return { note: note.trim(), startDate: startDate, endDate: endDate || null };
+                }
+            });
+
+            if (isConfirmed && formValues) {
+                const keyToSave = existingReminderKey || push(remindersRef).key;
+                set(ref(database, `reminders/${keyToSave}`), formValues)
+                    .then(() => Swal.fire('สำเร็จ', 'บันทึกเรียบร้อยเหมียว', 'success'))
+                    .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
+            } else if (isDenied) {
+                remove(ref(database, `reminders/${existingReminderKey}`))
+                    .then(() => Swal.fire('สำเร็จ', 'ลบบันทึกแล้ว', 'success'))
+                    .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
+            }
+        }
+        
+        async function handleDateClick(arg) {
+            const holidayName = THAI_HOLIDAYS.get(arg.dateStr);
+            if (holidayName) {
+                await Swal.fire({
+                    title: `🎉 วันหยุด: ${holidayName}`,
+                    icon: 'info',
+                    confirmButtonText: 'รับทราบเหมียว!',
+                    confirmButtonColor: 'var(--primary-color)',
+                });
+            }
+
+            const { value: action } = await Swal.fire({
+                title: `วันที่ ${new Date(arg.dateStr).toLocaleDateString('th-TH', {dateStyle: 'long'})}`,
+                text: 'จะทำอะไรดีเหมียว?',
+                showDenyButton: true, confirmButtonText: 'เพิ่มเวร',
+                denyButtonText: 'เพิ่มบันทึกช่วยเตือน',
+                confirmButtonColor: 'var(--primary-color)', denyButtonColor: '#28a745'
+            });
+            if (action) { promptAddShift(arg.dateStr); } 
+            else if (action === false) { promptAddOrEditReminder(arg.dateStr); }
+        }
+
+        async function handleEventClick(arg) {
+            const shiftId = arg.event.id;
+            if (arg.event.extendedProps.isReminder) {
+                promptAddOrEditReminder(arg.event.startStr);
+                return;
+            }
+            if (shiftId.endsWith('_off')) { return; }
+
+            const originalProps = arg.event.extendedProps;
+            const { person, shift, room, notes, medOption, isCancelled } = originalProps;
+            const eventDateStr = arg.event.startStr.split('T')[0];
+            
+            if(isCancelled){
+                const result = await Swal.fire({
+                    title: 'เวรนี้ถูกยกเลิกแล้ว',
+                    html: `<p>เวรเดิมของ: <strong>${person}</strong></p><p>ช่วงเวลา: <strong>${shift} (${SHIFTS[shift]?.time || 'N/A'})</strong></p><p>ห้อง: <strong>${room}</strong></p><p>เหตุผล: ${notes || 'ไม่มี'}</p><hr><p>ต้องการลบข้อมูลนี้ถาวรหรือไม่?</p>`,
+                    icon: 'info', showCancelButton: true, confirmButtonText: 'ลบถาวร',
+                    cancelButtonText: 'ปิด', confirmButtonColor: '#d33'
+                });
+                if (result.isConfirmed) {
+                    remove(ref(database, `shifts/${shiftId}`))
+                        .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
+                        .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
+                }
+                return;
+            }
+
+            const dateIsSpecial = isSpecialDay(eventDateStr);
+            const availableShifts = {...SHIFTS};
+            if(dateIsSpecial) {
+                delete availableShifts['รุ่งอรุณ'];
+            } else {
+                delete availableShifts['เช้า'];
+            }
+
+            const result = await Swal.fire({
+                title: `แก้ไข/ลบเวร`,
+                html: `
+                    <p style="margin-bottom: 20px;">วันที่ ${new Date(eventDateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}</p>
+                    <label for="swal-person-edit" class="swal2-input-label">เภสัชกร</label>
+                    <select id="swal-person-edit" class="swal2-select">${Object.keys(PERSONS).map(p => `<option value="${p}" ${p === person ? 'selected' : ''}>${PERSONS[p].name}</option>`).join('')}</select>
+                    <label for="swal-shift-edit" class="swal2-input-label">ช่วงเวลา</label>
+                    <select id="swal-shift-edit" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}" ${s === shift ? 'selected' : ''}>${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <label for="swal-room-edit" class="swal2-input-label">เวร</label>
+                    <select id="swal-room-edit" class="swal2-select"></select>
+                    <div id="med-options-container-edit" style="display: none; margin-top: 1em;">
+                        <label for="swal-med-option-edit" class="swal2-input-label">ตัวเลือก (MED เช้าวันหยุด)</label>
+                        <select id="swal-med-option-edit" class="swal2-select"><option value="Cont" ${medOption === 'Cont' ? 'selected' : ''}>Cont</option><option value="D/C" ${medOption === 'D/C' ? 'selected' : ''}>D/C</option></select>
+                    </div>
+                    <label for="swal-notes-edit" class="swal2-input-label">หมายเหตุ</label>
+                    <input type="text" id="swal-notes-edit" class="swal2-input" placeholder="ไม่บังคับ" value="${notes || ''}">`,
+                focusConfirm: false,
+                didOpen: () => {
+                    const shiftSelect = document.getElementById('swal-shift-edit');
+                    const roomSelect = document.getElementById('swal-room-edit');
+                    const medContainer = document.getElementById('med-options-container-edit');
+                    const updateFormFields = () => {
+                        const selectedShift = shiftSelect.value;
+                        const currentRoom = roomSelect.value || room;
+                        let availableRooms = [];
+                        const dayOfWeek = new Date(eventDateStr).getDay();
+                        if (selectedShift === 'รุ่งอรุณ') {
+                           if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                        } else if (selectedShift === 'เช้า') {
+                           availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
+                           if (isSpecialDay(eventDateStr)) availableRooms.push('CHEMO');
+                        } else if (selectedShift === 'บ่าย') {
+                            if (isSpecialDay(eventDateStr)) { availableRooms = ['ER', 'MED']; } 
+                            else {
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC'); }
+                            }
+                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                        roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoom ? 'selected' : ''}>${r}</option>`).join('');
+                        if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        const showMedField = dateIsSpecial && selectedShift === 'เช้า' && roomSelect.value === 'MED';
+                        medContainer.style.display = showMedField ? 'block' : 'none';
+                    };
+                    shiftSelect.addEventListener('change', updateFormFields);
+                    roomSelect.addEventListener('change', updateFormFields);
+                    updateFormFields();
+                },
+                preConfirm: () => {
+                    const newPerson = document.getElementById('swal-person-edit').value;
+                    const newShift = document.getElementById('swal-shift-edit').value;
+                    for (const key in allShiftsData) {
+                        if (key === shiftId) continue; 
+                        const existingShift = allShiftsData[key];
+                        if (existingShift.date === eventDateStr && existingShift.person === newPerson && existingShift.shift === newShift && !existingShift.isCancelled) {
+                            Swal.showValidationMessage(`อัปเดตไม่ได้นะ! ${newPerson} มีเวร ${newShift} ที่โซน ${existingShift.room} อยู่แล้ว`);
+                            return false;
+                        }
+                    }
+                    return {
+                        person: newPerson, shift: newShift,
+                        room: document.getElementById('swal-room-edit').value,
+                        notes: document.getElementById('swal-notes-edit').value.trim(),
+                        medOption: document.getElementById('med-options-container-edit').style.display === 'block' ? document.getElementById('swal-med-option-edit').value : null
+                    }
+                },
+                showCancelButton: true, showDenyButton: true,
+                confirmButtonText: 'อัปเดต', denyButtonText: `ลบ/ยกเลิกเวร`,
+                cancelButtonText: 'ยกเลิก', denyButtonColor: '#d33',
+            });
+            
+            if (result.isDenied) {
+                const { value: reason } = await Swal.fire({
+                    title: 'จะยกเลิกเวรเหรอ?', input: 'text',
+                    inputPlaceholder: 'บอกเหตุผลหน่อยสิ (ถ้าไม่บอกจะลบถาวรนะ)', showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                });
+                if (reason !== undefined) { 
+                    const currentShiftData = allShiftsData[shiftId]; 
+                    if (reason) { 
+                        const cancelledData = { ...currentShiftData, notes: reason, isCancelled: true };
+                        set(ref(database, `shifts/${shiftId}`), cancelledData)
+                            .then(() => Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้เหมียว', 'info'))
+                            .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
+                    } else { 
+                        const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
+                        if(deleteConfirmation.isConfirmed){
+                            remove(ref(database, `shifts/${shiftId}`))
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
+                                .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
+                        }
+                    }
+                }
+            } else if (result.isConfirmed) {
+                const formValues = result.value;
+                if(formValues) {
+                    const updateConfirmation = await Swal.fire({ title: 'จะอัปเดตข้อมูลแน่นะ?', icon: 'question', showCancelButton: true, confirmButtonText: 'ใช่, อัปเดตเลย!', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#28a745' });
+                    if (updateConfirmation.isConfirmed) {
+                        const currentShiftData = allShiftsData[shiftId]; 
+                        const updatedData = { ...currentShiftData, ...formValues, date: eventDateStr };
+                        set(ref(database, `shifts/${shiftId}`), updatedData).then(() => Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลเวรเรียบร้อยแล้ว', 'success')).catch((error) => Swal.fire('ผิดพลาด!', `อัปเดตไม่ได้: ${error.message}`, 'error'));
+                    }
+                }
+            }
+        }
+        
+        // --- 7. INITIALIZATION ---
         function initializeFilters() {
-            // This function would be fully implemented here
-            console.log("Filters initialized.");
+            const personFilterEl = document.getElementById('filter-person');
+            const shiftFilterEl = document.getElementById('filter-shift');
+            const roomFilterEl = document.getElementById('filter-room');
+            const clearButtonEl = document.getElementById('clear-filters-btn');
+            const dateStartEl = document.getElementById('filter-start-date');
+            const dateEndEl = document.getElementById('filter-end-date');
+
+            personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
+            shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
+            roomFilterEl.innerHTML = '<option value="all">ทุกเวร</option>' + ALL_ROOMS.map(r => `<option value="${r}">${r}</option>`).join('');
+
+            [personFilterEl, shiftFilterEl, roomFilterEl, dateStartEl, dateEndEl].forEach(el => {
+                el.addEventListener('change', () => {
+                    currentPage = 1; 
+                    applyAndRenderFilters();
+                });
+            });
+            clearButtonEl.addEventListener('click', () => {
+                personFilterEl.value = 'all'; shiftFilterEl.value = 'all'; roomFilterEl.value = 'all';
+                dateStartEl.value = ''; dateEndEl.value = '';
+                currentPage = 1;
+                applyAndRenderFilters();
+            });
         }
         
-        // All other functions like handleDateClick, renderSummaryList, etc.
-        // would be fully implemented here as in previous versions.
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFilters();
+            onValue(shiftsRef, (snapshot) => {
+                allShiftsData = snapshot.val() || {}; 
+                renderCalendarAndSummary();
+            });
+            onValue(remindersRef, (snapshot) => {
+                allRemindersData = snapshot.val() || {};
+                renderCalendarAndSummary();
+            });
+            
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        });
 
     </script>
 </body>
