@@ -374,7 +374,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.2</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.4</p>
     </footer>
 
     <script type="module">
@@ -577,7 +577,8 @@
                 const totalPersonShifts = personShifts.length;
                 
                 personShifts.forEach(item => {
-                    roomCounts[item.room] = (roomCounts[item.room] || 0) + 1;
+                    const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room;
+                    roomCounts[countKey] = (roomCounts[countKey] || 0) + 1;
                 });
 
                 summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${totalPersonShifts} เวร</strong></p><hr>`;
