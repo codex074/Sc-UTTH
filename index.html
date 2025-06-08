@@ -22,14 +22,14 @@
     <style>
         /* --- CUTE CAT THEME --- */
         :root {
-            --theme-bg: #F5FBEF; /* Light Green background */
+            --theme-bg: #FFF9F2; /* Light cream background */
             --container-bg: #ffffff;
-            --primary-color: #76BC43; /* Main Green */
-            --primary-hover: #65a33a; /* Darker Green */
+            --primary-color: #FF8A5B; /* Playful Orange */
+            --primary-hover: #E57A50;
             --secondary-color: #7DD8C9; /* Soft Teal */
-            --text-color: #384C27; /* Dark Green-Brown */
-            --border-color: #E8F5E9; /* Light Green */
-            --weekend-bg: #E8F5E9;
+            --text-color: #5C3A21; /* Dark Brown */
+            --border-color: #FFE8D6; /* Light Peach */
+            --weekend-bg: #FFE8D6;
             --reminder-bg: #01A6BA; 
             --reminder-text: #ffffff; 
             --holiday-red: #ff8e8e;
@@ -88,7 +88,7 @@
             padding: 20px;
             margin-top: 40px;
             border-radius: 20px;
-            background-color: #fafff5;
+            background-color: #fffdfa;
             border: 1px solid var(--border-color);
         }
         .filter-grid {
@@ -320,47 +320,6 @@
         }
         footer p {
             margin: 0;
-        }
-
-        /* --- <<<< NEW: Mobile Responsive Styles >>>> --- */
-        @media (max-width: 768px) {
-            #app-container {
-                padding: 15px 20px;
-            }
-            h1 {
-                font-size: 2.2em;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
-            }
-            h2 {
-                font-size: 1.5em;
-            }
-            .filter-grid {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #chart-summary-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-            #data-summary {
-                padding-left: 0;
-                text-align: center;
-            }
-             #data-summary h3 {
-                text-align: center;
-            }
-            #data-summary p {
-                justify-content: center;
-                gap: 15px;
-            }
-
-            .fc-toolbar-title {
-                font-size: 1.4em !important;
-            }
-            .fc .fc-button {
-                padding: 8px 10px !important;
-            }
         }
     </style>
 </head>
