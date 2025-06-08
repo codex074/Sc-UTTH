@@ -15,27 +15,30 @@
     
     <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         /* --- CUTE CAT THEME --- */
         :root {
             --theme-bg: #F5FBEF; /* Light Green background */
             --container-bg: #ffffff;
-            --primary-color: #76BC43; /* New Green */
+            --primary-color: #76BC43; /* Main Green */
             --primary-hover: #65a33a; /* Darker Green */
             --secondary-color: #7DD8C9; /* Soft Teal */
             --text-color: #384C27; /* Dark Green-Brown */
             --border-color: #E8F5E9; /* Light Green */
             --weekend-bg: #E8F5E9;
-            --reminder-bg: #01A6BA; /* NEW Reminder Color */
-            --reminder-text: #ffffff; /* NEW Reminder Text Color */
+            --reminder-bg: #01A6BA; 
+            --reminder-text: #ffffff; 
             --holiday-red: #ff8e8e;
             --cancelled-color: #c3c3c3;
             --post-night-shift-color: #a0a0a0;
             --clear-btn-red: #ff6b6b;
             --clear-btn-red-hover: #e05d5d;
-            --today-color: #219DFF; /* NEW Today Color */
-            --today-bg-tint: rgba(33, 157, 255, 0.15); /* NEW Today Tint */
+            --today-color: #219DFF; 
+            --today-bg-tint: rgba(33, 157, 255, 0.15); 
         }
 
         body {
@@ -132,6 +135,43 @@
         #clear-filters-btn:hover { background-color: var(--clear-btn-red-hover); }
         #clear-filters-btn:active { transform: scale(0.97); }
 
+        #chart-summary-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px dashed var(--border-color);
+        }
+        #chart-container {
+            flex: 1 1 300px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        #data-summary {
+            flex: 1 1 300px;
+            font-size: 1.1em;
+            padding-left: 20px;
+        }
+        #data-summary h3 {
+            margin-top: 0;
+            font-size: 1.4em;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        #data-summary p {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+         #data-summary p strong {
+            color: var(--primary-color);
+        }
+
+
         #summary-container { margin-top: 20px; padding-top: 20px; }
 
         .summary-item {
@@ -206,16 +246,17 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number {
+        .holiday-cell .fc-daygrid-day-number,
+        .fc-day-today .fc-daygrid-day-number {
             margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            border-radius: 50%; color: white !important;
             text-align: center; box-shadow: none; font-weight: 500; 
         }
-        /* <<<< REMOVED: highlight for today's number >>>> */
+        .holiday-cell .fc-daygrid-day-number {
+            background-color: var(--holiday-red);
+        }
         .fc-day-today .fc-daygrid-day-number {
-            background-color: transparent;
-            color: var(--today-color) !important;
-            font-weight: 700;
+            background-color: var(--today-color);
         }
         
         .swal2-popup { font-family: 'Mitr', sans-serif !important; border-radius: 20px !important; }
@@ -238,6 +279,88 @@
             color: var(--reminder-text) !important; font-size: 0.8em !important;
             font-weight: 500; padding-top: 2px !important;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .radio-group-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 5px !important;
+            margin-bottom: 15px !important;
+            padding: 0 10%;
+        }
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        .radio-option span {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 400;
+        }
+        .radio-option input[type="radio"]:checked + span {
+            background-color: var(--secondary-color);
+            border-color: var(--primary-hover);
+            color: white;
+            font-weight: 500;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px 0 10px 0;
+            margin-top: 40px;
+            border-top: 2px dashed var(--border-color);
+            color: var(--text-color);
+            opacity: 0.6;
+            font-size: 0.9em;
+        }
+        footer p {
+            margin: 0;
+        }
+
+        /* --- <<<< NEW: Mobile Responsive Styles >>>> --- */
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 15px 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .filter-grid {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #chart-summary-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            #data-summary {
+                padding-left: 0;
+                text-align: center;
+            }
+             #data-summary h3 {
+                text-align: center;
+            }
+            #data-summary p {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .fc-toolbar-title {
+                font-size: 1.4em !important;
+            }
+            .fc .fc-button {
+                padding: 8px 10px !important;
+            }
         }
     </style>
 </head>
@@ -276,6 +399,13 @@
             </div>
         </div>
         
+        <div id="chart-summary-container">
+            <div id="chart-container">
+                <canvas id="shift-chart"></canvas>
+            </div>
+            <div id="data-summary"></div>
+        </div>
+
         <div id="summary-container">
             <h2>สรุปรายการเวร</h2>
             <div id="summary-list">
@@ -285,10 +415,8 @@
         </div>
     </div>
 
-    <!-- <<<< NEW: Footer Element >>>> -->
     <footer id="page-footer">
-        <p>เวอร์ชั่น 2.0.4</p>
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.0</p>
     </footer>
 
     <script type="module">
@@ -318,6 +446,7 @@
         let fullSummaryData = [];
         let currentPage = 1; 
         const itemsPerPage = 10; 
+        let shiftChartInstance = null; 
 
         const SHIFTS = {
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
@@ -453,6 +582,98 @@
             }
         }
 
+        function updateChartAndSummary(data) {
+            const dataSummaryEl = document.getElementById('data-summary');
+            const personFilter = document.getElementById('filter-person').value;
+            const validShifts = data.filter(item => !item.isCancelled && !item.isPostNightShift);
+
+            let chartLabels, chartData, chartColors;
+            let summaryHTML = '<h3>ข้อมูลสรุป</h3>';
+
+            if (personFilter === 'all') {
+                const personCounts = {};
+                const shiftTypeCounts = {};
+                validShifts.forEach(item => {
+                    personCounts[item.person] = (personCounts[item.person] || 0) + 1;
+                    shiftTypeCounts[item.shift] = (shiftTypeCounts[item.shift] || 0) + 1;
+                });
+
+                summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p><hr>`;
+                for(const person in PERSONS) {
+                     const count = personCounts[person] || 0;
+                     const percentage = validShifts.length > 0 ? (count / validShifts.length * 100).toFixed(1) : 0;
+                    summaryHTML += `<p><span>${PERSONS[person].name}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
+                }
+                summaryHTML += `<hr>`;
+                for(const shift in SHIFTS) {
+                    summaryHTML += `<p><span>${SHIFTS[shift].name}:</span> <strong>${shiftTypeCounts[shift] || 0} เวร</strong></p>`;
+                }
+
+                chartLabels = Object.keys(personCounts);
+                chartData = Object.values(personCounts);
+                chartColors = chartLabels.map(label => PERSONS[label]?.color || '#cccccc');
+
+            } else {
+                const roomCounts = {};
+                const personShifts = validShifts.filter(item => item.person === personFilter);
+                const totalPersonShifts = personShifts.length;
+                
+                personShifts.forEach(item => {
+                    roomCounts[item.room] = (roomCounts[item.room] || 0) + 1;
+                });
+
+                summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${totalPersonShifts} เวร</strong></p><hr>`;
+                 for(const room in roomCounts) {
+                     const count = roomCounts[room];
+                     const percentage = totalPersonShifts > 0 ? (count / totalPersonShifts * 100).toFixed(1) : 0;
+                    summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
+                }
+
+                chartLabels = Object.keys(roomCounts);
+                chartData = Object.values(roomCounts);
+                chartColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'];
+            }
+            
+            dataSummaryEl.innerHTML = summaryHTML;
+
+            const ctx = document.getElementById('shift-chart').getContext('2d');
+            if (shiftChartInstance) {
+                shiftChartInstance.data.labels = chartLabels;
+                shiftChartInstance.data.datasets[0].data = chartData;
+                shiftChartInstance.data.datasets[0].backgroundColor = chartColors;
+                shiftChartInstance.update();
+            } else {
+                shiftChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'จำนวนเวร',
+                            data: chartData,
+                            backgroundColor: chartColors,
+                            borderColor: 'var(--container-bg)',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        family: 'Mitr, sans-serif',
+                                        size: 14
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
         function applyAndRenderFilters() {
             const personFilter = document.getElementById('filter-person').value;
             const startDateFilter = document.getElementById('filter-start-date').value;
@@ -479,6 +700,8 @@
             if (roomFilter !== 'all') {
                 filteredData = filteredData.filter(item => !item.isPostNightShift);
             }
+
+            updateChartAndSummary(filteredData);
 
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
             if (currentPage > totalPages && totalPages > 0) {
@@ -586,7 +809,14 @@
                 title: `เพิ่มเวรวันที่ ${new Date(dateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}`,
                 html: `
                     <label class="swal2-input-label">เภสัชกร</label>
-                    <select id="swal-person" class="swal2-select">${Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('')}</select>
+                    <div class="radio-group-horizontal">
+                        ${Object.keys(PERSONS).map((p, index) => `
+                            <label class="radio-option">
+                                <input type="radio" name="swal-person" value="${p}" ${index === 0 ? 'checked' : ''}>
+                                <span style="background-color:${PERSONS[p].color}; color: white;">${PERSONS[p].name}</span>
+                            </label>
+                        `).join('')}
+                    </div>
                     <label for="swal-shift" class="swal2-input-label">เลือกช่วงเวลา</label>
                     <select id="swal-shift" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}">${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
                     <label for="swal-room" class="swal2-input-label">เวร</label>
@@ -629,7 +859,7 @@
                     updateFormFields();
                 },
                 preConfirm: () => {
-                    const person = document.getElementById('swal-person').value;
+                    const person = document.querySelector('input[name="swal-person"]:checked').value;
                     const shift = document.getElementById('swal-shift').value;
                     for (const key in allShiftsData) {
                         const existingShift = allShiftsData[key];
@@ -771,8 +1001,15 @@
                 title: `แก้ไข/ลบเวร`,
                 html: `
                     <p style="margin-bottom: 20px;">วันที่ ${new Date(eventDateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}</p>
-                    <label for="swal-person-edit" class="swal2-input-label">เภสัชกร</label>
-                    <select id="swal-person-edit" class="swal2-select">${Object.keys(PERSONS).map(p => `<option value="${p}" ${p === person ? 'selected' : ''}>${PERSONS[p].name}</option>`).join('')}</select>
+                    <label class="swal2-input-label">เภสัชกร</label>
+                    <div class="radio-group-horizontal">
+                        ${Object.keys(PERSONS).map(p => `
+                            <label class="radio-option">
+                                <input type="radio" name="swal-person-edit" value="${p}" ${p === person ? 'checked' : ''}>
+                                <span style="background-color:${PERSONS[p].color}; color: white;">${PERSONS[p].name}</span>
+                            </label>
+                        `).join('')}
+                    </div>
                     <label for="swal-shift-edit" class="swal2-input-label">ช่วงเวลา</label>
                     <select id="swal-shift-edit" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}" ${s === shift ? 'selected' : ''}>${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
                     <label for="swal-room-edit" class="swal2-input-label">เวร</label>
@@ -815,7 +1052,7 @@
                     updateFormFields();
                 },
                 preConfirm: () => {
-                    const newPerson = document.getElementById('swal-person-edit').value;
+                    const newPerson = document.querySelector('input[name="swal-person-edit"]:checked').value;
                     const newShift = document.getElementById('swal-shift-edit').value;
                     for (const key in allShiftsData) {
                         if (key === shiftId) continue; 
