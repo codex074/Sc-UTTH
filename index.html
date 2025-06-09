@@ -92,13 +92,12 @@
             border: 1px solid var(--border-color);
         }
         .filter-grid {
-            display: flex;
-            flex-wrap: wrap; 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px; 
             align-items: flex-end;
         }
         .filter-group {
-            flex: 1 1 180px; 
             display: flex;
             flex-direction: column;
         }
@@ -347,6 +346,9 @@
                 padding: 5px 8px !important;
                 font-size: 0.8em !important;
             }
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
     </style>
@@ -364,16 +366,16 @@
                     <select id="filter-person"></select>
                 </div>
                 <div class="filter-group">
+                    <label for="filter-shift">ช่วงเวลา</label>
+                    <select id="filter-shift"></select>
+                </div>
+                <div class="filter-group">
                     <label for="filter-start-date">ตั้งแต่วันที่</label>
                     <input type="date" id="filter-start-date">
                 </div>
                 <div class="filter-group">
                     <label for="filter-end-date">ถึงวันที่</label>
                     <input type="date" id="filter-end-date">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-shift">ช่วงเวลา</label>
-                    <select id="filter-shift"></select>
                 </div>
                 <div class="filter-group">
                     <label for="filter-room">เวร</label>
@@ -403,7 +405,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.6</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.7</p>
     </footer>
 
     <script type="module">
@@ -475,8 +477,9 @@
         const paginationContainer = document.getElementById('pagination-container');
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth', locale: 'th',
-            buttonText: { today: 'วันนี้', month: 'เดือน', week: 'สัปดาห์' },
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+            buttonText: { month: 'เดือน', year: 'ปี' },
+            headerToolbar: { left: 'prev,next', center: 'title', right: 'dayGridMonth,dayGridYear' },
+            navLinks: true, // Enable clicking month names in year view
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
             dayCellDidMount: function(arg) {
@@ -1115,7 +1118,7 @@
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
-                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
                                 .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
                         }
                     }
@@ -1134,7 +1137,7 @@
         }
         
         // --- 7. INITIALIZATION ---
-        function initializeApp() {
+        function initializeAppUI() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
             const roomFilterEl = document.getElementById('filter-room');
@@ -1161,7 +1164,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
+            initializeAppUI();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
