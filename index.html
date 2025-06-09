@@ -403,7 +403,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.5</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.6</p>
     </footer>
 
     <script type="module">
@@ -580,30 +580,18 @@
             paginationContainer.appendChild(createButton('«', currentPage - 1, currentPage === 1));
 
             const pagesToShow = [];
-            if (totalPages <= 7) {
+            if (totalPages <= 5) {
                 for (let i = 1; i <= totalPages; i++) {
                     pagesToShow.push(i);
                 }
             } else {
-                pagesToShow.push(1);
-                if (currentPage > 3) {
-                    pagesToShow.push('...');
+                 if (currentPage <= 3) {
+                    pagesToShow.push(1, 2, 3, '...', totalPages);
+                } else if (currentPage >= totalPages - 2) {
+                    pagesToShow.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+                } else {
+                    pagesToShow.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
                 }
-                let start = Math.max(2, currentPage - 1);
-                let end = Math.min(totalPages - 1, currentPage + 1);
-                if (currentPage <= 3) {
-                    start = 2; end = 4;
-                }
-                if (currentPage >= totalPages - 2) {
-                    start = totalPages - 3; end = totalPages - 1;
-                }
-                for (let i = start; i <= end; i++) {
-                    pagesToShow.push(i);
-                }
-                if (currentPage < totalPages - 2) {
-                    pagesToShow.push('...');
-                }
-                pagesToShow.push(totalPages);
             }
 
             [...new Set(pagesToShow)].forEach(page => {
@@ -1146,7 +1134,7 @@
         }
         
         // --- 7. INITIALIZATION ---
-        function initializeFilters() {
+        function initializeApp() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
             const roomFilterEl = document.getElementById('filter-room');
@@ -1173,7 +1161,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            initializeFilters();
+            initializeApp();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
