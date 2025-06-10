@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แมวมีมเภสัช</title>
     
-    <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- FullCalendar v6 CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     
-    <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -229,13 +225,9 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
-            font-weight: 500;
+            padding: 5px 8px; border-radius: 8px !important; color: white !important;
         }
-        .fc-daygrid-day.fc-day-today { 
-            background-color: var(--today-bg-tint) !important; 
-            border: 2px solid var(--today-color) !important;
-        }
+        .fc-daygrid-day.fc-day-today { background-color: var(--today-bg-tint) !important; }
         .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
         .fc-button {
             background-color: var(--primary-color) !important; border: none !important;
@@ -249,10 +241,14 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number {
+        .holiday-cell .fc-daygrid-day-number,
+        .fc-day-today .fc-daygrid-day-number {
             margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            border-radius: 50%; color: white !important;
             text-align: center; box-shadow: none; font-weight: 500; 
+        }
+        .holiday-cell .fc-daygrid-day-number {
+            background-color: var(--holiday-red);
         }
         .fc-day-today .fc-daygrid-day-number {
             background-color: var(--today-color);
@@ -352,14 +348,7 @@
                 font-size: 0.8em !important;
             }
             .filter-grid {
-                grid-template-columns: 1fr;
-            }
-            #data-summary {
-                padding-left: 0;
-                text-align: left;
-            }
-             #data-summary h3 {
-                text-align: left;
+                grid-template-columns: 1fr 1fr;
             }
         }
 
@@ -417,7 +406,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.0</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.1</p>
     </footer>
 
     <script type="module">
@@ -1149,7 +1138,7 @@
         }
         
         // --- 7. INITIALIZATION ---
-        function initializeFiltersAndListeners() {
+        function initializeAppUI() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
             const roomFilterEl = document.getElementById('filter-room');
@@ -1176,7 +1165,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            initializeFiltersAndListeners();
+            initializeAppUI();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
