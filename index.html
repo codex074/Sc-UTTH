@@ -229,7 +229,8 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
+            font-weight: 500;
         }
         .fc-daygrid-day.fc-day-today { background-color: var(--today-bg-tint) !important; }
         .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
@@ -347,7 +348,14 @@
                 font-size: 0.8em !important;
             }
             .filter-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
+            }
+            #data-summary {
+                padding-left: 0;
+                text-align: left;
+            }
+             #data-summary h3 {
+                text-align: left;
             }
         }
 
@@ -405,7 +413,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.7</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.8</p>
     </footer>
 
     <script type="module">
@@ -441,7 +449,7 @@
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
             'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
         };
-        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'Nanti', color: '#FEB9D0' } };
+        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'N', color: '#FEB9D0' } };
         const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
         
         const THAI_HOLIDAYS = new Map([
@@ -758,7 +766,7 @@
                     title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}, ${shiftData.room}`;
                     eventColor = 'var(--cancelled-color)';
                 } else {
-                    title = `${shiftData.person}, ${shiftData.shift}, ${shiftData.room}`;
+                    title = `${PERSONS[shiftData.person].name}, ${shiftData.shift}, ${shiftData.room}`;
                     if (shiftData.medOption) { title += ` (${shiftData.medOption})`; }
                     if (shiftData.notes) { title += ' 📝'; }
                     eventColor = PERSONS[shiftData.person]?.color || '#777777';
@@ -770,7 +778,7 @@
                     nightShiftDate.setDate(nightShiftDate.getDate() + 1);
                     const nextDayStr = toYYYYMMDD(nightShiftDate);
                     allEvents.push({
-                        id: `${key}_off`, title: `⬇️ ${shiftData.person} (ลงดึก)`, start: nextDayStr, allDay: true,
+                        id: `${key}_off`, title: `⬇️ ${PERSONS[shiftData.person].name} (ลงดึก)`, start: nextDayStr, allDay: true,
                         backgroundColor: 'var(--post-night-shift-color)', borderColor: 'var(--post-night-shift-color)', classNames: ['post-night-shift-event'] 
                     });
                     fullSummaryData.push({ key: `${key}_off`, isPostNightShift: true, date: nextDayStr, person: shiftData.person, createdAt: shiftData.createdAt });
