@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แมวมีมเภสัช</title>
     
-    <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- FullCalendar v6 CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     
-    <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -349,17 +345,16 @@
                 font-size: 1.8em;
             }
             .fc-toolbar.fc-header-toolbar {
-                flex-direction: column;
-                gap: 5px;
-            }
-            .fc-toolbar-chunk {
                 display: flex;
-                justify-content: center;
-                align-items: center;
+                flex-wrap: wrap; /* Allow wrapping */
+                justify-content: space-between; /* Space out items */
                 gap: 5px;
             }
             .fc-toolbar-title {
                 font-size: 1.2em !important;
+                order: -1; /* Move title to the beginning on mobile */
+                width: 100%; /* Make title take full width */
+                text-align: center; /* Center the title */
             }
             .fc .fc-button {
                 padding: 5px 8px !important;
@@ -424,7 +419,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.2</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.3</p>
     </footer>
 
     <script type="module">
@@ -1137,7 +1132,7 @@
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
-                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
                                 .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
                         }
                     }
@@ -1156,7 +1151,7 @@
         }
         
         // --- 7. INITIALIZATION ---
-        function initializeAppUI() {
+        function startApp() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
             const roomFilterEl = document.getElementById('filter-room');
@@ -1183,7 +1178,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            initializeAppUI();
+            startApp();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
