@@ -350,13 +350,6 @@
             .filter-grid {
                 grid-template-columns: 1fr;
             }
-            #data-summary {
-                padding-left: 0;
-                text-align: left;
-            }
-             #data-summary h3 {
-                text-align: left;
-            }
         }
 
     </style>
@@ -413,7 +406,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.8</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.1.9</p>
     </footer>
 
     <script type="module">
@@ -449,7 +442,7 @@
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
             'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
         };
-        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'N', color: '#FEB9D0' } };
+        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'Nanti', color: '#FEB9D0' } };
         const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
         
         const THAI_HOLIDAYS = new Map([
@@ -1126,7 +1119,7 @@
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
-                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
                                 .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
                         }
                     }
@@ -1145,7 +1138,7 @@
         }
         
         // --- 7. INITIALIZATION ---
-        function initializeAppUI() {
+        function initializeApp() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
             const roomFilterEl = document.getElementById('filter-room');
@@ -1172,7 +1165,7 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            initializeAppUI();
+            initializeApp();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
