@@ -259,14 +259,10 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number,
-        .fc-day-today .fc-daygrid-day-number {
-            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; color: white !important;
-            text-align: center; box-shadow: none; font-weight: 500; 
-        }
         .holiday-cell .fc-daygrid-day-number {
-            background-color: var(--holiday-red);
+            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
+            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            text-align: center; box-shadow: none; font-weight: 500; 
         }
         .fc-day-today .fc-daygrid-day-number {
             background-color: var(--today-color);
@@ -354,10 +350,12 @@
                 justify-content: space-between;
                 align-items: center;
             }
-            .fc-toolbar-chunk:nth-child(1) { order: 1; } /* prev,next */
-            .fc-toolbar-chunk:nth-child(2) { order: 3; flex-basis: 100%; text-align: center; } /* title */
-            .fc-toolbar-chunk:nth-child(3) { order: 2; } /* buttons */
-            
+            .fc-toolbar-chunk:nth-child(2) { /* title */
+                order: -1; /* Make title appear first visually */
+                width: 100%;
+                text-align: center;
+                padding-bottom: 10px;
+            }
             .fc-toolbar-title {
                 font-size: 1.2em !important;
             }
@@ -366,7 +364,8 @@
                 font-size: 0.8em !important;
             }
             .filter-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
             }
         }
 
@@ -424,7 +423,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.6</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.7</p>
     </footer>
 
     <script type="module">
