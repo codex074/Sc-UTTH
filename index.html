@@ -259,17 +259,16 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number,
-        .fc-day-today .fc-daygrid-day-number {
+        .holiday-cell .fc-daygrid-day-number {
             margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; color: white !important;
+            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
             text-align: center; box-shadow: none; font-weight: 500; 
         }
-        .holiday-cell .fc-daygrid-day-number {
-            background-color: var(--holiday-red);
-        }
         .fc-day-today .fc-daygrid-day-number {
-            background-color: var(--today-color);
+           color: var(--today-color) !important;
+           font-weight: bold;
+           background-color: transparent !important;
+           text-decoration: none; /* remove underline from link */
         }
         
         .fc .fc-day-other {
@@ -424,7 +423,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.4</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.5</p>
     </footer>
 
     <script type="module">
@@ -1140,7 +1139,7 @@
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
                                 .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
-                                .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
+                                .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                         }
                     }
                 }
