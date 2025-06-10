@@ -259,16 +259,17 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number {
+        .holiday-cell .fc-daygrid-day-number,
+        .fc-day-today .fc-daygrid-day-number {
             margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            border-radius: 50%; color: white !important;
             text-align: center; box-shadow: none; font-weight: 500; 
         }
+        .holiday-cell .fc-daygrid-day-number {
+            background-color: var(--holiday-red);
+        }
         .fc-day-today .fc-daygrid-day-number {
-           color: var(--today-color) !important;
-           font-weight: bold;
-           background-color: transparent !important;
-           text-decoration: none; /* remove underline from link */
+            background-color: var(--today-color);
         }
         
         .fc .fc-day-other {
@@ -348,15 +349,15 @@
                 font-size: 1.8em;
             }
             .fc-toolbar.fc-header-toolbar {
-                flex-direction: column;
-                gap: 5px;
-            }
-            .fc-toolbar-chunk {
                 display: flex;
-                justify-content: center;
+                flex-wrap: wrap;
+                justify-content: space-between;
                 align-items: center;
-                gap: 5px;
             }
+            .fc-toolbar-chunk:nth-child(1) { order: 1; } /* prev,next */
+            .fc-toolbar-chunk:nth-child(2) { order: 3; flex-basis: 100%; text-align: center; } /* title */
+            .fc-toolbar-chunk:nth-child(3) { order: 2; } /* buttons */
+            
             .fc-toolbar-title {
                 font-size: 1.2em !important;
             }
@@ -423,7 +424,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.5</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.6</p>
     </footer>
 
     <script type="module">
@@ -1139,7 +1140,7 @@
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
                                 .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
-                                .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
+                                .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
                         }
                     }
                 }
