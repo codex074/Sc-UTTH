@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แมวมีมเภสัช</title>
     
+    <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
+    <!-- FullCalendar v6 CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     
+    <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -227,7 +231,21 @@
             font-size: 0.85em !important; border: none !important;
             padding: 5px 8px; border-radius: 8px !important; color: white !important;
         }
-        .fc-daygrid-day.fc-day-today { background-color: var(--today-bg-tint) !important; }
+        .fc-daygrid-day.fc-day-today { 
+            background-color: var(--today-bg-tint) !important; 
+            position: relative;
+        }
+         .fc-daygrid-day.fc-day-today::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 2px solid var(--today-color);
+            border-radius: 4px;
+            pointer-events: none;
+        }
         .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
         .fc-button {
             background-color: var(--primary-color) !important; border: none !important;
@@ -406,7 +424,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.1</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.2</p>
     </footer>
 
     <script type="module">
