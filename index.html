@@ -229,8 +229,7 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
-            font-weight: 500;
+            padding: 5px 8px; border-radius: 8px !important; color: white !important;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -260,14 +259,10 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number,
-        .fc-day-today .fc-daygrid-day-number {
-            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; color: white !important;
-            text-align: center; box-shadow: none; font-weight: 500; 
-        }
         .holiday-cell .fc-daygrid-day-number {
-            background-color: var(--holiday-red);
+            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
+            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            text-align: center; box-shadow: none; font-weight: 500; 
         }
         .fc-day-today .fc-daygrid-day-number {
             background-color: var(--today-color);
@@ -356,7 +351,7 @@
                 align-items: center;
             }
             .fc-toolbar-chunk:nth-child(2) { /* title */
-                order: -1; /* Make title appear first visually */
+                order: -1; 
                 width: 100%;
                 text-align: center;
                 padding-bottom: 10px;
@@ -427,7 +422,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.8</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.9</p>
     </footer>
 
     <script type="module">
