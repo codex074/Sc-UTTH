@@ -187,6 +187,11 @@
             font-size: 0.9em; color: var(--text-color); opacity: 0.7; margin-top: 8px;
             padding-top: 8px; border-top: 1px dashed var(--border-color);
         }
+        .summary-item .timestamp {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-left: 10px;
+        }
         #pagination-container {
             display: flex;
             justify-content: center;
@@ -422,12 +427,12 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.9</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.0</p>
     </footer>
 
     <script type="module">
         // --- 1. FIREBASE SETUP ---
-        import { initializeApp as initializeFirebaseApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
@@ -441,7 +446,7 @@
             measurementId: "G-RYDN5M4PLB"
         };
 
-        const app = initializeFirebaseApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const shiftsRef = ref(database, 'shifts');
         const remindersRef = ref(database, 'reminders');
@@ -458,7 +463,7 @@
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
             'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
         };
-        const PERSONS = { 'A': { name: 'A', color: '#AFD7F6' }, 'Nanti': { name: 'Nanti', color: '#FEB9D0' } };
+        const PERSONS = { 'A': { name: 'A', color: '#1E90FF' }, 'Nanti': { name: 'Nanti', color: '#DB7093' } };
         const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
         
         const THAI_HOLIDAYS = new Map([
@@ -547,7 +552,16 @@
                  itemsToRender.forEach(item => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'summary-item';
-                    let itemColor, mainInfo, notesHTML = '';
+                    let itemColor, mainInfo, notesHTML, timestampHTML = '';
+
+                    if(item.createdAt){
+                        const timestamp = new Date(item.createdAt).toLocaleString('th-TH', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                        timestampHTML = `<span class="timestamp">| ${timestamp}</span>`;
+                    }
+
                     if (item.isPostNightShift) {
                         itemColor = 'var(--post-night-shift-color)';
                         mainInfo = `⬇️ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>ลงดึก</strong>`;
@@ -561,7 +575,7 @@
                         if(item.medOption){ mainInfo += ` | <strong style="color: #c0392b;">สถานะ: ${item.medOption}</strong>`; }
                         if (item.notes) { notesHTML = `<div class="notes"><strong>หมายเหตุ:</strong> ${item.notes}</div>`; }
                     }
-                    itemEl.innerHTML = `<div><span>${mainInfo}</span>${notesHTML}</div>`;
+                    itemEl.innerHTML = `<div><span>${mainInfo}</span> ${timestampHTML}${notesHTML}</div>`;
                     itemEl.style.borderLeftColor = itemColor;
                     summaryListEl.appendChild(itemEl);
                 });
