@@ -234,7 +234,8 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
+            font-weight: 500;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -265,14 +266,25 @@
         
         .weekend-cell { background-color: var(--weekend-bg); }
         .holiday-cell .fc-daygrid-day-number {
-            margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
-            text-align: center; box-shadow: none; font-weight: 500; 
+            background-color: var(--holiday-red);
+            border-radius: 50%;
+            color: white !important;
         }
         .fc-day-today .fc-daygrid-day-number {
-            background-color: var(--today-color);
+            background-color: transparent;
+            color: var(--today-color) !important;
+            font-weight: bold;
+            border-radius: 0;
         }
-        
+        .fc .fc-daygrid-day-number {
+            padding: 4px;
+            position: relative;
+            z-index: 4;
+            text-align: right;
+            width: auto;
+            height: auto;
+            line-height: normal;
+        }
         .fc .fc-day-other {
             background-color: #f7f7f7;
             opacity: 0.4;
@@ -427,7 +439,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.2</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.4</p>
     </footer>
 
     <script type="module">
@@ -552,7 +564,9 @@
                  itemsToRender.forEach(item => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'summary-item';
-                    let itemColor, mainInfo, notesHTML, timestampHTML = '';
+                    let itemColor, mainInfo;
+                    let notesHTML = '';
+                    let timestampHTML = '';
 
                     if(item.createdAt){
                         const timestamp = new Date(item.createdAt).toLocaleString('th-TH', {
