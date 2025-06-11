@@ -234,8 +234,7 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
-            font-weight: 500;
+            padding: 5px 8px; border-radius: 8px !important; color: white !important;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -271,7 +270,7 @@
             text-align: center; box-shadow: none; font-weight: 500; 
         }
         .fc-day-today .fc-daygrid-day-number {
-           background-color: var(--today-color);
+            background-color: var(--today-color);
         }
         
         .fc .fc-day-other {
@@ -428,12 +427,12 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.1</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.2</p>
     </footer>
 
     <script type="module">
         // --- 1. FIREBASE SETUP ---
-        import { initializeApp as initializeFirebaseApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
@@ -447,7 +446,7 @@
             measurementId: "G-RYDN5M4PLB"
         };
 
-        const app = initializeFirebaseApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const shiftsRef = ref(database, 'shifts');
         const remindersRef = ref(database, 'reminders');
@@ -553,9 +552,7 @@
                  itemsToRender.forEach(item => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'summary-item';
-                    let itemColor, mainInfo;
-                    let notesHTML = '';
-                    let timestampHTML = '';
+                    let itemColor, mainInfo, notesHTML, timestampHTML = '';
 
                     if(item.createdAt){
                         const timestamp = new Date(item.createdAt).toLocaleString('th-TH', {
@@ -650,12 +647,30 @@
             let chartLabels, chartData, chartColors;
             let summaryHTML = '<h3>ข้อมูลสรุป</h3>';
 
+            const REMUNERATION_RATES = {
+                'ER': 780,
+                'MED': 780,
+                'SURG': 780,
+                'Extend': 540,
+                'SMC': 900,
+                'CHEMO': 390,
+                'รุ่งอรุณ': 202.5
+            };
+            let totalRemuneration = 0;
+
             if (personFilter === 'all') {
                 const personCounts = {};
                 const shiftTypeCounts = {};
+
                 validShifts.forEach(item => {
                     personCounts[item.person] = (personCounts[item.person] || 0) + 1;
                     shiftTypeCounts[item.shift] = (shiftTypeCounts[item.shift] || 0) + 1;
+                    
+                    if (item.shift === 'รุ่งอรุณ') {
+                        totalRemuneration += REMUNERATION_RATES['รุ่งอรุณ'];
+                    } else if (REMUNERATION_RATES[item.room]) {
+                        totalRemuneration += REMUNERATION_RATES[item.room];
+                    }
                 });
 
                 summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p><hr>`;
@@ -668,6 +683,7 @@
                 for(const shift in SHIFTS) {
                     summaryHTML += `<p><span>${SHIFTS[shift].name}:</span> <strong>${shiftTypeCounts[shift] || 0} เวร</strong></p>`;
                 }
+                summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทนทั้งหมด:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
 
                 chartLabels = Object.keys(personCounts);
                 chartData = Object.values(personCounts);
@@ -681,6 +697,13 @@
                 personShifts.forEach(item => {
                     const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room;
                     roomCounts[countKey] = (roomCounts[countKey] || 0) + 1;
+
+                    // Calculate remuneration for the specific person
+                    if (item.shift === 'รุ่งอรุณ') {
+                        totalRemuneration += REMUNERATION_RATES['รุ่งอรุณ'];
+                    } else if (REMUNERATION_RATES[item.room]) {
+                        totalRemuneration += REMUNERATION_RATES[item.room];
+                    }
                 });
 
                 summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${totalPersonShifts} เวร</strong></p><hr>`;
@@ -689,6 +712,8 @@
                      const percentage = totalPersonShifts > 0 ? (count / totalPersonShifts * 100).toFixed(1) : 0;
                     summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
                 }
+                summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทน:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
+
 
                 chartLabels = Object.keys(roomCounts);
                 chartData = Object.values(roomCounts);
