@@ -266,6 +266,7 @@
         .weekend-cell { background-color: var(--weekend-bg); }
         .holiday-cell .fc-daygrid-day-number {
             background-color: var(--holiday-red);
+            border-radius: 50%;
         }
         .fc-day-today .fc-daygrid-day-number {
            background-color: var(--today-color);
@@ -433,7 +434,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.5</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.3.6</p>
     </footer>
 
     <script type="module">
@@ -718,7 +719,8 @@
                  for(const room in roomCounts) {
                      const count = roomCounts[room];
                      const percentage = totalPersonShifts > 0 ? (count / totalPersonShifts * 100).toFixed(1) : 0;
-                    summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
+                     const remuneration = REMUNERATION_RATES[room] ? `(฿${(count * REMUNERATION_RATES[room]).toLocaleString()})` : '';
+                    summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%) ${remuneration}</strong></p>`;
                 }
                 summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทน:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
 
