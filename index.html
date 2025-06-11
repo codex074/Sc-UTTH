@@ -229,7 +229,8 @@
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+            padding: 5px 8px; border-radius: 8px !important; color: var(--text-color) !important;
+            font-weight: 500;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -259,10 +260,14 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
-        .holiday-cell .fc-daygrid-day-number {
+        .holiday-cell .fc-daygrid-day-number,
+        .fc-day-today .fc-daygrid-day-number {
             margin: 2px auto 0; width: 2.3em; height: 2.3em; line-height: 2.3em;
-            border-radius: 50%; background-color: var(--holiday-red); color: white !important;
+            border-radius: 50%; color: white !important;
             text-align: center; box-shadow: none; font-weight: 500; 
+        }
+        .holiday-cell .fc-daygrid-day-number {
+            background-color: var(--holiday-red);
         }
         .fc-day-today .fc-daygrid-day-number {
             background-color: var(--today-color);
@@ -365,7 +370,6 @@
             }
             .filter-grid {
                 grid-template-columns: 1fr 1fr;
-                gap: 10px;
             }
         }
 
@@ -423,12 +427,12 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.7</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด. | เวอร์ชั่น 2.2.8</p>
     </footer>
 
     <script type="module">
         // --- 1. FIREBASE SETUP ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { initializeApp as initializeFirebaseApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
@@ -442,7 +446,7 @@
             measurementId: "G-RYDN5M4PLB"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app = initializeFirebaseApp(firebaseConfig);
         const database = getDatabase(app);
         const shiftsRef = ref(database, 'shifts');
         const remindersRef = ref(database, 'reminders');
