@@ -30,7 +30,7 @@
             --primary-color: #76BC43; /* Main Green */
             --primary-hover: #65a33a; /* Darker Green */
             --secondary-color: #7DD8C9; /* Soft Teal */
-            --text-color: #384C27; /* Dark Green-Brown */
+            --text-color: #ffffff; /* White */
             --border-color: #E8F5E9; /* Light Green */
             --weekend-bg: #E8F5E9;
             --reminder-bg: #01A6BA; 
@@ -271,12 +271,11 @@
         .holiday-cell .fc-daygrid-day-number {
             background-color: var(--holiday-red);
             border-radius: 50%;
-            color: white !important;
         }
         .fc-day-today .fc-daygrid-day-number {
-           background-color: var(--today-color);
-           border-radius: 50%;
-           color: white !important;
+           color: var(--today-color) !important;
+           font-weight: bold;
+           background-color: transparent !important;
         }
         .fc .fc-daygrid-day-number {
             padding: 4px;
@@ -386,27 +385,13 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
-        #gemini-summary-btn {
-            background-color: #8E44AD; /* Purple color for Gemini button */
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 15px;
-            font-family: 'Mitr', sans-serif;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 15px;
-        }
-        #gemini-summary-btn:hover {
-            background-color: #7D3C98;
-        }
+
     </style>
 </head>
 <body>
 
     <div id="app-container">
-        <h1>🐾 แมวมีมเภสัช 🐾</h1>
+        <h1>🐾 UTTH-Schedule 🐾</h1>
         <div id='calendar'></div>
         
         <div id="filter-container">
@@ -444,10 +429,6 @@
             </div>
             <div id="data-summary"></div>
         </div>
-        <div style="text-align: center;">
-             <button id="gemini-summary-btn">✨ ให้เหมียว AI ช่วยสรุป</button>
-        </div>
-
 
         <div id="summary-container">
             <h2>สรุปรายการเวร</h2>
@@ -459,7 +440,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีเภสัช | version 2.4.1</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช | เวอร์ชั่น 2.4.3</p>
     </footer>
 
     <script type="module">
@@ -490,7 +471,6 @@
         let currentPage = 1; 
         const itemsPerPage = 10; 
         let shiftChartInstance = null; 
-        let currentFilteredShifts = [];
 
         const SHIFTS = {
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
@@ -693,7 +673,6 @@
             const dataSummaryEl = document.getElementById('data-summary');
             const personFilter = document.getElementById('filter-person').value;
             const validShifts = data.filter(item => !item.isCancelled && !item.isPostNightShift);
-            currentFilteredShifts = validShifts; // Store for Gemini
 
             let chartLabels, chartData, chartColors;
             let summaryHTML = '<h3>ข้อมูลสรุป</h3>';
@@ -1231,8 +1210,8 @@
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
-                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลเวรถูกลบออกจากระบบแล้ว', 'success'))
-                                .catch((error) => Swal.fire('ผิดพลาด!', `ลบไม่ได้: ${error.message}`, 'error'));
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
+                                .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                         }
                     }
                 }
@@ -1257,7 +1236,7 @@
             const clearButtonEl = document.getElementById('clear-filters-btn');
             const dateStartEl = document.getElementById('filter-start-date');
             const dateEndEl = document.getElementById('filter-end-date');
-            const geminiButton = document.getElementById('gemini-summary-btn');
+            
 
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
             shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
@@ -1276,54 +1255,7 @@
                 applyAndRenderFilters();
             });
             
-             geminiButton.addEventListener('click', async () => {
-                Swal.fire({
-                    title: 'เหมียว AI กำลังคิด...',
-                    html: 'กำลังสรุปและให้คำแนะนำสักครู่นะเหมียว...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                const shiftsText = currentFilteredShifts.map(s => `วันที่ ${s.date}, ${s.person} ทำงานเวร ${s.shift} ที่ ${s.room}`).join('\\n');
-                const prompt = `คุณคือผู้ช่วยจัดการตารางเวรที่เป็นมิตรและฉลาดของ 'แมวมีมเภสัช' จากข้อมูลตารางเวรต่อไปนี้: ${shiftsText} กรุณา: 1. สรุปภาพรวมของตารางเวรนี้สั้นๆ ด้วยน้ำเสียงให้กำลังใจ 2. วิเคราะห์ภาระงาน และแนะนำช่วงเวลาที่ควรพักผ่อน หรือวัน/เวรที่อาจจะแลกเปลี่ยนได้ 3. ปิดท้ายด้วยคำพูดให้กำลังใจสไตล์แมวๆ`;
-
-                 try {
-                    let chatHistory = [];
-                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                    const payload = { contents: chatHistory };
-                    const apiKey = "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                    
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    let summaryText = 'ขออภัยเหมียว, เหมียว AI ยังให้คำแนะนำตอนนี้ไม่ได้...';
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        summaryText = result.candidates[0].content.parts[0].text;
-                    }
-                    
-                    Swal.fire({
-                        title: '✨ สรุปจากเหมียว AI',
-                        html: summaryText.replace(/\\n/g, '<br>'),
-                        icon: 'success'
-                    });
-                } catch (error) {
-                    Swal.fire({
-                        title: 'เกิดข้อผิดพลาด!',
-                        text: 'ไม่สามารถติดต่อเหมียว AI ได้ในขณะนี้',
-                        icon: 'error'
-                    });
-                }
-            });
+            
         }
         
         document.addEventListener('DOMContentLoaded', () => {
