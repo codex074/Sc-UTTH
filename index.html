@@ -479,29 +479,7 @@
     </footer>
 
     <script type="module">
-        /*
-        ================================================================
-        == หมายเหตุสำคัญเกี่ยวกับการเชื่อมต่อ GOOGLE CALENDAR ==
-        ================================================================
-        โค้ดในไฟล์ HTML นี้เชื่อมต่อกับ Firebase Realtime Database เรียบร้อยแล้ว
-        สำหรับการ "อ่าน" และ "เขียน" ข้อมูลเวร ซึ่งทำงานได้อย่างถูกต้อง
-
-        ส่วนการ "ส่งข้อมูลไป Google Calendar โดยอัตโนมัติ" จะต้องทำผ่าน
-        "Cloud Function" ที่ทำงานบนเซิร์ฟเวอร์ของ Google เพื่อความปลอดภัย
-        (ป้องกันไม่ให้ API Key และ Credentials ของคุณรั่วไหล)
-
-        ดังนั้น คุณไม่จำเป็นต้องแก้ไขโค้ดในหน้านี้เพื่อเชื่อมต่อ Google Calendar
-        แต่ต้องไปสร้าง Cloud Function ตามขั้นตอนที่ได้อธิบายไปก่อนหน้านี้ครับ
-
-        ปุ่ม "เพิ่มในปฏิทิน" ที่มีอยู่ จะเป็นการสร้างไฟล์ .ics
-        เพื่อให้ผู้ใช้ดาวน์โหลดและนำไปเพิ่มในปฏิทินของตนเอง "ด้วยตนเอง"
-        ซึ่งเป็นคนละส่วนกับการทำงานอัตโนมัติผ่าน Cloud Function ครับ
-        ================================================================
-        */
-
         // --- 1. FIREBASE SETUP ---
-        // This part correctly connects your web app to the Firebase Realtime Database.
-        // No changes are needed here.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -601,7 +579,6 @@
         calendar.render();
 
         // --- 4. HELPER & RENDER FUNCTIONS ---
-        // All helper and render functions remain the same. They handle the UI logic.
         function toYYYYMMDD(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -923,9 +900,7 @@
         }
 
         // --- 5. EVENT HANDLER FUNCTIONS ---
-        // All event handler functions remain the same.
         async function promptAddShift(dateStr) {
-            // ... (Your existing code for this function is great, no changes needed)
             const clickedDate = new Date(dateStr + "T00:00:00");
             const reminderOnDay = Object.values(allRemindersData).find(r => {
                 const startDate = new Date(r.startDate + "T00:00:00");
@@ -1039,7 +1014,6 @@
         }
 
         async function promptAddOrEditReminder(dateStr) {
-            // ... (Your existing code for this function is great, no changes needed)
             const clickedDate = new Date(dateStr + "T00:00:00");
             const existingReminderKey = Object.keys(allRemindersData).find(key => {
                 const reminder = allRemindersData[key];
@@ -1088,7 +1062,6 @@
         }
         
         async function handleDateClick(arg) {
-            // ... (Your existing code for this function is great, no changes needed)
             const holidayName = THAI_HOLIDAYS.get(arg.dateStr);
             if (holidayName) {
                 await Swal.fire({
@@ -1111,7 +1084,6 @@
         }
 
         async function handleEventClick(arg) {
-            // ... (Your existing code for this function is great, no changes needed)
             const shiftId = arg.event.id;
             if (arg.event.extendedProps.isReminder) {
                 promptAddOrEditReminder(arg.event.startStr);
@@ -1325,6 +1297,9 @@
                 XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
             });
 
+            // =================================================================
+            // == ⬇️⬇️ โค้ดที่แก้ไขแล้วอยู่ตรงนี้ ⬇️⬇️ ==
+            // =================================================================
             addToCalendarButton.addEventListener('click', async () => {
                 const { value: person } = await Swal.fire({
                     title: 'เลือกเภสัชกรเพื่อส่งออก',
@@ -1354,32 +1329,44 @@
                         Swal.fire('ผิดพลาด!', 'ไม่สามารถส่งออกปฏิทินได้ในขณะนี้', 'error');
                         return;
                     }
-                    const cal = ics();
-                    shiftsToExport.forEach(shift => {
-                        const shiftDetails = SHIFTS[shift.shift];
-                        if (!shiftDetails) return;
 
-                        const [startTimeStr, endTimeStr] = shiftDetails.time.split('-');
-                        const [startHour, startMinute] = startTimeStr.split('.').map(Number);
-                        const [endHour, endMinute] = endTimeStr.split('.').map(Number);
+                    try {
+                        const cal = ics();
+                        shiftsToExport.forEach(shift => {
+                            const shiftDetails = SHIFTS[shift.shift];
+                            if (!shiftDetails) {
+                                console.warn(`Skipping shift with unknown type: ${shift.shift}`);
+                                return; // ข้ามเวรที่ไม่มีข้อมูลเวลา
+                            }
 
-                        const startDate = new Date(`${shift.date}T${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00`);
-                        const endDate = new Date(`${shift.date}T${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`);
-                        
-                        // Handle overnight shifts for end date
-                        if (endHour < startHour || (endHour === startHour && endMinute < startMinute)) {
-                            endDate.setDate(endDate.getDate() + 1);
-                        }
+                            const [startTimeStr, endTimeStr] = shiftDetails.time.split('-');
+                            const [startHour, startMinute] = startTimeStr.split('.').map(Number);
+                            const [endHour, endMinute] = endTimeStr.split('.').map(Number);
 
-                        cal.addEvent(
-                            `เวร ${PERSONS[shift.person]?.name} ที่ ${shift.room}`,
-                            `เวร ${shiftDetails.name} (${shiftDetails.time}) ที่ห้อง ${shift.room}\nหมายเหตุ: ${shift.notes || ''}`,
-                            'โรงพยาบาลอุตรดิตถ์',
-                            startDate,
-                            endDate
-                        );
-                    });
-                    cal.download(`utth-schedule-${person}`);
+                            const startDate = new Date(shift.date);
+                            startDate.setHours(startHour, startMinute, 0, 0);
+
+                            const endDate = new Date(shift.date);
+                            endDate.setHours(endHour, endMinute, 0, 0);
+
+                            // **FIX:** จัดการกับเวรที่ข้ามวัน (เช่น เวรดึก)
+                            if (endDate <= startDate) {
+                                endDate.setDate(endDate.getDate() + 1);
+                            }
+
+                            cal.addEvent(
+                                `เวร ${PERSONS[shift.person]?.name || shift.person} ที่ ${shift.room}`,
+                                `เวร ${shiftDetails.name} (${shiftDetails.time}) ที่ห้อง ${shift.room}\nหมายเหตุ: ${shift.notes || 'ไม่มี'}`,
+                                'โรงพยาบาลอุตรดิตถ์',
+                                startDate, // ส่งเป็น Date object โดยตรง
+                                endDate    // ส่งเป็น Date object โดยตรง
+                            );
+                        });
+                        cal.download(`utth-schedule-${person}`);
+                    } catch (error) {
+                        console.error("Error creating .ics file:", error);
+                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถสร้างไฟล์ปฏิทินได้ กรุณาตรวจสอบ Console', 'error');
+                    }
                 }
             });
         }
