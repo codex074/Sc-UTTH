@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตารางเวร</title>
-    <link rel="shortcut icon" href="cool.ico" type="image/x-icon">
+    <title>UTTH-Schedule</title>
     
     <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +19,11 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- ICS.js for generating .ics files -->
+    <!-- ICS.js for generating .ics files (For Manual Calendar Export) -->
     <script src="https://unpkg.com/ics@3.0.1/dist/ics.min.js"></script>
+    
+    <!-- SheetJS (xlsx) CDN for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
     <style>
         /* --- CUTE CAT THEME --- */
@@ -386,14 +388,46 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
+        #backup-btn, #export-excel-btn, #add-to-google-calendar-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-family: 'Mitr', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        #export-excel-btn {
+            background-color: #1D6F42;
+        }
+        #add-to-google-calendar-btn {
+            background-color: #3498DB;
+        }
+        #backup-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        #export-excel-btn:hover {
+            background-color: #16A085;
+        }
+        #add-to-google-calendar-btn:hover {
+            background-color: #2980B9;
+        }
 
     </style>
 </head>
 <body>
 
     <div id="app-container">
-        <h1>🐾 แมวมีมเภสัช 🐾</h1>
+        <h1>🐾 UTTH-Schedule 🐾</h1>
         <div id='calendar'></div>
+        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button id="backup-btn">สำรองข้อมูล (JSON)</button>
+            <button id="export-excel-btn">ส่งออกเป็น Excel</button>
+            <button id="add-to-google-calendar-btn">เพิ่มในปฏิทิน (ไฟล์ .ics)</button>
+        </div>
         
         <div id="filter-container">
             <div class="filter-grid">
@@ -441,11 +475,33 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.4.5</p>
+        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.4.9</p>
     </footer>
 
     <script type="module">
+        /*
+        ================================================================
+        == หมายเหตุสำคัญเกี่ยวกับการเชื่อมต่อ GOOGLE CALENDAR ==
+        ================================================================
+        โค้ดในไฟล์ HTML นี้เชื่อมต่อกับ Firebase Realtime Database เรียบร้อยแล้ว
+        สำหรับการ "อ่าน" และ "เขียน" ข้อมูลเวร ซึ่งทำงานได้อย่างถูกต้อง
+
+        ส่วนการ "ส่งข้อมูลไป Google Calendar โดยอัตโนมัติ" จะต้องทำผ่าน
+        "Cloud Function" ที่ทำงานบนเซิร์ฟเวอร์ของ Google เพื่อความปลอดภัย
+        (ป้องกันไม่ให้ API Key และ Credentials ของคุณรั่วไหล)
+
+        ดังนั้น คุณไม่จำเป็นต้องแก้ไขโค้ดในหน้านี้เพื่อเชื่อมต่อ Google Calendar
+        แต่ต้องไปสร้าง Cloud Function ตามขั้นตอนที่ได้อธิบายไปก่อนหน้านี้ครับ
+
+        ปุ่ม "เพิ่มในปฏิทิน" ที่มีอยู่ จะเป็นการสร้างไฟล์ .ics
+        เพื่อให้ผู้ใช้ดาวน์โหลดและนำไปเพิ่มในปฏิทินของตนเอง "ด้วยตนเอง"
+        ซึ่งเป็นคนละส่วนกับการทำงานอัตโนมัติผ่าน Cloud Function ครับ
+        ================================================================
+        */
+
         // --- 1. FIREBASE SETUP ---
+        // This part correctly connects your web app to the Firebase Realtime Database.
+        // No changes are needed here.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -545,7 +601,7 @@
         calendar.render();
 
         // --- 4. HELPER & RENDER FUNCTIONS ---
-        // ... (All helper and render functions remain the same) ...
+        // All helper and render functions remain the same. They handle the UI logic.
         function toYYYYMMDD(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -619,7 +675,6 @@
             paginationContainer.innerHTML = '';
             if (totalPages <= 1) return;
 
-            // <<<< UPDATED PAGINATION LOGIC >>>>
             const createButton = (text, page, isDisabled = false, isActive = false) => {
                 const btn = document.createElement('button');
                 btn.textContent = text;
@@ -679,13 +734,8 @@
             let summaryHTML = '<h3>ข้อมูลสรุป</h3>';
 
             const REMUNERATION_RATES = {
-                'ER': 780,
-                'MED': 780,
-                'SURG': 780,
-                'Extend': 540,
-                'SMC': 900,
-                'CHEMO': 390,
-                'รุ่งอรุณ': 202.5
+                'ER': 780, 'MED': 780, 'SURG': 780, 'Extend': 540,
+                'SMC': 900, 'CHEMO': 390, 'รุ่งอรุณ': 202.5
             };
             let totalRemuneration = 0;
 
@@ -696,12 +746,8 @@
                 validShifts.forEach(item => {
                     personCounts[item.person] = (personCounts[item.person] || 0) + 1;
                     shiftTypeCounts[item.shift] = (shiftTypeCounts[item.shift] || 0) + 1;
-                    
-                    if (item.shift === 'รุ่งอรุณ') {
-                        totalRemuneration += REMUNERATION_RATES['รุ่งอรุณ'];
-                    } else if (REMUNERATION_RATES[item.room]) {
-                        totalRemuneration += REMUNERATION_RATES[item.room];
-                    }
+                    const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
+                    if (rate) totalRemuneration += rate;
                 });
 
                 summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p><hr>`;
@@ -723,29 +769,22 @@
             } else {
                 const roomCounts = {};
                 const personShifts = validShifts.filter(item => item.person === personFilter);
-                const totalPersonShifts = personShifts.length;
                 
                 personShifts.forEach(item => {
                     const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room;
                     roomCounts[countKey] = (roomCounts[countKey] || 0) + 1;
-
-                    // Calculate remuneration for the specific person
-                    if (item.shift === 'รุ่งอรุณ') {
-                        totalRemuneration += REMUNERATION_RATES['รุ่งอรุณ'];
-                    } else if (REMUNERATION_RATES[item.room]) {
-                        totalRemuneration += REMUNERATION_RATES[item.room];
-                    }
+                    const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
+                    if (rate) totalRemuneration += rate;
                 });
 
-                summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${totalPersonShifts} เวร</strong></p><hr>`;
+                summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${personShifts.length} เวร</strong></p><hr>`;
                  for(const room in roomCounts) {
                      const count = roomCounts[room];
-                     const percentage = totalPersonShifts > 0 ? (count / totalPersonShifts * 100).toFixed(1) : 0;
+                     const percentage = personShifts.length > 0 ? (count / personShifts.length * 100).toFixed(1) : 0;
                      const remuneration = REMUNERATION_RATES[room] ? `(฿${(count * REMUNERATION_RATES[room]).toLocaleString()})` : '';
                     summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%) ${remuneration}</strong></p>`;
                 }
                 summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทน:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
-
 
                 chartLabels = Object.keys(roomCounts);
                 chartData = Object.values(roomCounts);
@@ -756,41 +795,23 @@
 
             const ctx = document.getElementById('shift-chart').getContext('2d');
             if (shiftChartInstance) {
-                shiftChartInstance.data.labels = chartLabels;
-                shiftChartInstance.data.datasets[0].data = chartData;
-                shiftChartInstance.data.datasets[0].backgroundColor = chartColors;
-                shiftChartInstance.update();
-            } else {
-                shiftChartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: chartLabels,
-                        datasets: [{
-                            label: 'จำนวนเวร',
-                            data: chartData,
-                            backgroundColor: chartColors,
-                            borderColor: 'var(--container-bg)',
-                            borderWidth: 4,
-                            hoverOffset: 15, 
-                            offset: 8 
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    font: {
-                                        family: 'Mitr, sans-serif',
-                                        size: 14
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
+                shiftChartInstance.destroy();
             }
+            shiftChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'จำนวนเวร', data: chartData, backgroundColor: chartColors,
+                        borderColor: 'var(--container-bg)', borderWidth: 4,
+                        hoverOffset: 15, offset: 8 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Mitr, sans-serif', size: 14 } } } }
+                }
+            });
         }
 
 
@@ -802,15 +823,19 @@
             const roomFilter = document.getElementById('filter-room').value;
 
             let filteredData = fullSummaryData.filter(item => {
-                const itemDate = new Date(item.date);
+                let effectiveDate = new Date(item.date);
+                if (item.shift === 'ดึก' && !item.isCancelled) {
+                    effectiveDate.setDate(effectiveDate.getDate() + 1);
+                }
+                
                 const startDate = startDateFilter ? new Date(startDateFilter + "T00:00:00") : null;
                 const endDate = endDateFilter ? new Date(endDateFilter + "T00:00:00") : null;
                 if(startDate) startDate.setHours(0,0,0,0);
                 if(endDate) endDate.setHours(23,59,59,999);
 
                 const personMatch = personFilter === 'all' || item.person === personFilter;
-                const startDateMatch = !startDate || itemDate >= startDate;
-                const endDateMatch = !endDate || itemDate <= endDate;
+                const startDateMatch = !startDate || effectiveDate >= startDate;
+                const endDateMatch = !endDate || effectiveDate <= endDate;
                 const roomMatch = roomFilter === 'all' || item.room === roomFilter || item.isPostNightShift;
                 let shiftMatch = shiftFilter === 'all' || (shiftFilter === 'post_night' ? item.isPostNightShift : item.shift === shiftFilter);
                 
@@ -830,9 +855,7 @@
                 currentPage = 1;
             }
             const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            
-            const paginatedData = filteredData.slice(startIndex, endIndex);
+            const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
             renderSummaryList(paginatedData);
             renderPaginationControls(totalPages);
@@ -848,7 +871,7 @@
                 fullSummaryData.push({ ...shiftData, key });
                 let title, eventColor;
                 if (shiftData.isCancelled) {
-                    title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}, ${shiftData.room}`;
+                    title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}`;
                     eventColor = 'var(--cancelled-color)';
                 } else {
                     title = `${PERSONS[shiftData.person].name}, ${shiftData.shift}, ${shiftData.room}`;
@@ -888,8 +911,10 @@
             }
             
             fullSummaryData.sort((a, b) => {
-                const dateComparison = new Date(b.date) - new Date(a.date);
-                if (dateComparison !== 0) return dateComparison;
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
                 return b.createdAt - a.createdAt;
             });
 
@@ -898,8 +923,9 @@
         }
 
         // --- 5. EVENT HANDLER FUNCTIONS ---
-        // ... (All event handler functions remain the same) ...
+        // All event handler functions remain the same.
         async function promptAddShift(dateStr) {
+            // ... (Your existing code for this function is great, no changes needed)
             const clickedDate = new Date(dateStr + "T00:00:00");
             const reminderOnDay = Object.values(allRemindersData).find(r => {
                 const startDate = new Date(r.startDate + "T00:00:00");
@@ -1013,6 +1039,7 @@
         }
 
         async function promptAddOrEditReminder(dateStr) {
+            // ... (Your existing code for this function is great, no changes needed)
             const clickedDate = new Date(dateStr + "T00:00:00");
             const existingReminderKey = Object.keys(allRemindersData).find(key => {
                 const reminder = allRemindersData[key];
@@ -1061,6 +1088,7 @@
         }
         
         async function handleDateClick(arg) {
+            // ... (Your existing code for this function is great, no changes needed)
             const holidayName = THAI_HOLIDAYS.get(arg.dateStr);
             if (holidayName) {
                 await Swal.fire({
@@ -1083,6 +1111,7 @@
         }
 
         async function handleEventClick(arg) {
+            // ... (Your existing code for this function is great, no changes needed)
             const shiftId = arg.event.id;
             if (arg.event.extendedProps.isReminder) {
                 promptAddOrEditReminder(arg.event.startStr);
@@ -1237,7 +1266,9 @@
             const clearButtonEl = document.getElementById('clear-filters-btn');
             const dateStartEl = document.getElementById('filter-start-date');
             const dateEndEl = document.getElementById('filter-end-date');
-            
+            const backupButton = document.getElementById('backup-btn');
+            const exportExcelButton = document.getElementById('export-excel-btn');
+            const addToCalendarButton = document.getElementById('add-to-google-calendar-btn');
 
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
             shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
@@ -1256,7 +1287,101 @@
                 applyAndRenderFilters();
             });
             
+            backupButton.addEventListener('click', () => {
+                const backupData = { shifts: allShiftsData, reminders: allRemindersData };
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `utth-schedule-backup-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
             
+            exportExcelButton.addEventListener('click', () => {
+                const dataToExport = fullSummaryData
+                    .filter(item => !item.isPostNightShift) // Exclude post-night-shift placeholders
+                    .map(shift => {
+                        let cancelledInfo = shift.isCancelled ? `ใช่, เหตุผล: ${shift.notes || ''}` : 'ไม่';
+                        let regularNotes = !shift.isCancelled ? (shift.notes || '') : '';
+
+                        return {
+                            'วันที่': shift.date,
+                            'เภสัชกร': PERSONS[shift.person]?.name || shift.person,
+                            'ช่วงเวลา': SHIFTS[shift.shift]?.name || shift.shift,
+                            'เวร': shift.room,
+                            'สถานะ(MED)': shift.medOption || '',
+                            'หมายเหตุ': regularNotes,
+                            'ยกเลิก': cancelledInfo
+                        };
+                    });
+                
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "ตารางเวร");
+                XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
+            });
+
+            addToCalendarButton.addEventListener('click', async () => {
+                const { value: person } = await Swal.fire({
+                    title: 'เลือกเภสัชกรเพื่อส่งออก',
+                    input: 'select',
+                    inputOptions: {
+                        'all': 'ทั้งหมด',
+                        ...Object.fromEntries(Object.entries(PERSONS).map(([key, value]) => [key, value.name]))
+                    },
+                    inputPlaceholder: 'เลือกเภสัชกร',
+                    showCancelButton: true,
+                    confirmButtonText: 'ส่งออกไฟล์ .ics',
+                    cancelButtonText: 'ยกเลิก'
+                });
+
+                if (person) {
+                    const shiftsToExport = Object.values(allShiftsData).filter(shift => 
+                        !shift.isCancelled && (person === 'all' || shift.person === person)
+                    );
+
+                    if (shiftsToExport.length === 0) {
+                        Swal.fire('ไม่มีข้อมูล', 'ไม่พบเวรของบุคคลที่เลือก', 'info');
+                        return;
+                    }
+                    
+                    if (typeof ics !== 'function') {
+                        console.error('ics.js library is not loaded correctly.');
+                        Swal.fire('ผิดพลาด!', 'ไม่สามารถส่งออกปฏิทินได้ในขณะนี้', 'error');
+                        return;
+                    }
+                    const cal = ics();
+                    shiftsToExport.forEach(shift => {
+                        const shiftDetails = SHIFTS[shift.shift];
+                        if (!shiftDetails) return;
+
+                        const [startTimeStr, endTimeStr] = shiftDetails.time.split('-');
+                        const [startHour, startMinute] = startTimeStr.split('.').map(Number);
+                        const [endHour, endMinute] = endTimeStr.split('.').map(Number);
+
+                        const startDate = new Date(`${shift.date}T${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00`);
+                        const endDate = new Date(`${shift.date}T${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`);
+                        
+                        // Handle overnight shifts for end date
+                        if (endHour < startHour || (endHour === startHour && endMinute < startMinute)) {
+                            endDate.setDate(endDate.getDate() + 1);
+                        }
+
+                        cal.addEvent(
+                            `เวร ${PERSONS[shift.person]?.name} ที่ ${shift.room}`,
+                            `เวร ${shiftDetails.name} (${shiftDetails.time}) ที่ห้อง ${shift.room}\nหมายเหตุ: ${shift.notes || ''}`,
+                            'โรงพยาบาลอุตรดิตถ์',
+                            startDate,
+                            endDate
+                        );
+                    });
+                    cal.download(`utth-schedule-${person}`);
+                }
+            });
         }
         
         document.addEventListener('DOMContentLoaded', () => {
