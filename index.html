@@ -225,10 +225,20 @@
             opacity: 0.4;
         }
 
+        /* --- ⬇️⬇️ **MODIFIED:** Darker Calendar Borders ⬇️⬇️ --- */
+        .fc { font-size: 1em; --fc-border-color: #dce9d8; }
+        
+        .fc .fc-col-header-cell { 
+            background-color: #f0f8e8;
+            border-bottom: 1px solid #dce9d8; /* Match the darker border */
+        }
+        .fc .fc-col-header-cell a { 
+            color: var(--primary-color) !important; 
+            font-weight: 500 !important;
+            font-size: 1.05em;
+        }
+        /* --- ⬆️⬆️ End of Modified Styles ⬆️⬆️ --- */
 
-        .fc { font-size: 1em; --fc-border-color: var(--border-color);}
-        .fc .fc-col-header-cell { background-color: transparent; border-color: var(--border-color); }
-        .fc .fc-col-header-cell a { color: var(--text-color) !important; font-weight: 400; }
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
@@ -1215,69 +1225,7 @@
             }
         }
         
-        // --- 6. GOOGLE DRIVE IMAGE VIEWER (Cloud Function Method) ---
-        async function initializeDriveViewer() {
-            const imageSelector = document.getElementById('image-selector');
-            const scheduleImage = document.getElementById('schedule-image');
-            const imagePlaceholder = document.getElementById('image-placeholder');
-            const imageDirectLink = document.getElementById('image-direct-link');
-
-            try {
-                // Initialize Firebase Functions and get a reference to the function
-                const functions = getFunctions(app, 'asia-southeast1'); // Specify the region
-                const listDriveImages = httpsCallable(functions, 'listDriveImages');
-
-                // Call the function and wait for the result
-                imageSelector.innerHTML = '<option value="">กำลังโหลดรายการรูปภาพ...</option>';
-                const result = await listDriveImages();
-                const data = result.data;
-
-                if (data.files && data.files.length > 0) {
-                    imageSelector.innerHTML = '<option value="">-- กรุณาเลือกเดือน --</option>';
-                    data.files.forEach(file => {
-                        const option = document.createElement('option');
-                        option.value = file.id;
-                        option.textContent = file.name.replace(/\.(jpg|jpeg|png|gif)$/i, '');
-                        imageSelector.appendChild(option);
-                    });
-                } else {
-                    imageSelector.innerHTML = '<option value="">-- ไม่พบรูปภาพในโฟลเดอร์ --</option>';
-                    imagePlaceholder.textContent = 'ไม่พบรูปภาพในโฟลเดอร์ที่กำหนด กรุณาตรวจสอบว่ามีการอัปโหลดรูปและแชร์อย่างถูกต้อง';
-                }
-
-            } catch (error) {
-                console.error('Error calling listDriveImages function:', error);
-                imageSelector.innerHTML = '<option value="">-- เกิดข้อผิดพลาดในการโหลด --</option>';
-                imagePlaceholder.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    html: `ไม่สามารถดึงรายการรูปภาพจากเซิร์ฟเวอร์ได้<br><br><b>กรุณาตรวจสอบ:</b><br>
-                           1. ทำการ Deploy Cloud Function แล้วหรือยัง<br>
-                           2. โฟลเดอร์และไฟล์ใน Google Drive แชร์เป็น "ทุกคนที่มีลิงก์" แล้วหรือไม่`,
-                });
-            }
-
-            imageSelector.addEventListener('change', (event) => {
-                const fileId = event.target.value;
-                if (fileId) {
-                    // This direct link format is generally more reliable for public images
-                    const imageUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-                    scheduleImage.src = imageUrl;
-                    scheduleImage.style.display = 'block';
-                    imagePlaceholder.style.display = 'none';
-                    imageDirectLink.href = `https://drive.google.com/file/d/${fileId}/view`;
-                    imageDirectLink.style.display = 'inline-block';
-                } else {
-                    scheduleImage.style.display = 'none';
-                    imagePlaceholder.style.display = 'block';
-                    imageDirectLink.style.display = 'none';
-                }
-            });
-        }
-
-
-        // --- 7. INITIALIZATION ---
+        // --- 6. INITIALIZATION ---
         function initializeAppUI() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
@@ -1346,7 +1294,6 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             initializeAppUI();
-            initializeDriveViewer();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
