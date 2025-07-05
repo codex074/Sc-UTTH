@@ -81,7 +81,7 @@
         
         #calendar { max-width: 100%; margin: 25px auto 0; }
 
-        #filter-container {
+        #filter-container, #drive-image-container {
             padding: 20px;
             margin-top: 40px;
             border-radius: 20px;
@@ -408,7 +408,6 @@
     <div id="app-container">
         <h1>🐾 UTTH-Schedule 🐾</h1>
         <div id='calendar'></div>
-        <!-- ⬇️⬇️ **FIX:** Removed the calendar export button entirely. ⬇️⬇️ -->
         <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <button id="backup-btn">สำรองข้อมูล (JSON)</button>
             <button id="export-excel-btn">ส่งออกเป็น Excel</button>
@@ -457,10 +456,26 @@
             </div>
             <div id="pagination-container"></div>
         </div>
+
+        <div id="drive-image-container">
+            <h2>รูปถ่ายตารางเวร</h2>
+            <div class="filter-group">
+                <label for="image-selector">เลือกเดือน (เรียงจากใหม่สุดไปเก่าสุด)</label>
+                <select id="image-selector">
+                    <option value="">กำลังโหลดรายการรูปภาพ...</option>
+                </select>
+            </div>
+            <div id="image-display-area" style="margin-top: 20px; text-align: center;">
+                <img id="schedule-image" src="" alt="รูปตารางเวร" style="max-width: 100%; border-radius: 15px; display: none; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <p id="image-placeholder" style="color: #888; padding: 40px 0;">กรุณาเลือกเดือนเพื่อดูรูปภาพ</p>
+                <a id="image-direct-link" href="#" target="_blank" style="display: none; margin-top: 15px; font-size: 0.9em;">เปิดรูปภาพในแท็บใหม่</a>
+            </div>
+        </div>
+
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.4.9</p>
+        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.3</p>
     </footer>
 
     <script type="module">
@@ -1215,6 +1230,83 @@
             }
         }
         
+        // --- 6. GOOGLE DRIVE IMAGE VIEWER ---
+        async function initializeDriveViewer() {
+            const FOLDER_ID = '1pjGU5PNX2IFbkUhOpyiuwGo5X7j5oEaU';
+            const API_KEY = firebaseConfig.apiKey;
+            const PROJECT_ID = firebaseConfig.messagingSenderId;
+            const imageSelector = document.getElementById('image-selector');
+            const scheduleImage = document.getElementById('schedule-image');
+            const imagePlaceholder = document.getElementById('image-placeholder');
+            const imageDirectLink = document.getElementById('image-direct-link');
+
+            const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}' in parents and mimeType contains 'image/'&key=${API_KEY}&fields=files(id,name)&orderBy=name desc`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const error = new Error(`ไม่สามารถดึงข้อมูลจาก Google Drive ได้ (HTTP ${response.status})`);
+                    error.response = response;
+                    throw error;
+                }
+                const data = await response.json();
+                
+                if (data.files && data.files.length > 0) {
+                    imageSelector.innerHTML = '<option value="">-- กรุณาเลือกเดือน --</option>';
+                    data.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.id;
+                        option.textContent = file.name.replace(/\.(jpg|jpeg|png|gif)$/i, '');
+                        imageSelector.appendChild(option);
+                    });
+                } else {
+                    imageSelector.innerHTML = '<option value="">-- ไม่พบรูปภาพในโฟลเดอร์ --</option>';
+                    imagePlaceholder.textContent = 'ไม่พบรูปภาพในโฟลเดอร์ที่กำหนด กรุณาตรวจสอบว่ามีการอัปโหลดรูปและแชร์อย่างถูกต้อง';
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch from Google Drive:', error);
+                imageSelector.innerHTML = '<option value="">-- เกิดข้อผิดพลาดในการโหลด --</option>';
+                
+                if (error.response && error.response.status === 403) {
+                    const activationUrl = `https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=${PROJECT_ID}`;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ต้องเปิดใช้งาน Google Drive API',
+                        html: `ฟังก์ชันนี้ต้องการการเข้าถึง Google Drive API ซึ่งยังไม่ได้เปิดใช้งานในโปรเจกต์ของคุณ<br><br>
+                               <b>ขั้นตอนการแก้ไข:</b>
+                               <ol style="text-align: left; margin-left: 20px;">
+                                 <li>คลิกที่ลิงก์ด้านล่างเพื่อไปที่หน้าตั้งค่า</li>
+                                 <li>กดปุ่มสีน้ำเงิน <b>"ENABLE"</b></li>
+                                 <li>รอสักครู่ แล้วรีเฟรชหน้านี้อีกครั้ง</li>
+                               </ol>
+                               <a href="${activationUrl}" target="_blank">เปิดหน้าตั้งค่า Google Drive API</a>`,
+                        confirmButtonText: 'รับทราบ'
+                    });
+                    imagePlaceholder.innerHTML = `กรุณาเปิดใช้งาน Google Drive API โดยคลิกที่ลิงก์: <a href="${activationUrl}" target="_blank">เปิดหน้าตั้งค่า</a>`;
+                } else {
+                    imagePlaceholder.textContent = `เกิดข้อผิดพลาด: ${error.message}. กรุณาตรวจสอบ Console และการตั้งค่าการแชร์ของโฟลเดอร์ใน Google Drive`;
+                }
+            }
+
+            imageSelector.addEventListener('change', (event) => {
+                const fileId = event.target.value;
+                if (fileId) {
+                    const imageUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                    scheduleImage.src = imageUrl;
+                    scheduleImage.style.display = 'block';
+                    imagePlaceholder.style.display = 'none';
+                    imageDirectLink.href = `https://drive.google.com/file/d/${fileId}/view`;
+                    imageDirectLink.style.display = 'inline-block';
+                } else {
+                    scheduleImage.style.display = 'none';
+                    imagePlaceholder.style.display = 'block';
+                    imageDirectLink.style.display = 'none';
+                }
+            });
+        }
+
+
         // --- 7. INITIALIZATION ---
         function initializeAppUI() {
             const personFilterEl = document.getElementById('filter-person');
@@ -1225,9 +1317,6 @@
             const dateEndEl = document.getElementById('filter-end-date');
             const backupButton = document.getElementById('backup-btn');
             const exportExcelButton = document.getElementById('export-excel-btn');
-            
-            // ⬇️⬇️ **FIX:** Removed the calendar button constant. ⬇️⬇️
-            // const addToCalendarButton = document.getElementById('add-to-google-calendar-btn');
 
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
             shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
@@ -1262,7 +1351,7 @@
             
             exportExcelButton.addEventListener('click', () => {
                 const dataToExport = fullSummaryData
-                    .filter(item => !item.isPostNightShift) // Exclude post-night-shift placeholders
+                    .filter(item => !item.isPostNightShift)
                     .map(shift => {
                         let cancelledInfo = shift.isCancelled ? `ใช่, เหตุผล: ${shift.notes || ''}` : 'ไม่';
                         let regularNotes = !shift.isCancelled ? (shift.notes || '') : '';
@@ -1283,12 +1372,11 @@
                 XLSX.utils.book_append_sheet(wb, ws, "ตารางเวร");
                 XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
             });
-
-            // ⬇️⬇️ **FIX:** Removed the calendar button's event listener entirely. ⬇️⬇️
         }
         
         document.addEventListener('DOMContentLoaded', () => {
             initializeAppUI();
+            initializeDriveViewer();
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
                 renderCalendarAndSummary();
