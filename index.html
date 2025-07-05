@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTTH-Schedule</title>
+    
+    <!-- Google Fonts: Mitr -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- External Libraries -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        /* --- CUTE CAT THEME --- */
+        :root {
+            --theme-bg: #F5FBEF; /* Light Green background */
+            --container-bg: #ffffff;
+            --primary-color: #76BC43; /* Main Green */
+            --primary-hover: #65a33a; /* Darker Green */
+            --secondary-color: #7DD8C9; /* Soft Teal */
+            --text-color: #384C27; /* Dark Green-Brown */
+            --border-color: #E8F5E9; /* Light Green */
+            --weekend-bg: #E8F5E9;
+            --reminder-bg: #01A6BA; 
+            --reminder-text: #ffffff; 
+            --holiday-red: #ff8e8e;
+            --cancelled-color: #c3c3c3;
+            --post-night-shift-color: #a0a0a0;
+            --clear-btn-red: #ff6b6b;
+            --clear-btn-red-hover: #e05d5d;
+            --today-color: #219DFF; 
+            --today-bg-tint: rgba(33, 157, 255, 0.15); 
+        }
+
+        body {
+            font-family: 'Mitr', sans-serif;
+            background-color: var(--theme-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #app-container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 500;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        h1 { 
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 25px;
+        }
+        h2 { 
+            font-size: 1.8em; 
+            margin-top: 40px; 
+            padding-bottom: 15px;
+            border-bottom: none;
+        }
+        
+        #calendar { max-width: 100%; margin: 25px auto 0; }
+
+        #filter-container {
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 20px;
+            background-color: #fafff5;
+            border: 1px solid var(--border-color);
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px; 
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            margin-bottom: 8px; font-size: 0.9em;
+            font-weight: 400; color: var(--text-color);
+            opacity: 0.8;
+        }
+        .filter-group select,
+        .filter-group input {
+            width: 100%; padding: 10px 12px; border-radius: 10px;
+            border: 1px solid var(--border-color); background-color: var(--container-bg);
+            font-family: 'Mitr', sans-serif; font-size: 0.95em;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box; 
+        }
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(118, 188, 67, 0.2);
+        }
+
+        #clear-filters-btn {
+            width: 100%; padding: 10px 12px; 
+            background-color: var(--clear-btn-red);
+            color: white;
+            border: none;
+            border-radius: 10px; cursor: pointer; 
+            transition: background-color 0.2s, transform 0.1s;
+            font-family: 'Mitr', sans-serif; font-size: 0.95em; font-weight: 400;
+        }
+        #clear-filters-btn:hover { background-color: var(--clear-btn-red-hover); }
+        #clear-filters-btn:active { transform: scale(0.97); }
+
+        #chart-summary-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px dashed var(--border-color);
+        }
+        #chart-container {
+            flex: 1 1 300px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        #data-summary {
+            flex: 1 1 300px;
+            font-size: 1.1em;
+            padding-left: 20px;
+        }
+        #data-summary h3 {
+            margin-top: 0;
+            font-size: 1.4em;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        #data-summary p {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+         #data-summary p strong {
+            color: var(--primary-color);
+            font-weight: 300;
+        }
+
+
+        #summary-container { margin-top: 20px; padding-top: 20px; }
+
+        .summary-item {
+            background-color: var(--container-bg); padding: 15px 20px; margin-bottom: 12px;
+            border-radius: 16px; font-size: 1em; 
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .summary-item:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .summary-item strong { color: var(--text-color); font-weight: 500; }
+        .summary-item .notes {
+            font-size: 0.9em; color: var(--text-color); opacity: 0.7; margin-top: 8px;
+            padding-top: 8px; border-top: 1px dashed var(--border-color);
+        }
+        .summary-item .timestamp {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-left: 10px;
+        }
+        #pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0 10px 0;
+        }
+        .pagination-btn {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            opacity: 0.7;
+            padding: 8px 14px;
+            margin: 0 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Mitr', sans-serif;
+            font-size: 0.9em;
+        }
+        .pagination-btn:hover {
+            background-color: var(--border-color);
+            opacity: 1;
+        }
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            opacity: 1;
+            font-weight: 500;
+        }
+        .pagination-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+
+        .fc { font-size: 1em; --fc-border-color: var(--border-color);}
+        .fc .fc-col-header-cell { background-color: transparent; border-color: var(--border-color); }
+        .fc .fc-col-header-cell a { color: var(--text-color) !important; font-weight: 400; }
+        .fc-event {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.85em !important; border: none !important;
+            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+        }
+        .fc-daygrid-day.fc-day-today { 
+            background-color: var(--today-bg-tint) !important; 
+            position: relative;
+        }
+         .fc-daygrid-day.fc-day-today::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 2px solid var(--today-color);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
+        .fc-button {
+            background-color: var(--primary-color) !important; border: none !important;
+            text-transform: capitalize !important; box-shadow: none !important;
+            border-radius: 12px !important; transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .fc-button:hover { background-color: var(--primary-hover) !important; }
+        .fc-button:active { transform: scale(0.96); }
+        .fc .fc-button-group > .fc-button {
+            margin: 0 2px;
+        }
+        
+        .weekend-cell { background-color: var(--weekend-bg); }
+        .holiday-cell .fc-daygrid-day-number {
+            background-color: var(--holiday-red);
+            border-radius: 50%;
+        }
+        .fc-day-today .fc-daygrid-day-number {
+           color: var(--today-color) !important;
+           font-weight: bold;
+           background-color: transparent !important;
+        }
+        .fc .fc-daygrid-day-number {
+            padding: 4px;
+            position: relative;
+            z-index: 4;
+            text-align: right;
+            width: auto;
+            height: auto;
+            line-height: normal;
+        }
+        .fc .fc-day-other {
+            background-color: #f7f7f7;
+            opacity: 0.4;
+        }
+        
+        .swal2-popup { font-family: 'Mitr', sans-serif !important; border-radius: 20px !important; }
+        .swal2-title { color: var(--text-color) !important; font-weight: 500; }
+        .swal2-input-label {
+            font-weight: 400; margin: 1em 0 0.5em !important; color: var(--text-color) !important;
+            text-align: left; width: 80%; margin-left: 10%;
+        }
+        .swal2-select, .swal2-input {
+            width: 80% !important; margin: 0 auto !important; padding: 12px;
+            font-size: 1em; border-radius: 10px; border: 1px solid var(--border-color);
+        }
+        .swal2-confirm { border-radius: 10px !important; background-color: var(--primary-color) !important; }
+        .swal2-deny, .swal2-cancel { border-radius: 10px !important; }
+        .swal2-html-container { text-align: left !important; margin: 1em 10% !important; }
+
+        .post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
+        .reminder-event {
+            background-color: transparent !important; border: none !important;
+            color: var(--reminder-text) !important; font-size: 0.8em !important;
+            font-weight: 500; padding-top: 2px !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .radio-group-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 5px !important;
+            margin-bottom: 15px !important;
+            padding: 0 10%;
+        }
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        .radio-option span {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+        .radio-option input[type="radio"]:checked + span {
+            border-color: var(--text-color);
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px 0 10px 0;
+            margin-top: 40px;
+            border-top: 2px dashed var(--border-color);
+            color: var(--text-color);
+            opacity: 0.6;
+            font-size: 0.9em;
+        }
+        footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .fc-toolbar.fc-header-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .fc-toolbar-chunk:nth-child(2) { /* title */
+                order: -1; 
+                width: 100%;
+                text-align: center;
+                padding-bottom: 10px;
+            }
+            .fc-toolbar-title {
+                font-size: 1.2em !important;
+            }
+            .fc .fc-button {
+                padding: 5px 8px !important;
+                font-size: 0.8em !important;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        #backup-btn, #export-excel-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-family: 'Mitr', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        #export-excel-btn {
+            background-color: #1D6F42;
+        }
+        #backup-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        #export-excel-btn:hover {
+            background-color: #16A085;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h1>🐾 UTTH-Schedule 🐾</h1>
+        <div id='calendar'></div>
+        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button id="backup-btn">สำรองข้อมูล (JSON)</button>
+            <button id="export-excel-btn">ส่งออกเป็น Excel</button>
+        </div>
+        
+        <div id="filter-container">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filter-person">เภสัชกร</label>
+                    <select id="filter-person"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-shift">ช่วงเวลา</label>
+                    <select id="filter-shift"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-start-date">ตั้งแต่วันที่</label>
+                    <input type="date" id="filter-start-date">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-end-date">ถึงวันที่</label>
+                    <input type="date" id="filter-end-date">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-room">เวร</label>
+                    <select id="filter-room"></select>
+                </div>
+                <div class="filter-group">
+                     <label>&nbsp;</label>
+                     <button id="clear-filters-btn">ล้างตัวกรอง</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chart-summary-container">
+            <div id="chart-container">
+                <canvas id="shift-chart"></canvas>
+            </div>
+            <div id="data-summary"></div>
+        </div>
+
+        <div id="summary-container">
+            <h2>สรุปรายการเวร</h2>
+            <div id="summary-list">
+                <p style="text-align:center; color:#888;">กำลังโหลดข้อมูล หรือยังไม่มีข้อมูล...</p>
+            </div>
+            <div id="pagination-container"></div>
+        </div>
+
+    </div>
+
+    <footer id="page-footer">
+        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.0</p>
+    </footer>
+
+    <script type="module">
+        // --- 1. FIREBASE SETUP ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiiXFhlwYdfC7IddBcBu-Sq3vJanTQNR0",
+            authDomain: "utth-shift.firebaseapp.com",
+            databaseURL: "https://utth-shift-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "utth-shift",
+            storageBucket: "utth-shift.appspot.com",
+            messagingSenderId: "615647177323",
+            appId: "1:615647177323:web:e905ef70f223d898285f2e",
+            measurementId: "G-RYDN5M4PLB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const shiftsRef = ref(database, 'shifts');
+        const remindersRef = ref(database, 'reminders');
+
+        // --- 2. APPLICATION CONSTANTS & STATE ---
+        let allShiftsData = {}; 
+        let allRemindersData = {};
+        let fullSummaryData = [];
+        let currentPage = 1; 
+        const itemsPerPage = 10; 
+        let shiftChartInstance = null; 
+
+        const SHIFTS = {
+            'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
+            'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
+        };
+        const PERSONS = { 'A': { name: 'A', color: '#1E90FF', icon: '👨‍⚕️' }, 'Nanti': { name: 'Nanti', color: '#DB7093', icon: '👩‍⚕️' } };
+        const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
+        
+        const THAI_HOLIDAYS = new Map([
+            ['2024-12-31', 'วันสิ้นปี'],
+            ['2025-01-01', 'วันขึ้นปีใหม่'],
+            ['2025-02-12', 'วันมาฆบูชา'],
+            ['2025-04-07', 'ชดเชยวันจักรี'],
+            ['2025-04-14', 'วันสงกรานต์'],
+            ['2025-04-15', 'วันสงกรานต์'],
+            ['2025-05-01', 'วันแรงงาน'],
+            ['2025-05-05', 'ชดเชยวันฉัตรมงคล'],
+            ['2025-05-09', 'วันพืชมงคล'],
+            ['2025-05-12', 'ชดเชยวันวิสาขบูชา'],
+            ['2025-06-02', 'วันหยุดพิเศษ'],
+            ['2025-06-03', 'วันเฉลิมฯ พระราชินี'],
+            ['2025-07-10', 'วันอาสาฬหบูชา'],
+            ['2025-07-11', 'วันเข้าพรรษา'],
+            ['2025-07-28', 'วันเฉลิมฯ ร.10'],
+            ['2025-08-11', 'วันหยุดพิเศษ'],
+            ['2025-08-12', 'วันแม่แห่งชาติ'],
+            ['2025-10-13', 'วันคล้ายวันสวรรคต ร.9'],
+            ['2025-10-23', 'วันปิยมหาราช'],
+            ['2025-12-05', 'วันพ่อแห่งชาติ'],
+            ['2025-12-10', 'วันรัฐธรรมนูญ'],
+            ['2025-12-31', 'วันสิ้นปี'],
+            ['2026-01-02', 'วันหยุดพิเศษ']
+        ]);
+
+
+        // --- 3. FULLCALENDAR SETUP ---
+        const calendarEl = document.getElementById('calendar');
+        const summaryListEl = document.getElementById('summary-list');
+        const paginationContainer = document.getElementById('pagination-container');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth', locale: 'th',
+            buttonText: { month: 'เดือน', year: 'ปี' },
+            headerToolbar: { left: 'prev,next', center: 'title', right: 'dayGridMonth,dayGridYear' },
+            navLinks: true, // Enable clicking month names in year view
+            dateClick: handleDateClick, eventClick: handleEventClick,
+            events: [], eventDisplay: 'block',
+            dayCellDidMount: function(arg) {
+                const year = arg.date.getFullYear();
+                const month = String(arg.date.getMonth() + 1).padStart(2, '0');
+                const day = String(arg.date.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                const dayOfWeek = arg.date.getDay();
+                if (isHoliday(dateStr)) { 
+                    arg.el.classList.add('holiday-cell'); 
+                    const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
+                    if (dayNumberEl) {
+                        dayNumberEl.style.width = '2.3em';
+                        dayNumberEl.style.height = '2.3em';
+                        dayNumberEl.style.lineHeight = '2.3em';
+                        dayNumberEl.style.borderRadius = '50%';
+                        dayNumberEl.style.margin = '2px auto 0';
+                        dayNumberEl.style.textAlign = 'center';
+                        dayNumberEl.style.boxShadow = 'none';
+                        dayNumberEl.style.fontWeight = '500';
+                    }
+                } 
+                else if (dayOfWeek === 0 || dayOfWeek === 6) { arg.el.classList.add('weekend-cell'); }
+            }
+        });
+        calendar.render();
+
+        // --- 4. HELPER & RENDER FUNCTIONS ---
+        function toYYYYMMDD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function isHoliday(dateString) { return THAI_HOLIDAYS.has(dateString); }
+        function isSpecialDay(dateString) {
+            const date = new Date(dateString);
+            const dayOfWeek = date.getDay();
+            return (dayOfWeek === 0 || dayOfWeek === 6) || isHoliday(dateString);
+        }
+
+        function isPersonPostNightShift(person, dateStr) {
+            const currentDate = new Date(dateStr + "T00:00:00");
+            currentDate.setDate(currentDate.getDate() - 1);
+            const yesterdayStr = toYYYYMMDD(currentDate);
+            return Object.values(allShiftsData).some(s => s.date === yesterdayStr && s.person === person && s.shift === 'ดึก' && !s.isCancelled);
+        }
+
+        function saveShiftToFirebase(data) {
+            set(push(shiftsRef), data)
+                .then(() => Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเวรเรียบร้อยแล้ว', 'success'))
+                .catch(error => Swal.fire('ผิดพลาด!', `ไม่สามารถบันทึกข้อมูลได้: ${error.message}`, 'error'));
+        }
+
+        function renderSummaryList(itemsToRender) {
+            summaryListEl.innerHTML = '';
+            if (itemsToRender.length > 0) {
+                 itemsToRender.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'summary-item';
+                    let itemColor, mainInfo;
+                    let notesHTML = '';
+                    let timestampHTML = '';
+
+                    if(item.createdAt){
+                        const timestamp = new Date(item.createdAt).toLocaleString('th-TH', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                        timestampHTML = `<span class="timestamp">| ${timestamp}</span>`;
+                    }
+
+                    const personIcon = PERSONS[item.person]?.icon || '🧑‍⚕️';
+
+                    if (item.isPostNightShift) {
+                        itemColor = 'var(--post-night-shift-color)';
+                        mainInfo = `⬇️ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>ลงดึก</strong>`;
+                        notesHTML = `<div class="notes">พักผ่อนหลังปฏิบัติงานเวรดึก</div>`;
+                    } else if (item.isCancelled) {
+                        itemColor = 'var(--cancelled-color)';
+                        mainInfo = `❌ <strong style="color: #7f8c8d;">ยกเลิกเวร</strong> ของ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <span style="text-decoration: line-through;">${item.shift} / ${item.room}</span> | เหตุผล: <strong>${item.notes || ''}</strong>`;
+                    } else {
+                        itemColor = PERSONS[item.person]?.color || '#777777';
+                        mainInfo = `${personIcon} <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>${item.shift}</strong> (${SHIFTS[item.shift].time}) ที่ห้อง <strong>${item.room}</strong>`;
+                        if(item.medOption){ mainInfo += ` | <strong style="color: #c0392b;">สถานะ: ${item.medOption}</strong>`; }
+                        if (item.notes) { notesHTML = `<div class="notes"><strong>หมายเหตุ:</strong> ${item.notes}</div>`; }
+                    }
+                    itemEl.innerHTML = `<div><span>${mainInfo}</span>${timestampHTML}${notesHTML}</div>`;
+                    itemEl.style.borderLeftColor = itemColor;
+                    summaryListEl.appendChild(itemEl);
+                });
+            } else {
+                 summaryListEl.innerHTML = '<p style="text-align:center; color:#888; padding: 20px 0;">เมี๊ยววว~ ไม่เจอข้อมูลเลยนะ</p>';
+            }
+        }
+        
+        function renderPaginationControls(totalPages) {
+            paginationContainer.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const createButton = (text, page, isDisabled = false, isActive = false) => {
+                const btn = document.createElement('button');
+                btn.textContent = text;
+                btn.className = 'pagination-btn';
+                if (isDisabled) btn.classList.add('disabled');
+                if (isActive) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    if (!isDisabled && page) {
+                        currentPage = page;
+                        applyAndRenderFilters();
+                    }
+                });
+                return btn;
+            };
+
+            const createEllipsis = () => {
+                 const ellipsis = document.createElement('span');
+                 ellipsis.textContent = '...';
+                 ellipsis.className = 'pagination-btn disabled';
+                 return ellipsis;
+            }
+
+            paginationContainer.appendChild(createButton('«', currentPage - 1, currentPage === 1));
+
+            const pagesToShow = [];
+            if (totalPages <= 5) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pagesToShow.push(i);
+                }
+            } else {
+                 if (currentPage <= 3) {
+                    pagesToShow.push(1, 2, 3, '...', totalPages);
+                } else if (currentPage >= totalPages - 2) {
+                    pagesToShow.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+                } else {
+                    pagesToShow.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                }
+            }
+
+            [...new Set(pagesToShow)].forEach(page => {
+                 if (page === '...') {
+                     paginationContainer.appendChild(createEllipsis());
+                 } else {
+                     paginationContainer.appendChild(createButton(page, page, false, page === currentPage));
+                 }
+            });
+
+            paginationContainer.appendChild(createButton('»', currentPage + 1, currentPage === totalPages));
+        }
+
+        function updateChartAndSummary(data) {
+            const dataSummaryEl = document.getElementById('data-summary');
+            const personFilter = document.getElementById('filter-person').value;
+            const validShifts = data.filter(item => !item.isCancelled && !item.isPostNightShift);
+
+            let chartLabels, chartData, chartColors;
+            let summaryHTML = '<h3>ข้อมูลสรุป</h3>';
+
+            const REMUNERATION_RATES = {
+                'ER': 780, 'MED': 780, 'SURG': 780, 'Extend': 540,
+                'SMC': 900, 'CHEMO': 390, 'รุ่งอรุณ': 202.5
+            };
+            let totalRemuneration = 0;
+
+            if (personFilter === 'all') {
+                const personCounts = {};
+                const shiftTypeCounts = {};
+
+                validShifts.forEach(item => {
+                    personCounts[item.person] = (personCounts[item.person] || 0) + 1;
+                    shiftTypeCounts[item.shift] = (shiftTypeCounts[item.shift] || 0) + 1;
+                    const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
+                    if (rate) totalRemuneration += rate;
+                });
+
+                summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p><hr>`;
+                for(const person in PERSONS) {
+                     const count = personCounts[person] || 0;
+                     const percentage = validShifts.length > 0 ? (count / validShifts.length * 100).toFixed(1) : 0;
+                    summaryHTML += `<p><span>${PERSONS[person].name}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
+                }
+                summaryHTML += `<hr>`;
+                for(const shift in SHIFTS) {
+                    summaryHTML += `<p><span>${SHIFTS[shift].name}:</span> <strong>${shiftTypeCounts[shift] || 0} เวร</strong></p>`;
+                }
+                summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทนทั้งหมด:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
+
+                chartLabels = Object.keys(personCounts);
+                chartData = Object.values(personCounts);
+                chartColors = chartLabels.map(label => PERSONS[label]?.color || '#cccccc');
+
+            } else {
+                const roomCounts = {};
+                const personShifts = validShifts.filter(item => item.person === personFilter);
+                
+                personShifts.forEach(item => {
+                    const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room;
+                    roomCounts[countKey] = (roomCounts[countKey] || 0) + 1;
+                    const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
+                    if (rate) totalRemuneration += rate;
+                });
+
+                summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${personShifts.length} เวร</strong></p><hr>`;
+                 for(const room in roomCounts) {
+                     const count = roomCounts[room];
+                     const percentage = personShifts.length > 0 ? (count / personShifts.length * 100).toFixed(1) : 0;
+                     const remuneration = REMUNERATION_RATES[room] ? `(฿${(count * REMUNERATION_RATES[room]).toLocaleString()})` : '';
+                    summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%) ${remuneration}</strong></p>`;
+                }
+                summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทน:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
+
+                chartLabels = Object.keys(roomCounts);
+                chartData = Object.values(roomCounts);
+                chartColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'];
+            }
+            
+            dataSummaryEl.innerHTML = summaryHTML;
+
+            const ctx = document.getElementById('shift-chart').getContext('2d');
+            if (shiftChartInstance) {
+                shiftChartInstance.destroy();
+            }
+            shiftChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'จำนวนเวร', data: chartData, backgroundColor: chartColors,
+                        borderColor: 'var(--container-bg)', borderWidth: 4,
+                        hoverOffset: 15, offset: 8 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top', labels: { font: { family: 'Mitr, sans-serif', size: 14 } } } }
+                }
+            });
+        }
+
+
+        function applyAndRenderFilters() {
+            const personFilter = document.getElementById('filter-person').value;
+            const startDateFilter = document.getElementById('filter-start-date').value;
+            const endDateFilter = document.getElementById('filter-end-date').value;
+            const shiftFilter = document.getElementById('filter-shift').value;
+            const roomFilter = document.getElementById('filter-room').value;
+
+            let filteredData = fullSummaryData.filter(item => {
+                let effectiveDate = new Date(item.date);
+                if (item.shift === 'ดึก' && !item.isCancelled) {
+                    effectiveDate.setDate(effectiveDate.getDate() + 1);
+                }
+                
+                const startDate = startDateFilter ? new Date(startDateFilter + "T00:00:00") : null;
+                const endDate = endDateFilter ? new Date(endDateFilter + "T00:00:00") : null;
+                if(startDate) startDate.setHours(0,0,0,0);
+                if(endDate) endDate.setHours(23,59,59,999);
+
+                const personMatch = personFilter === 'all' || item.person === personFilter;
+                const startDateMatch = !startDate || effectiveDate >= startDate;
+                const endDateMatch = !endDate || effectiveDate <= endDate;
+                const roomMatch = roomFilter === 'all' || item.room === roomFilter || item.isPostNightShift;
+                let shiftMatch = shiftFilter === 'all' || (shiftFilter === 'post_night' ? item.isPostNightShift : item.shift === shiftFilter);
+                
+                return personMatch && startDateMatch && endDateMatch && shiftMatch && roomMatch;
+            });
+
+            if (roomFilter !== 'all') {
+                filteredData = filteredData.filter(item => !item.isPostNightShift);
+            }
+
+            updateChartAndSummary(filteredData);
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            } else if (totalPages === 0) {
+                currentPage = 1;
+            }
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+            renderSummaryList(paginatedData);
+            renderPaginationControls(totalPages);
+        }
+        
+        function renderCalendarAndSummary() {
+            const allEvents = [];
+            fullSummaryData = [];
+            calendar.getEvents().forEach(event => event.remove());
+            
+            for (let key in allShiftsData) {
+                const shiftData = allShiftsData[key];
+                fullSummaryData.push({ ...shiftData, key });
+                let title, eventColor;
+                if (shiftData.isCancelled) {
+                    title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}`;
+                    eventColor = 'var(--cancelled-color)';
+                } else {
+                    title = `${PERSONS[shiftData.person].name}, ${shiftData.shift}, ${shiftData.room}`;
+                    if (shiftData.medOption) { title += ` (${shiftData.medOption})`; }
+                    if (shiftData.notes) { title += ' 📝'; }
+                    eventColor = PERSONS[shiftData.person]?.color || '#777777';
+                }
+                allEvents.push({ id: key, title, start: shiftData.date, backgroundColor: eventColor, borderColor: eventColor, extendedProps: { ...shiftData } });
+
+                if (shiftData.shift === 'ดึก' && !shiftData.isCancelled) {
+                    const nightShiftDate = new Date(shiftData.date + "T00:00:00");
+                    nightShiftDate.setDate(nightShiftDate.getDate() + 1);
+                    const nextDayStr = toYYYYMMDD(nightShiftDate);
+                    allEvents.push({
+                        id: `${key}_off`, title: `⬇️ ${PERSONS[shiftData.person].name} (ลงดึก)`, start: nextDayStr, allDay: true,
+                        backgroundColor: 'var(--post-night-shift-color)', borderColor: 'var(--post-night-shift-color)', classNames: ['post-night-shift-event'] 
+                    });
+                    fullSummaryData.push({ key: `${key}_off`, isPostNightShift: true, date: nextDayStr, person: shiftData.person, createdAt: shiftData.createdAt });
+                }
+            }
+
+            for (let key in allRemindersData) {
+                const reminderData = allRemindersData[key];
+                allEvents.push({
+                    id: key, title: `📌 ${reminderData.note}`, start: reminderData.startDate,
+                    classNames: ['reminder-event'], extendedProps: { ...reminderData, isReminder: true }
+                });
+
+                const startDate = new Date(reminderData.startDate + "T00:00:00");
+                const endDate = reminderData.endDate ? new Date(reminderData.endDate + "T00:00:00") : startDate;
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    allEvents.push({
+                        id: `${key}_bg_${toYYYYMMDD(d)}`, display: 'background',
+                        start: toYYYYMMDD(d), backgroundColor: 'var(--reminder-bg)',
+                    });
+                }
+            }
+            
+            fullSummaryData.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+                return b.createdAt - a.createdAt;
+            });
+
+            calendar.addEventSource(allEvents);
+            applyAndRenderFilters();
+        }
+
+        // --- 5. EVENT HANDLER FUNCTIONS ---
+        async function promptAddShift(dateStr) {
+            const clickedDate = new Date(dateStr + "T00:00:00");
+            const reminderOnDay = Object.values(allRemindersData).find(r => {
+                const startDate = new Date(r.startDate + "T00:00:00");
+                const endDate = r.endDate ? new Date(r.endDate + "T00:00:00") : startDate;
+                return clickedDate >= startDate && clickedDate <= endDate;
+            });
+
+            if (reminderOnDay) {
+                const confirmation = await Swal.fire({
+                    title: 'เดี๋ยวก่อนนะเหมียว!',
+                    html: `วันนี้มีบันทึกว่า: "<b>${reminderOnDay.note}</b>"<br>จะเพิ่มเวรจริงๆ เหรอ?`,
+                    icon: 'warning', showCancelButton: true,
+                    confirmButtonText: 'ใช่, เพิ่มเวรเลย', cancelButtonText: 'ไม่ดีกว่า',
+                });
+                if (!confirmation.isConfirmed) return;
+            }
+            
+            const dateIsSpecial = isSpecialDay(dateStr);
+            const availableShifts = {...SHIFTS};
+            if(dateIsSpecial) { 
+                delete availableShifts['รุ่งอรุณ'];
+            } else {
+                delete availableShifts['เช้า'];
+            }
+
+            const { value: formValues } = await Swal.fire({
+                title: `เพิ่มเวรวันที่ ${new Date(dateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}`,
+                html: `
+                    <label class="swal2-input-label">เภสัชกร</label>
+                    <div class="radio-group-horizontal">
+                        ${Object.keys(PERSONS).map((p, index) => `
+                            <label class="radio-option">
+                                <input type="radio" name="swal-person" value="${p}" ${index === 0 ? 'checked' : ''}>
+                                <span style="background-color:${PERSONS[p].color}; color: white;">${PERSONS[p].name}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <label for="swal-shift" class="swal2-input-label">เลือกช่วงเวลา</label>
+                    <select id="swal-shift" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}">${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <label for="swal-room" class="swal2-input-label">เวร</label>
+                    <select id="swal-room" class="swal2-select"></select>
+                    <div id="med-options-container" style="display: none; margin-top: 1em;">
+                        <label for="swal-med-option" class="swal2-input-label">ตัวเลือก (MED เช้าวันหยุด)</label>
+                        <select id="swal-med-option" class="swal2-select"><option value="Cont">Cont</option><option value="D/C">D/C</option></select>
+                    </div>
+                    <label for="swal-notes" class="swal2-input-label">หมายเหตุ</label>
+                    <input type="text" id="swal-notes" class="swal2-input" placeholder="ไม่บังคับ">
+                `,
+                focusConfirm: false,
+                didOpen: () => {
+                    const shiftSelect = document.getElementById('swal-shift');
+                    const roomSelect = document.getElementById('swal-room');
+                    const medContainer = document.getElementById('med-options-container');
+                    const updateFormFields = () => {
+                        const selectedShift = shiftSelect.value;
+                        const currentRoomValue = roomSelect.value;
+                        let availableRooms = [];
+                        const dayOfWeek = new Date(dateStr).getDay();
+                        if (selectedShift === 'รุ่งอรุณ') {
+                            if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                        } else if (selectedShift === 'เช้า') {
+                            availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
+                            if (isSpecialDay(dateStr)) availableRooms.push('CHEMO');
+                        } else if (selectedShift === 'บ่าย') {
+                            if (isSpecialDay(dateStr)) { availableRooms = ['ER', 'MED']; } else {
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC');}
+                            }
+                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                        roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoomValue ? 'selected' : ''}>${r}</option>`).join('');
+                        if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        const showMedField = isSpecialDay(dateStr) && selectedShift === 'เช้า' && roomSelect.value === 'MED';
+                        medContainer.style.display = showMedField ? 'block' : 'none';
+                    };
+                    shiftSelect.addEventListener('change', updateFormFields);
+                    roomSelect.addEventListener('change', updateFormFields);
+                    updateFormFields();
+                },
+                preConfirm: () => {
+                    const person = document.querySelector('input[name="swal-person"]:checked').value;
+                    const shift = document.getElementById('swal-shift').value;
+                    for (const key in allShiftsData) {
+                        const existingShift = allShiftsData[key];
+                        if (existingShift.date === dateStr && existingShift.person === person && existingShift.shift === shift && !existingShift.isCancelled) {
+                            Swal.showValidationMessage(`เพิ่มไม่ได้นะ! ${person} มีเวร ${shift} ที่โซน ${existingShift.room} อยู่แล้ว`);
+                            return false;
+                        }
+                    }
+                    return {
+                        person, shift, room: document.getElementById('swal-room').value,
+                        notes: document.getElementById('swal-notes').value.trim(),
+                        medOption: document.getElementById('med-options-container').style.display === 'block' ? document.getElementById('swal-med-option').value : null
+                    }
+                },
+                showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก'
+            });
+
+            if (formValues) {
+                const personToAdd = formValues.person;
+                if (isPersonPostNightShift(personToAdd, dateStr)) {
+                    const confirmation = await Swal.fire({
+                        title: 'แน่ใจนะเหมียว?', html: `<strong>${personToAdd}</strong> เพิ่งลงเวรดึกมานะ<br>จะให้เพิ่มเวรอีกเหรอ?`,
+                        icon: 'warning', showCancelButton: true, confirmButtonText: 'จัดไป!',
+                        cancelButtonText: 'โอ๊ะ ไม่ดีกว่า', confirmButtonColor: '#28a745',
+                    });
+                    if (confirmation.isConfirmed) { saveShiftToFirebase({ date: dateStr, ...formValues, createdAt: serverTimestamp() }); }
+                } else {
+                    saveShiftToFirebase({ date: dateStr, ...formValues, createdAt: serverTimestamp() });
+                }
+            }
+        }
+
+        async function promptAddOrEditReminder(dateStr) {
+            const clickedDate = new Date(dateStr + "T00:00:00");
+            const existingReminderKey = Object.keys(allRemindersData).find(key => {
+                const reminder = allRemindersData[key];
+                const startDate = new Date(reminder.startDate + "T00:00:00");
+                const endDate = reminder.endDate ? new Date(reminder.endDate + "T00:00:00") : startDate;
+                return clickedDate >= startDate && clickedDate <= endDate;
+            });
+            const existingReminder = existingReminderKey ? allRemindersData[existingReminderKey] : null;
+
+            const { value: formValues, isConfirmed, isDenied } = await Swal.fire({
+                title: existingReminder ? 'แก้ไข/ลบบันทึกช่วยเตือน' : 'เพิ่มบันทึกช่วยเตือน',
+                html: `
+                    <label for="swal-reminder-note" class="swal2-input-label">หมายเหตุ</label>
+                    <input id="swal-reminder-note" class="swal2-input" value="${existingReminder ? existingReminder.note : ''}" placeholder="ไปเที่ยว, ลาพักร้อน...">
+                    <label for="swal-reminder-start" class="swal2-input-label">วันที่เริ่มต้น</label>
+                    <input type="date" id="swal-reminder-start" class="swal2-input" value="${existingReminder ? existingReminder.startDate : dateStr}">
+                    <label for="swal-reminder-end" class="swal2-input-label">วันที่สิ้นสุด (ไม่บังคับ)</label>
+                    <input type="date" id="swal-reminder-end" class="swal2-input" value="${existingReminder && existingReminder.endDate ? existingReminder.endDate : ''}">
+                `,
+                focusConfirm: false, showCancelButton: true,
+                showDenyButton: !!existingReminder,
+                confirmButtonText: existingReminder ? 'อัปเดต' : 'บันทึก',
+                denyButtonText: 'ลบ', cancelButtonText: 'ยกเลิก', denyButtonColor: '#d33',
+                preConfirm: () => {
+                    const note = document.getElementById('swal-reminder-note').value;
+                    const startDate = document.getElementById('swal-reminder-start').value;
+                    let endDate = document.getElementById('swal-reminder-end').value;
+                    if (!note) { Swal.showValidationMessage('ต้องใส่หมายเหตุก่อนนะ'); return false; }
+                    if (!startDate) { Swal.showValidationMessage('ต้องใส่วันที่เริ่มต้นด้วยนะ'); return false; }
+                    if (endDate && endDate < startDate) { Swal.showValidationMessage('วันที่สิ้นสุดจะอยู่ก่อนวันเริ่มต้นไม่ได้นะ'); return false; }
+                    if (endDate === startDate) { endDate = ''; }
+                    return { note: note.trim(), startDate: startDate, endDate: endDate || null };
+                }
+            });
+
+            if (isConfirmed && formValues) {
+                const keyToSave = existingReminderKey || push(remindersRef).key;
+                set(ref(database, `reminders/${keyToSave}`), formValues)
+                    .then(() => Swal.fire('สำเร็จ', 'บันทึกเรียบร้อยเหมียว', 'success'))
+                    .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
+            } else if (isDenied) {
+                remove(ref(database, `reminders/${existingReminderKey}`))
+                    .then(() => Swal.fire('สำเร็จ', 'ลบบันทึกแล้ว', 'success'))
+                    .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
+            }
+        }
+        
+        async function handleDateClick(arg) {
+            const holidayName = THAI_HOLIDAYS.get(arg.dateStr);
+            if (holidayName) {
+                await Swal.fire({
+                    title: `🎉 วันหยุด: ${holidayName}`,
+                    icon: 'info',
+                    confirmButtonText: 'รับทราบเหมียว!',
+                    confirmButtonColor: 'var(--primary-color)',
+                });
+            }
+
+            const { value: action } = await Swal.fire({
+                title: `วันที่ ${new Date(arg.dateStr).toLocaleDateString('th-TH', {dateStyle: 'long'})}`,
+                text: 'จะทำอะไรดีเหมียว?',
+                showDenyButton: true, confirmButtonText: 'เพิ่มเวร',
+                denyButtonText: 'เพิ่มบันทึกช่วยเตือน',
+                confirmButtonColor: 'var(--primary-color)', denyButtonColor: '#28a745'
+            });
+            if (action) { promptAddShift(arg.dateStr); } 
+            else if (action === false) { promptAddOrEditReminder(arg.dateStr); }
+        }
+
+        async function handleEventClick(arg) {
+            const shiftId = arg.event.id;
+            if (arg.event.extendedProps.isReminder) {
+                promptAddOrEditReminder(arg.event.startStr);
+                return;
+            }
+            if (shiftId.endsWith('_off')) { return; }
+
+            const originalProps = arg.event.extendedProps;
+            const { person, shift, room, notes, medOption, isCancelled } = originalProps;
+            const eventDateStr = arg.event.startStr.split('T')[0];
+            
+            if(isCancelled){
+                const result = await Swal.fire({
+                    title: 'เวรนี้ถูกยกเลิกแล้ว',
+                    html: `<p>เวรเดิมของ: <strong>${person}</strong></p><p>ช่วงเวลา: <strong>${shift} (${SHIFTS[shift]?.time || 'N/A'})</strong></p><p>ห้อง: <strong>${room}</strong></p><p>เหตุผล: ${notes || 'ไม่มี'}</p><hr><p>ต้องการลบข้อมูลนี้ถาวรหรือไม่?</p>`,
+                    icon: 'info', showCancelButton: true, confirmButtonText: 'ลบถาวร',
+                    cancelButtonText: 'ปิด', confirmButtonColor: '#d33'
+                });
+                if (result.isConfirmed) {
+                    remove(ref(database, `shifts/${shiftId}`))
+                        .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
+                        .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
+                }
+                return;
+            }
+
+            const dateIsSpecial = isSpecialDay(eventDateStr);
+            const availableShifts = {...SHIFTS};
+            if(dateIsSpecial) {
+                delete availableShifts['รุ่งอรุณ'];
+            } else {
+                delete availableShifts['เช้า'];
+            }
+
+            const result = await Swal.fire({
+                title: `แก้ไข/ลบเวร`,
+                html: `
+                    <p style="margin-bottom: 20px;">วันที่ ${new Date(eventDateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}</p>
+                    <label class="swal2-input-label">เภสัชกร</label>
+                    <div class="radio-group-horizontal">
+                        ${Object.keys(PERSONS).map(p => `
+                            <label class="radio-option">
+                                <input type="radio" name="swal-person-edit" value="${p}" ${p === person ? 'checked' : ''}>
+                                <span style="background-color:${PERSONS[p].color}; color: white;">${PERSONS[p].name}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <label for="swal-shift-edit" class="swal2-input-label">ช่วงเวลา</label>
+                    <select id="swal-shift-edit" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}" ${s === shift ? 'selected' : ''}>${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <label for="swal-room-edit" class="swal2-input-label">เวร</label>
+                    <select id="swal-room-edit" class="swal2-select"></select>
+                    <div id="med-options-container-edit" style="display: none; margin-top: 1em;">
+                        <label for="swal-med-option-edit" class="swal2-input-label">ตัวเลือก (MED เช้าวันหยุด)</label>
+                        <select id="swal-med-option-edit" class="swal2-select"><option value="Cont" ${medOption === 'Cont' ? 'selected' : ''}>Cont</option><option value="D/C" ${medOption === 'D/C' ? 'selected' : ''}>D/C</option></select>
+                    </div>
+                    <label for="swal-notes-edit" class="swal2-input-label">หมายเหตุ</label>
+                    <input type="text" id="swal-notes-edit" class="swal2-input" placeholder="ไม่บังคับ" value="${notes || ''}">`,
+                focusConfirm: false,
+                didOpen: () => {
+                    const shiftSelect = document.getElementById('swal-shift-edit');
+                    const roomSelect = document.getElementById('swal-room-edit');
+                    const medContainer = document.getElementById('med-options-container-edit');
+                    const updateFormFields = () => {
+                        const selectedShift = shiftSelect.value;
+                        const currentRoom = roomSelect.value || room;
+                        let availableRooms = [];
+                        const dayOfWeek = new Date(eventDateStr).getDay();
+                        if (selectedShift === 'รุ่งอรุณ') {
+                           if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                        } else if (selectedShift === 'เช้า') {
+                           availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
+                           if (isSpecialDay(eventDateStr)) availableRooms.push('CHEMO');
+                        } else if (selectedShift === 'บ่าย') {
+                            if (isSpecialDay(eventDateStr)) { availableRooms = ['ER', 'MED']; } 
+                            else {
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC'); }
+                            }
+                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                        roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoom ? 'selected' : ''}>${r}</option>`).join('');
+                        if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        const showMedField = dateIsSpecial && selectedShift === 'เช้า' && roomSelect.value === 'MED';
+                        medContainer.style.display = showMedField ? 'block' : 'none';
+                    };
+                    shiftSelect.addEventListener('change', updateFormFields);
+                    roomSelect.addEventListener('change', updateFormFields);
+                    updateFormFields();
+                },
+                preConfirm: () => {
+                    const newPerson = document.querySelector('input[name="swal-person-edit"]:checked').value;
+                    const newShift = document.getElementById('swal-shift-edit').value;
+                    for (const key in allShiftsData) {
+                        if (key === shiftId) continue; 
+                        const existingShift = allShiftsData[key];
+                        if (existingShift.date === eventDateStr && existingShift.person === newPerson && existingShift.shift === newShift && !existingShift.isCancelled) {
+                            Swal.showValidationMessage(`อัปเดตไม่ได้นะ! ${newPerson} มีเวร ${newShift} ที่โซน ${existingShift.room} อยู่แล้ว`);
+                            return false;
+                        }
+                    }
+                    return {
+                        person: newPerson, shift: newShift,
+                        room: document.getElementById('swal-room-edit').value,
+                        notes: document.getElementById('swal-notes-edit').value.trim(),
+                        medOption: document.getElementById('med-options-container-edit').style.display === 'block' ? document.getElementById('swal-med-option-edit').value : null
+                    }
+                },
+                showCancelButton: true, showDenyButton: true,
+                confirmButtonText: 'อัปเดต', denyButtonText: `ลบ/ยกเลิกเวร`,
+                cancelButtonText: 'ยกเลิก', denyButtonColor: '#d33',
+            });
+            
+            if (result.isDenied) {
+                const { value: reason } = await Swal.fire({
+                    title: 'จะยกเลิกเวรเหรอ?', input: 'text',
+                    inputPlaceholder: 'บอกเหตุผลหน่อยสิ (ถ้าไม่บอกจะลบถาวรนะ)', showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                });
+                if (reason !== undefined) { 
+                    const currentShiftData = allShiftsData[shiftId]; 
+                    if (reason) { 
+                        const cancelledData = { ...currentShiftData, notes: reason, isCancelled: true };
+                        set(ref(database, `shifts/${shiftId}`), cancelledData)
+                            .then(() => Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้เหมียว', 'info'))
+                            .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
+                    } else { 
+                        const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
+                        if(deleteConfirmation.isConfirmed){
+                            remove(ref(database, `shifts/${shiftId}`))
+                                .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
+                                .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
+                        }
+                    }
+                }
+            } else if (result.isConfirmed) {
+                const formValues = result.value;
+                if(formValues) {
+                    const updateConfirmation = await Swal.fire({ title: 'จะอัปเดตข้อมูลแน่นะ?', icon: 'question', showCancelButton: true, confirmButtonText: 'ใช่, อัปเดตเลย!', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#28a745' });
+                    if (updateConfirmation.isConfirmed) {
+                        const currentShiftData = allShiftsData[shiftId]; 
+                        const updatedData = { ...currentShiftData, ...formValues, date: eventDateStr };
+                        set(ref(database, `shifts/${shiftId}`), updatedData).then(() => Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลเวรเรียบร้อยแล้ว', 'success')).catch((error) => Swal.fire('ผิดพลาด!', `อัปเดตไม่ได้: ${error.message}`, 'error'));
+                    }
+                }
+            }
+        }
+        
+        // --- 6. GOOGLE DRIVE IMAGE VIEWER (Cloud Function Method) ---
+        async function initializeDriveViewer() {
+            const imageSelector = document.getElementById('image-selector');
+            const scheduleImage = document.getElementById('schedule-image');
+            const imagePlaceholder = document.getElementById('image-placeholder');
+            const imageDirectLink = document.getElementById('image-direct-link');
+
+            try {
+                // Initialize Firebase Functions and get a reference to the function
+                const functions = getFunctions(app, 'asia-southeast1'); // Specify the region
+                const listDriveImages = httpsCallable(functions, 'listDriveImages');
+
+                // Call the function and wait for the result
+                imageSelector.innerHTML = '<option value="">กำลังโหลดรายการรูปภาพ...</option>';
+                const result = await listDriveImages();
+                const data = result.data;
+
+                if (data.files && data.files.length > 0) {
+                    imageSelector.innerHTML = '<option value="">-- กรุณาเลือกเดือน --</option>';
+                    data.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.id;
+                        option.textContent = file.name.replace(/\.(jpg|jpeg|png|gif)$/i, '');
+                        imageSelector.appendChild(option);
+                    });
+                } else {
+                    imageSelector.innerHTML = '<option value="">-- ไม่พบรูปภาพในโฟลเดอร์ --</option>';
+                    imagePlaceholder.textContent = 'ไม่พบรูปภาพในโฟลเดอร์ที่กำหนด กรุณาตรวจสอบว่ามีการอัปโหลดรูปและแชร์อย่างถูกต้อง';
+                }
+
+            } catch (error) {
+                console.error('Error calling listDriveImages function:', error);
+                imageSelector.innerHTML = '<option value="">-- เกิดข้อผิดพลาดในการโหลด --</option>';
+                imagePlaceholder.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    html: `ไม่สามารถดึงรายการรูปภาพจากเซิร์ฟเวอร์ได้<br><br><b>กรุณาตรวจสอบ:</b><br>
+                           1. ทำการ Deploy Cloud Function แล้วหรือยัง<br>
+                           2. โฟลเดอร์และไฟล์ใน Google Drive แชร์เป็น "ทุกคนที่มีลิงก์" แล้วหรือไม่`,
+                });
+            }
+
+            imageSelector.addEventListener('change', (event) => {
+                const fileId = event.target.value;
+                if (fileId) {
+                    // This direct link format is generally more reliable for public images
+                    const imageUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                    scheduleImage.src = imageUrl;
+                    scheduleImage.style.display = 'block';
+                    imagePlaceholder.style.display = 'none';
+                    imageDirectLink.href = `https://drive.google.com/file/d/${fileId}/view`;
+                    imageDirectLink.style.display = 'inline-block';
+                } else {
+                    scheduleImage.style.display = 'none';
+                    imagePlaceholder.style.display = 'block';
+                    imageDirectLink.style.display = 'none';
+                }
+            });
+        }
+
+
+        // --- 7. INITIALIZATION ---
+        function initializeAppUI() {
+            const personFilterEl = document.getElementById('filter-person');
+            const shiftFilterEl = document.getElementById('filter-shift');
+            const roomFilterEl = document.getElementById('filter-room');
+            const clearButtonEl = document.getElementById('clear-filters-btn');
+            const dateStartEl = document.getElementById('filter-start-date');
+            const dateEndEl = document.getElementById('filter-end-date');
+            const backupButton = document.getElementById('backup-btn');
+            const exportExcelButton = document.getElementById('export-excel-btn');
+
+            personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
+            shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
+            roomFilterEl.innerHTML = '<option value="all">ทุกเวร</option>' + ALL_ROOMS.map(r => `<option value="${r}">${r}</option>`).join('');
+
+            [personFilterEl, shiftFilterEl, roomFilterEl, dateStartEl, dateEndEl].forEach(el => {
+                el.addEventListener('change', () => {
+                    currentPage = 1; 
+                    applyAndRenderFilters();
+                });
+            });
+            clearButtonEl.addEventListener('click', () => {
+                personFilterEl.value = 'all'; shiftFilterEl.value = 'all'; roomFilterEl.value = 'all';
+                dateStartEl.value = ''; dateEndEl.value = '';
+                currentPage = 1;
+                applyAndRenderFilters();
+            });
+            
+            backupButton.addEventListener('click', () => {
+                const backupData = { shifts: allShiftsData, reminders: allRemindersData };
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `utth-schedule-backup-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            exportExcelButton.addEventListener('click', () => {
+                const dataToExport = fullSummaryData
+                    .filter(item => !item.isPostNightShift)
+                    .map(shift => {
+                        let cancelledInfo = shift.isCancelled ? `ใช่, เหตุผล: ${shift.notes || ''}` : 'ไม่';
+                        let regularNotes = !shift.isCancelled ? (shift.notes || '') : '';
+
+                        return {
+                            'วันที่': shift.date,
+                            'เภสัชกร': PERSONS[shift.person]?.name || shift.person,
+                            'ช่วงเวลา': SHIFTS[shift.shift]?.name || shift.shift,
+                            'เวร': shift.room,
+                            'สถานะ(MED)': shift.medOption || '',
+                            'หมายเหตุ': regularNotes,
+                            'ยกเลิก': cancelledInfo
+                        };
+                    });
+                
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "ตารางเวร");
+                XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAppUI();
+            initializeDriveViewer();
+            onValue(shiftsRef, (snapshot) => {
+                allShiftsData = snapshot.val() || {}; 
+                renderCalendarAndSummary();
+            });
+            onValue(remindersRef, (snapshot) => {
+                allRemindersData = snapshot.val() || {};
+                renderCalendarAndSummary();
+            });
+            
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+        });
+
+    </script>
+</body>
+</html>
