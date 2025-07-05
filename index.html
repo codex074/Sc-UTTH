@@ -19,7 +19,7 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- ⬇️⬇️ **FIX:** Changed ICS.js CDN from unpkg to jsdelivr for better reliability ⬇️⬇️ -->
+    <!-- ICS.js CDN from jsdelivr for better reliability -->
     <script src="https://cdn.jsdelivr.net/npm/ics@3.0.1/dist/ics.min.js"></script>
     
     <!-- SheetJS (xlsx) CDN for Excel export -->
@@ -306,7 +306,7 @@
         }
         .swal2-confirm { border-radius: 10px !important; background-color: var(--primary-color) !important; }
         .swal2-deny, .swal2-cancel { border-radius: 10px !important; }
-        .swal2-html-container { text-align: center !important; margin: 20px !important; }
+        .swal2-html-container { text-align: left !important; margin: 1em 10% !important; }
 
         .post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
         .reminder-event {
@@ -1297,6 +1297,9 @@
                 XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
             });
 
+            // =================================================================
+            // == ⬇️⬇️ โค้ดที่แก้ไขแล้วอยู่ตรงนี้ (อัปเดตข้อความแจ้งเตือน) ⬇️⬇️ ==
+            // =================================================================
             addToCalendarButton.addEventListener('click', async () => {
                 const { value: person } = await Swal.fire({
                     title: 'เลือกเภสัชกรเพื่อส่งออก',
@@ -1321,9 +1324,14 @@
                         return;
                     }
                     
+                    // **FIX:** Improved error message for when the ics library fails to load.
                     if (typeof ics !== 'function') {
-                        console.error('ics.js library is not loaded correctly.');
-                        Swal.fire('ผิดพลาด!', 'ไม่สามารถส่งออกปฏิทินได้ในขณะนี้ กรุณาลองรีเฟรชหน้าเว็บ', 'error');
+                        console.error('ics.js library is not loaded or is not a function.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ผิดพลาด!',
+                            html: 'ไม่สามารถส่งออกปฏิทินได้ เนื่องจากส่วนประกอบสำคัญ (ics.js) ไม่สามารถโหลดได้<br><br><b>กรุณาลอง:</b><br>1. ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br>2. ลองปิดโปรแกรม Ad-blocker ชั่วคราว<br>3. รีเฟรชหน้าเว็บอีกครั้ง',
+                        });
                         return;
                     }
 
@@ -1361,7 +1369,7 @@
                         cal.download(`utth-schedule-${person}`);
                     } catch (error) {
                         console.error("Error creating .ics file:", error);
-                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถสร้างไฟล์ปฏิทินได้ กรุณาตรวจสอบ Console', 'error');
+                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถสร้างไฟล์ปฏิทินได้ กรุณาตรวจสอบ Console เพื่อดูรายละเอียด', 'error');
                     }
                 }
             });
