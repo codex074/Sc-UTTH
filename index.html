@@ -10,19 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- FullCalendar v6 CDN -->
+    <!-- External Libraries -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    
-    <!-- SweetAlert2 v11 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- ICS.js CDN from jsdelivr for better reliability -->
-    <script src="https://cdn.jsdelivr.net/npm/ics@3.0.1/dist/ics.min.js"></script>
-    
-    <!-- SheetJS (xlsx) CDN for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -388,7 +379,7 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
-        #backup-btn, #export-excel-btn, #add-to-google-calendar-btn {
+        #backup-btn, #export-excel-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -403,17 +394,11 @@
         #export-excel-btn {
             background-color: #1D6F42;
         }
-        #add-to-google-calendar-btn {
-            background-color: #3498DB;
-        }
         #backup-btn:hover {
             background-color: var(--primary-hover);
         }
         #export-excel-btn:hover {
             background-color: #16A085;
-        }
-        #add-to-google-calendar-btn:hover {
-            background-color: #2980B9;
         }
 
     </style>
@@ -423,10 +408,10 @@
     <div id="app-container">
         <h1>🐾 UTTH-Schedule 🐾</h1>
         <div id='calendar'></div>
+        <!-- ⬇️⬇️ **FIX:** Removed the calendar export button entirely. ⬇️⬇️ -->
         <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <button id="backup-btn">สำรองข้อมูล (JSON)</button>
             <button id="export-excel-btn">ส่งออกเป็น Excel</button>
-            <button id="add-to-google-calendar-btn">เพิ่มในปฏิทิน (ไฟล์ .ics)</button>
         </div>
         
         <div id="filter-container">
@@ -1240,7 +1225,9 @@
             const dateEndEl = document.getElementById('filter-end-date');
             const backupButton = document.getElementById('backup-btn');
             const exportExcelButton = document.getElementById('export-excel-btn');
-            const addToCalendarButton = document.getElementById('add-to-google-calendar-btn');
+            
+            // ⬇️⬇️ **FIX:** Removed the calendar button constant. ⬇️⬇️
+            // const addToCalendarButton = document.getElementById('add-to-google-calendar-btn');
 
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
             shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
@@ -1297,82 +1284,7 @@
                 XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
             });
 
-            // =================================================================
-            // == ⬇️⬇️ โค้ดที่แก้ไขแล้วอยู่ตรงนี้ (อัปเดตข้อความแจ้งเตือน) ⬇️⬇️ ==
-            // =================================================================
-            addToCalendarButton.addEventListener('click', async () => {
-                const { value: person } = await Swal.fire({
-                    title: 'เลือกเภสัชกรเพื่อส่งออก',
-                    input: 'select',
-                    inputOptions: {
-                        'all': 'ทั้งหมด',
-                        ...Object.fromEntries(Object.entries(PERSONS).map(([key, value]) => [key, value.name]))
-                    },
-                    inputPlaceholder: 'เลือกเภสัชกร',
-                    showCancelButton: true,
-                    confirmButtonText: 'ส่งออกไฟล์ .ics',
-                    cancelButtonText: 'ยกเลิก'
-                });
-
-                if (person) {
-                    const shiftsToExport = Object.values(allShiftsData).filter(shift => 
-                        !shift.isCancelled && (person === 'all' || shift.person === person)
-                    );
-
-                    if (shiftsToExport.length === 0) {
-                        Swal.fire('ไม่มีข้อมูล', 'ไม่พบเวรของบุคคลที่เลือก', 'info');
-                        return;
-                    }
-                    
-                    // **FIX:** Improved error message for when the ics library fails to load.
-                    if (typeof ics !== 'function') {
-                        console.error('ics.js library is not loaded or is not a function.');
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'ผิดพลาด!',
-                            html: 'ไม่สามารถส่งออกปฏิทินได้ เนื่องจากส่วนประกอบสำคัญ (ics.js) ไม่สามารถโหลดได้<br><br><b>กรุณาลอง:</b><br>1. ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต<br>2. ลองปิดโปรแกรม Ad-blocker ชั่วคราว<br>3. รีเฟรชหน้าเว็บอีกครั้ง',
-                        });
-                        return;
-                    }
-
-                    try {
-                        const cal = ics();
-                        shiftsToExport.forEach(shift => {
-                            const shiftDetails = SHIFTS[shift.shift];
-                            if (!shiftDetails) {
-                                console.warn(`Skipping shift with unknown type: ${shift.shift}`);
-                                return;
-                            }
-
-                            const [startTimeStr, endTimeStr] = shiftDetails.time.split('-');
-                            const [startHour, startMinute] = startTimeStr.split('.').map(Number);
-                            const [endHour, endMinute] = endTimeStr.split('.').map(Number);
-
-                            const startDate = new Date(shift.date);
-                            startDate.setHours(startHour, startMinute, 0, 0);
-
-                            const endDate = new Date(shift.date);
-                            endDate.setHours(endHour, endMinute, 0, 0);
-
-                            if (endDate <= startDate) {
-                                endDate.setDate(endDate.getDate() + 1);
-                            }
-
-                            cal.addEvent(
-                                `เวร ${PERSONS[shift.person]?.name || shift.person} ที่ ${shift.room}`,
-                                `เวร ${shiftDetails.name} (${shiftDetails.time}) ที่ห้อง ${shift.room}\nหมายเหตุ: ${shift.notes || 'ไม่มี'}`,
-                                'โรงพยาบาลอุตรดิตถ์',
-                                startDate,
-                                endDate
-                            );
-                        });
-                        cal.download(`utth-schedule-${person}`);
-                    } catch (error) {
-                        console.error("Error creating .ics file:", error);
-                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถสร้างไฟล์ปฏิทินได้ กรุณาตรวจสอบ Console เพื่อดูรายละเอียด', 'error');
-                    }
-                }
-            });
+            // ⬇️⬇️ **FIX:** Removed the calendar button's event listener entirely. ⬇️⬇️
         }
         
         document.addEventListener('DOMContentLoaded', () => {
