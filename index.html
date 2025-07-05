@@ -19,8 +19,8 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- ICS.js for generating .ics files (For Manual Calendar Export) -->
-    <script src="https://unpkg.com/ics@3.0.1/dist/ics.min.js"></script>
+    <!-- ⬇️⬇️ **FIX:** Changed ICS.js CDN from unpkg to jsdelivr for better reliability ⬇️⬇️ -->
+    <script src="https://cdn.jsdelivr.net/npm/ics@3.0.1/dist/ics.min.js"></script>
     
     <!-- SheetJS (xlsx) CDN for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -1297,9 +1297,6 @@
                 XLSX.writeFile(wb, `utth-schedule-${new Date().toISOString().slice(0,10)}.xlsx`);
             });
 
-            // =================================================================
-            // == ⬇️⬇️ โค้ดที่แก้ไขแล้วอยู่ตรงนี้ ⬇️⬇️ ==
-            // =================================================================
             addToCalendarButton.addEventListener('click', async () => {
                 const { value: person } = await Swal.fire({
                     title: 'เลือกเภสัชกรเพื่อส่งออก',
@@ -1326,7 +1323,7 @@
                     
                     if (typeof ics !== 'function') {
                         console.error('ics.js library is not loaded correctly.');
-                        Swal.fire('ผิดพลาด!', 'ไม่สามารถส่งออกปฏิทินได้ในขณะนี้', 'error');
+                        Swal.fire('ผิดพลาด!', 'ไม่สามารถส่งออกปฏิทินได้ในขณะนี้ กรุณาลองรีเฟรชหน้าเว็บ', 'error');
                         return;
                     }
 
@@ -1336,7 +1333,7 @@
                             const shiftDetails = SHIFTS[shift.shift];
                             if (!shiftDetails) {
                                 console.warn(`Skipping shift with unknown type: ${shift.shift}`);
-                                return; // ข้ามเวรที่ไม่มีข้อมูลเวลา
+                                return;
                             }
 
                             const [startTimeStr, endTimeStr] = shiftDetails.time.split('-');
@@ -1349,7 +1346,6 @@
                             const endDate = new Date(shift.date);
                             endDate.setHours(endHour, endMinute, 0, 0);
 
-                            // **FIX:** จัดการกับเวรที่ข้ามวัน (เช่น เวรดึก)
                             if (endDate <= startDate) {
                                 endDate.setDate(endDate.getDate() + 1);
                             }
@@ -1358,8 +1354,8 @@
                                 `เวร ${PERSONS[shift.person]?.name || shift.person} ที่ ${shift.room}`,
                                 `เวร ${shiftDetails.name} (${shiftDetails.time}) ที่ห้อง ${shift.room}\nหมายเหตุ: ${shift.notes || 'ไม่มี'}`,
                                 'โรงพยาบาลอุตรดิตถ์',
-                                startDate, // ส่งเป็น Date object โดยตรง
-                                endDate    // ส่งเป็น Date object โดยตรง
+                                startDate,
+                                endDate
                             );
                         });
                         cal.download(`utth-schedule-${person}`);
