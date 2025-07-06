@@ -79,6 +79,10 @@
             border-bottom: none;
         }
         
+        #calendar-wrapper {
+            position: relative;
+        }
+
         #calendar { max-width: 100%; margin: 25px auto 0; }
 
         #filter-container {
@@ -225,19 +229,17 @@
             opacity: 0.4;
         }
 
-        /* --- ⬇️⬇️ **MODIFIED:** Darker Calendar Borders ⬇️⬇️ --- */
         .fc { font-size: 1em; --fc-border-color: #dce9d8; }
         
         .fc .fc-col-header-cell { 
             background-color: #f0f8e8;
-            border-bottom: 1px solid #dce9d8; /* Match the darker border */
+            border-bottom: 1px solid var(--fc-border-color); 
         }
         .fc .fc-col-header-cell a { 
             color: var(--primary-color) !important; 
-            font-weight: 500 !important;
-            font-size: 1.05em;
+            font-weight: 600 !important;
+            font-size: 1em;
         }
-        /* --- ⬆️⬆️ End of Modified Styles ⬆️⬆️ --- */
 
         .fc-event {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -359,6 +361,81 @@
             margin: 0;
         }
 
+        #calendar-person-filter {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 15px;
+            background-color: #fafff5;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 15px;
+        }
+        .person-filter-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .person-filter-option input {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+        .person-filter-option label {
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        
+        /* --- ⬇️⬇️ **NEW:** Styles for Reminder List in Swal ⬇️⬇️ --- */
+        .swal2-html-container ul.reminder-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 0;
+        }
+        .swal2-html-container li.reminder-item-in-list {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .swal2-html-container li.reminder-item-in-list:last-child {
+            border-bottom: none;
+        }
+        .swal2-html-container .reminder-text {
+            flex-grow: 1;
+        }
+        .swal2-html-container .reminder-actions button {
+            background: none;
+            border: 1px solid;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+        .swal2-html-container .reminder-actions .edit-btn {
+            color: #f39c12;
+            border-color: #f39c12;
+        }
+        .swal2-html-container .reminder-actions .edit-btn:hover {
+            background: #f39c12;
+            color: white;
+        }
+        .swal2-html-container .reminder-actions .delete-btn {
+            color: var(--clear-btn-red);
+            border-color: var(--clear-btn-red);
+        }
+        .swal2-html-container .reminder-actions .delete-btn:hover {
+            background: var(--clear-btn-red);
+            color: white;
+        }
+        /* --- ⬆️⬆️ End of New Styles ⬆️⬆️ --- */
+
         @media (max-width: 768px) {
             #app-container {
                 padding: 15px;
@@ -417,10 +494,13 @@
 
     <div id="app-container">
         <h1>🐾 UTTH-Schedule 🐾</h1>
-        <div id='calendar'></div>
-        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <div id="calendar-wrapper">
+            <div id='calendar'></div>
+        </div>
+        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
             <button id="backup-btn">สำรองข้อมูล (JSON)</button>
             <button id="export-excel-btn">ส่งออกเป็น Excel</button>
+            <div id="calendar-person-filter"></div>
         </div>
         
         <div id="filter-container">
@@ -470,7 +550,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.0</p>
+        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.4</p>
     </footer>
 
     <script type="module">
@@ -501,6 +581,7 @@
         let currentPage = 1; 
         const itemsPerPage = 10; 
         let shiftChartInstance = null; 
+        let visiblePersons = []; 
 
         const SHIFTS = {
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
@@ -840,6 +921,11 @@
             
             for (let key in allShiftsData) {
                 const shiftData = allShiftsData[key];
+                
+                if (!visiblePersons.includes(shiftData.person)) {
+                    continue;
+                }
+
                 fullSummaryData.push({ ...shiftData, key });
                 let title, eventColor;
                 if (shiftData.isCancelled) {
@@ -1008,30 +1094,78 @@
             }
         }
 
-        async function promptAddOrEditReminder(dateStr) {
+        // --- ⬇️⬇️ **MODIFIED:** Functions for handling multiple reminders ⬇️⬇️ ---
+        async function showRemindersForDate(dateStr) {
             const clickedDate = new Date(dateStr + "T00:00:00");
-            const existingReminderKey = Object.keys(allRemindersData).find(key => {
-                const reminder = allRemindersData[key];
+            
+            const remindersOnDay = Object.entries(allRemindersData).filter(([key, reminder]) => {
                 const startDate = new Date(reminder.startDate + "T00:00:00");
                 const endDate = reminder.endDate ? new Date(reminder.endDate + "T00:00:00") : startDate;
                 return clickedDate >= startDate && clickedDate <= endDate;
             });
-            const existingReminder = existingReminderKey ? allRemindersData[existingReminderKey] : null;
 
-            const { value: formValues, isConfirmed, isDenied } = await Swal.fire({
-                title: existingReminder ? 'แก้ไข/ลบบันทึกช่วยเตือน' : 'เพิ่มบันทึกช่วยเตือน',
+            let reminderHtml = '<ul class="reminder-list">';
+            if (remindersOnDay.length > 0) {
+                remindersOnDay.forEach(([key, reminder]) => {
+                    reminderHtml += `
+                        <li class="reminder-item-in-list" data-id="${key}">
+                            <span class="reminder-text">${reminder.note}</span>
+                            <span class="reminder-actions">
+                                <button class="edit-btn" data-id="${key}">แก้ไข</button>
+                                <button class="delete-btn" data-id="${key}">ลบ</button>
+                            </span>
+                        </li>`;
+                });
+            } else {
+                reminderHtml += '<li>ยังไม่มีบันทึกช่วยเตือนในวันนี้</li>';
+            }
+            reminderHtml += '</ul>';
+
+            const result = await Swal.fire({
+                title: `บันทึกช่วยเตือนวันที่ ${new Date(dateStr).toLocaleDateString('th-TH', {dateStyle: 'long'})}`,
+                html: reminderHtml,
+                showCancelButton: true,
+                confirmButtonText: 'เพิ่มบันทึกใหม่',
+                cancelButtonText: 'ปิด',
+                didOpen: () => {
+                    // Add event listeners after the modal is open
+                    document.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const reminderId = e.target.dataset.id;
+                            Swal.close();
+                            promptEditReminder(reminderId);
+                        });
+                    });
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const reminderId = e.target.dataset.id;
+                            Swal.close();
+                            promptDeleteReminder(reminderId);
+                        });
+                    });
+                }
+            });
+
+            if (result.isConfirmed) {
+                promptAddReminder(dateStr);
+            }
+        }
+
+        async function promptAddReminder(dateStr) {
+            const { value: formValues } = await Swal.fire({
+                title: 'เพิ่มบันทึกช่วยเตือนใหม่',
                 html: `
                     <label for="swal-reminder-note" class="swal2-input-label">หมายเหตุ</label>
-                    <input id="swal-reminder-note" class="swal2-input" value="${existingReminder ? existingReminder.note : ''}" placeholder="ไปเที่ยว, ลาพักร้อน...">
+                    <input id="swal-reminder-note" class="swal2-input" placeholder="ไปเที่ยว, ลาพักร้อน...">
                     <label for="swal-reminder-start" class="swal2-input-label">วันที่เริ่มต้น</label>
-                    <input type="date" id="swal-reminder-start" class="swal2-input" value="${existingReminder ? existingReminder.startDate : dateStr}">
+                    <input type="date" id="swal-reminder-start" class="swal2-input" value="${dateStr}">
                     <label for="swal-reminder-end" class="swal2-input-label">วันที่สิ้นสุด (ไม่บังคับ)</label>
-                    <input type="date" id="swal-reminder-end" class="swal2-input" value="${existingReminder && existingReminder.endDate ? existingReminder.endDate : ''}">
+                    <input type="date" id="swal-reminder-end" class="swal2-input">
                 `,
-                focusConfirm: false, showCancelButton: true,
-                showDenyButton: !!existingReminder,
-                confirmButtonText: existingReminder ? 'อัปเดต' : 'บันทึก',
-                denyButtonText: 'ลบ', cancelButtonText: 'ยกเลิก', denyButtonColor: '#d33',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
                 preConfirm: () => {
                     const note = document.getElementById('swal-reminder-note').value;
                     const startDate = document.getElementById('swal-reminder-start').value;
@@ -1044,14 +1178,65 @@
                 }
             });
 
-            if (isConfirmed && formValues) {
-                const keyToSave = existingReminderKey || push(remindersRef).key;
-                set(ref(database, `reminders/${keyToSave}`), formValues)
+            if (formValues) {
+                set(push(remindersRef), formValues)
                     .then(() => Swal.fire('สำเร็จ', 'บันทึกเรียบร้อยเหมียว', 'success'))
                     .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
-            } else if (isDenied) {
-                remove(ref(database, `reminders/${existingReminderKey}`))
-                    .then(() => Swal.fire('สำเร็จ', 'ลบบันทึกแล้ว', 'success'))
+            }
+        }
+
+        async function promptEditReminder(reminderId) {
+            const existingReminder = allRemindersData[reminderId];
+            if (!existingReminder) return;
+
+            const { value: formValues } = await Swal.fire({
+                title: 'แก้ไขบันทึกช่วยเตือน',
+                html: `
+                    <label for="swal-reminder-note" class="swal2-input-label">หมายเหตุ</label>
+                    <input id="swal-reminder-note" class="swal2-input" value="${existingReminder.note}" placeholder="ไปเที่ยว, ลาพักร้อน...">
+                    <label for="swal-reminder-start" class="swal2-input-label">วันที่เริ่มต้น</label>
+                    <input type="date" id="swal-reminder-start" class="swal2-input" value="${existingReminder.startDate}">
+                    <label for="swal-reminder-end" class="swal2-input-label">วันที่สิ้นสุด (ไม่บังคับ)</label>
+                    <input type="date" id="swal-reminder-end" class="swal2-input" value="${existingReminder.endDate || ''}">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'อัปเดต',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const note = document.getElementById('swal-reminder-note').value;
+                    const startDate = document.getElementById('swal-reminder-start').value;
+                    let endDate = document.getElementById('swal-reminder-end').value;
+                    if (!note) { Swal.showValidationMessage('ต้องใส่หมายเหตุก่อนนะ'); return false; }
+                    if (!startDate) { Swal.showValidationMessage('ต้องใส่วันที่เริ่มต้นด้วยนะ'); return false; }
+                    if (endDate && endDate < startDate) { Swal.showValidationMessage('วันที่สิ้นสุดจะอยู่ก่อนวันเริ่มต้นไม่ได้นะ'); return false; }
+                    if (endDate === startDate) { endDate = ''; }
+                    return { note: note.trim(), startDate: startDate, endDate: endDate || null };
+                }
+            });
+
+            if (formValues) {
+                set(ref(database, `reminders/${reminderId}`), formValues)
+                    .then(() => Swal.fire('สำเร็จ', 'อัปเดตเรียบร้อยเหมียว', 'success'))
+                    .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
+            }
+        }
+
+        async function promptDeleteReminder(reminderId) {
+            const result = await Swal.fire({
+                title: 'แน่ใจนะว่าจะลบ?',
+                text: "ลบแล้วจะเอากลับมาไม่ได้นะเหมียว!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (result.isConfirmed) {
+                remove(ref(database, `reminders/${reminderId}`))
+                    .then(() => Swal.fire('ลบแล้ว!', 'บันทึกของคุณถูกลบแล้ว', 'success'))
                     .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
             }
         }
@@ -1071,17 +1256,20 @@
                 title: `วันที่ ${new Date(arg.dateStr).toLocaleDateString('th-TH', {dateStyle: 'long'})}`,
                 text: 'จะทำอะไรดีเหมียว?',
                 showDenyButton: true, confirmButtonText: 'เพิ่มเวร',
-                denyButtonText: 'เพิ่มบันทึกช่วยเตือน',
+                denyButtonText: 'จัดการบันทึกช่วยเตือน',
                 confirmButtonColor: 'var(--primary-color)', denyButtonColor: '#28a745'
             });
-            if (action) { promptAddShift(arg.dateStr); } 
-            else if (action === false) { promptAddOrEditReminder(arg.dateStr); }
+            if (action) { 
+                promptAddShift(arg.dateStr); 
+            } else if (action === false) { 
+                showRemindersForDate(arg.dateStr); 
+            }
         }
 
         async function handleEventClick(arg) {
             const shiftId = arg.event.id;
             if (arg.event.extendedProps.isReminder) {
-                promptAddOrEditReminder(arg.event.startStr);
+                showRemindersForDate(arg.event.startStr);
                 return;
             }
             if (shiftId.endsWith('_off')) { return; }
@@ -1225,7 +1413,7 @@
             }
         }
         
-        // --- 6. INITIALIZATION ---
+        // --- 7. INITIALIZATION ---
         function initializeAppUI() {
             const personFilterEl = document.getElementById('filter-person');
             const shiftFilterEl = document.getElementById('filter-shift');
@@ -1235,10 +1423,56 @@
             const dateEndEl = document.getElementById('filter-end-date');
             const backupButton = document.getElementById('backup-btn');
             const exportExcelButton = document.getElementById('export-excel-btn');
+            const calendarPersonFilterEl = document.getElementById('calendar-person-filter');
 
+            // Populate main filters
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
             shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
             roomFilterEl.innerHTML = '<option value="all">ทุกเวร</option>' + ALL_ROOMS.map(r => `<option value="${r}">${r}</option>`).join('');
+
+            // Populate and handle calendar person filter
+            const allPersonKeys = Object.keys(PERSONS);
+            visiblePersons = [...allPersonKeys]; // Initially, all persons are visible
+
+            calendarPersonFilterEl.innerHTML += `
+                <div class="person-filter-option">
+                    <input type="checkbox" id="filter-all-persons" checked>
+                    <label for="filter-all-persons">แสดงทั้งหมด</label>
+                </div>
+            `;
+
+            allPersonKeys.forEach(key => {
+                calendarPersonFilterEl.innerHTML += `
+                    <div class="person-filter-option">
+                        <input type="checkbox" id="filter-person-${key}" value="${key}" class="person-checkbox" checked>
+                        <label for="filter-person-${key}">${PERSONS[key].name}</label>
+                    </div>
+                `;
+            });
+
+            const allPersonsCheckbox = document.getElementById('filter-all-persons');
+            const personCheckboxes = document.querySelectorAll('.person-checkbox');
+
+            allPersonsCheckbox.addEventListener('change', () => {
+                const isChecked = allPersonsCheckbox.checked;
+                personCheckboxes.forEach(cb => cb.checked = isChecked);
+                updateVisiblePersons();
+            });
+
+            personCheckboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const allChecked = [...personCheckboxes].every(c => c.checked);
+                    allPersonsCheckbox.checked = allChecked;
+                    updateVisiblePersons();
+                });
+            });
+
+            function updateVisiblePersons() {
+                visiblePersons = [...personCheckboxes]
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+                renderCalendarAndSummary();
+            }
 
             [personFilterEl, shiftFilterEl, roomFilterEl, dateStartEl, dateEndEl].forEach(el => {
                 el.addEventListener('change', () => {
