@@ -79,6 +79,10 @@
             border-bottom: none;
         }
         
+        #calendar-wrapper {
+            position: relative;
+        }
+
         #calendar { max-width: 100%; margin: 25px auto 0; }
 
         #filter-container {
@@ -1424,13 +1428,6 @@
             const allPersonKeys = Object.keys(PERSONS);
             visiblePersons = [...allPersonKeys]; // Initially, all persons are visible
 
-            calendarPersonFilterEl.innerHTML += `
-                <div class="person-filter-option">
-                    <input type="checkbox" id="filter-all-persons" checked>
-                    <label for="filter-all-persons">แสดงทั้งหมด</label>
-                </div>
-            `;
-
             allPersonKeys.forEach(key => {
                 calendarPersonFilterEl.innerHTML += `
                     <div class="person-filter-option">
@@ -1440,19 +1437,10 @@
                 `;
             });
 
-            const allPersonsCheckbox = document.getElementById('filter-all-persons');
             const personCheckboxes = document.querySelectorAll('.person-checkbox');
-
-            allPersonsCheckbox.addEventListener('change', () => {
-                const isChecked = allPersonsCheckbox.checked;
-                personCheckboxes.forEach(cb => cb.checked = isChecked);
-                updateVisiblePersons();
-            });
 
             personCheckboxes.forEach(cb => {
                 cb.addEventListener('change', () => {
-                    const allChecked = [...personCheckboxes].every(c => c.checked);
-                    allPersonsCheckbox.checked = allChecked;
                     updateVisiblePersons();
                 });
             });
