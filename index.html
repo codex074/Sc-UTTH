@@ -489,13 +489,13 @@
 <body>
 
     <div id="app-container">
-        <h1>🐾 UTTH-Schedule 🐾</h1>
+        <h1>🐾 ตารางเวรแมวมีม 🐾</h1>
         <div id="calendar-wrapper">
             <div id='calendar'></div>
         </div>
         <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
             <button id="backup-btn">สำรองข้อมูล (JSON)</button>
-            <button id="export-excel-btn">ส่งออกเป็น Excel</button>
+            <button id="export-excel-btn">สำรองข้อมูล Excel</button>
             <div id="calendar-person-filter"></div>
         </div>
         
@@ -546,7 +546,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.4</p>
+        <p>&copy; <span id="copyright-year"></span> UTTH-Schedule | เวอร์ชั่น 2.5.6</p>
     </footer>
 
     <script type="module">
@@ -701,7 +701,7 @@
                     if (item.isPostNightShift) {
                         itemColor = 'var(--post-night-shift-color)';
                         mainInfo = `⬇️ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>ลงดึก</strong>`;
-                        notesHTML = `<div class="notes">พักผ่อนหลังปฏิบัติงานเวรดึก</div>`;
+                        notesHTML = `<div class="notes">พักผ่อนลงเวรดึก</div>`;
                     } else if (item.isCancelled) {
                         itemColor = 'var(--cancelled-color)';
                         mainInfo = `❌ <strong style="color: #7f8c8d;">ยกเลิกเวร</strong> ของ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <span style="text-decoration: line-through;">${item.shift} / ${item.room}</span> | เหตุผล: <strong>${item.notes || ''}</strong>`;
@@ -987,7 +987,7 @@
 
             if (reminderOnDay) {
                 const confirmation = await Swal.fire({
-                    title: 'เดี๋ยวก่อนนะเหมียว!',
+                    title: 'เดี๋ยวก่อนนะ!',
                     html: `วันนี้มีบันทึกว่า: "<b>${reminderOnDay.note}</b>"<br>จะเพิ่มเวรจริงๆ เหรอ?`,
                     icon: 'warning', showCancelButton: true,
                     confirmButtonText: 'ใช่, เพิ่มเวรเลย', cancelButtonText: 'ไม่ดีกว่า',
@@ -1079,7 +1079,7 @@
                 const personToAdd = formValues.person;
                 if (isPersonPostNightShift(personToAdd, dateStr)) {
                     const confirmation = await Swal.fire({
-                        title: 'แน่ใจนะเหมียว?', html: `<strong>${personToAdd}</strong> เพิ่งลงเวรดึกมานะ<br>จะให้เพิ่มเวรอีกเหรอ?`,
+                        title: 'แน่ใจนะ?', html: `<strong>${personToAdd}</strong> เพิ่งลงเวรดึกมานะ<br>จะให้เพิ่มเวรอีกเหรอ?`,
                         icon: 'warning', showCancelButton: true, confirmButtonText: 'จัดไป!',
                         cancelButtonText: 'โอ๊ะ ไม่ดีกว่า', confirmButtonColor: '#28a745',
                     });
@@ -1174,7 +1174,7 @@
 
             if (formValues) {
                 set(push(remindersRef), formValues)
-                    .then(() => Swal.fire('สำเร็จ', 'บันทึกเรียบร้อยเหมียว', 'success'))
+                    .then(() => Swal.fire('สำเร็จ', 'บันทึกเรียบร้อย', 'success'))
                     .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
             }
         }
@@ -1211,7 +1211,7 @@
 
             if (formValues) {
                 set(ref(database, `reminders/${reminderId}`), formValues)
-                    .then(() => Swal.fire('สำเร็จ', 'อัปเดตเรียบร้อยเหมียว', 'success'))
+                    .then(() => Swal.fire('สำเร็จ', 'อัปเดตเรียบร้อย', 'success'))
                     .catch(e => Swal.fire('ผิดพลาด', e.message, 'error'));
             }
         }
@@ -1219,7 +1219,7 @@
         async function promptDeleteReminder(reminderId) {
             const result = await Swal.fire({
                 title: 'แน่ใจนะว่าจะลบ?',
-                text: "ลบแล้วจะเอากลับมาไม่ได้นะเหมียว!",
+                text: "ลบแล้วจะเอากลับมาไม่ได้นะ!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -1241,16 +1241,16 @@
                 await Swal.fire({
                     title: `🎉 วันหยุด: ${holidayName}`,
                     icon: 'info',
-                    confirmButtonText: 'รับทราบเหมียว!',
+                    confirmButtonText: 'รับทราบ!',
                     confirmButtonColor: 'var(--primary-color)',
                 });
             }
 
             const { value: action } = await Swal.fire({
                 title: `วันที่ ${new Date(arg.dateStr).toLocaleDateString('th-TH', {dateStyle: 'long'})}`,
-                text: 'จะทำอะไรดีเหมียว?',
+                text: 'จะทำอะไรดีน้าา?',
                 showDenyButton: true, confirmButtonText: 'เพิ่มเวร',
-                denyButtonText: 'จัดการบันทึกช่วยเตือน',
+                denyButtonText: 'บันทึกช่วยเตือน',
                 confirmButtonColor: 'var(--primary-color)', denyButtonColor: '#28a745'
             });
             if (action) { 
@@ -1356,7 +1356,7 @@
                         if (key === shiftId) continue; 
                         const existingShift = allShiftsData[key];
                         if (existingShift.date === eventDateStr && existingShift.person === newPerson && existingShift.shift === newShift && !existingShift.isCancelled) {
-                            Swal.showValidationMessage(`อัปเดตไม่ได้นะ! ${newPerson} มีเวร ${newShift} ที่โซน ${existingShift.room} อยู่แล้ว`);
+                            Swal.showValidationMessage(`อัปเดตไม่ได้นะ! ${newPerson} มีเวร ${newShift} ที่ห้อง ${existingShift.room} อยู่แล้ว`);
                             return false;
                         }
                     }
@@ -1383,10 +1383,10 @@
                     if (reason) { 
                         const cancelledData = { ...currentShiftData, notes: reason, isCancelled: true };
                         set(ref(database, `shifts/${shiftId}`), cancelledData)
-                            .then(() => Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้เหมียว', 'info'))
+                            .then(() => Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้นะ', 'info'))
                             .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
                     } else { 
-                        const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะเหมียว!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
+                        const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะ!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
                             remove(ref(database, `shifts/${shiftId}`))
                                 .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
