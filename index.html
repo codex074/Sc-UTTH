@@ -79,10 +79,6 @@
             border-bottom: none;
         }
         
-        #calendar-wrapper {
-            position: relative;
-        }
-
         #calendar { max-width: 100%; margin: 25px auto 0; }
 
         #filter-container {
@@ -370,7 +366,6 @@
             background-color: #fafff5;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            margin-top: 15px;
         }
         .person-filter-option {
             display: flex;
@@ -389,7 +384,6 @@
             cursor: pointer;
         }
         
-        /* --- ⬇️⬇️ **NEW:** Styles for Reminder List in Swal ⬇️⬇️ --- */
         .swal2-html-container ul.reminder-list {
             list-style: none;
             padding: 0;
@@ -434,7 +428,6 @@
             background: var(--clear-btn-red);
             color: white;
         }
-        /* --- ⬆️⬆️ End of New Styles ⬆️⬆️ --- */
 
         @media (max-width: 768px) {
             #app-container {
@@ -476,7 +469,6 @@
             font-size: 1em;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-top: 15px;
         }
         #export-excel-btn {
             background-color: #1D6F42;
@@ -1094,7 +1086,6 @@
             }
         }
 
-        // --- ⬇️⬇️ **MODIFIED:** Functions for handling multiple reminders ⬇️⬇️ ---
         async function showRemindersForDate(dateStr) {
             const clickedDate = new Date(dateStr + "T00:00:00");
             
@@ -1128,7 +1119,6 @@
                 confirmButtonText: 'เพิ่มบันทึกใหม่',
                 cancelButtonText: 'ปิด',
                 didOpen: () => {
-                    // Add event listeners after the modal is open
                     document.querySelectorAll('.edit-btn').forEach(button => {
                         button.addEventListener('click', (e) => {
                             const reminderId = e.target.dataset.id;
