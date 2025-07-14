@@ -571,7 +571,7 @@
         const remindersRef = ref(database, 'reminders');
 
         // --- 2. APPLICATION CONSTANTS & STATE ---
-        const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/c26wurvfwhs34cjpgt8uko7bo9rymb3k"; 
+        const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/hc7v5pf4pu6g8hhjnrhl2mm7fi8ii8km"; 
 
         let allShiftsData = {}; 
         let allRemindersData = {};
@@ -654,23 +654,12 @@
 
         // --- 4. HELPER & RENDER FUNCTIONS ---
         function createMakePayload(data, actionType, firebaseKey = null) {
-            // For 'delete', we only need the key.
-            if (actionType === 'delete') {
-                return {
-                    ...data,
-                    firebaseKey: firebaseKey,
-                    actionType: actionType
-                };
-            }
-
-            // For other actions (create, update, cancel), shift info is required.
             const shiftInfo = SHIFTS[data.shift];
             if (!shiftInfo) {
                 console.error("Cannot create payload: shiftInfo not found for shift:", data.shift);
-                return null; // Don't send webhook if time cannot be calculated.
+                return null;
             }
 
-            // Calculate time.
             const [start, end] = shiftInfo.time.split('-');
             const startTimeStr = `${data.date}T${start.replace('.',':')}:00`;
             
@@ -683,7 +672,6 @@
             const localStartTime = new Date(new Date(startTimeStr) - tzOffset).toISOString().slice(0, 19);
             const localEndTime = new Date(endDateTime - tzOffset).toISOString().slice(0, 19);
 
-            // Create the complete payload.
             return {
                 ...data,
                 startTime: localStartTime,
@@ -1356,12 +1344,10 @@
                     cancelButtonText: 'ปิด', confirmButtonColor: '#d33'
                 });
                 if (result.isConfirmed) {
-                    const dataToDelete = allShiftsData[shiftId];
                     remove(ref(database, `shifts/${shiftId}`))
                         .then(() => {
                             Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
-                            const payload = createMakePayload(dataToDelete, 'delete', shiftId);
-                            sendToMakeWebhook(payload);
+                            // ไม่ส่ง Webhook ตอนลบ
                         })
                         .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                 }
@@ -1466,19 +1452,16 @@
                         set(ref(database, `shifts/${shiftId}`), cancelledData)
                             .then(() => {
                                 Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้นะ', 'info');
-                                const payload = createMakePayload(cancelledData, 'cancel', shiftId);
-                                sendToMakeWebhook(payload);
+                                // ไม่ส่ง Webhook ตอนยกเลิก
                             })
                             .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
                     } else { 
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะ!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
-                            const dataToDelete = allShiftsData[shiftId];
                             remove(ref(database, `shifts/${shiftId}`))
                                 .then(() => {
                                     Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
-                                    const payload = createMakePayload(dataToDelete, 'delete', shiftId);
-                                    sendToMakeWebhook(payload);
+                                    // ไม่ส่ง Webhook ตอนลบ
                                 })
                                 .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                         }
