@@ -245,6 +245,10 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
             padding: 5px 8px; border-radius: 8px !important; color: white !important;
+            /* --- ส่วนที่เพิ่มเข้ามา: จัดการข้อความที่ยาวเกินไป --- */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -626,6 +630,8 @@
             navLinks: true,
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
+            // --- ส่วนที่เพิ่มเข้ามา: จำกัดจำนวนกิจกรรมต่อวัน ---
+            dayMaxEvents: 3, // แสดงสูงสุด 3 กิจกรรม ถ้าเกินจะขึ้นเป็น "+X more"
             dayCellDidMount: function(arg) {
                 const year = arg.date.getFullYear();
                 const month = String(arg.date.getMonth() + 1).padStart(2, '0');
