@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ตารางเวร</title>
+    <link rel="shortcut icon" href="cool.ico" type="image/x-icon">
     
     <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -245,10 +246,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-size: 0.85em !important; border: none !important;
             padding: 5px 8px; border-radius: 8px !important; color: white !important;
-            /* --- ส่วนที่เพิ่มเข้ามา: จัดการข้อความที่ยาวเกินไป --- */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
@@ -493,7 +490,7 @@
 <body>
 
     <div id="app-container">
-        <h1>🐾 ตารางเวรเภสัชแมวมีม 🐾</h1>
+        <h1>🐾 ตารางเภสัชแมวมีม 🐾</h1>
         <div id="calendar-wrapper">
             <div id='calendar'></div>
         </div>
@@ -550,7 +547,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.5.7</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.5.9</p>
     </footer>
 
     <script type="module">
@@ -586,9 +583,12 @@
         let visiblePersons = []; 
 
         const SHIFTS = {
-            'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' }, 'เช้า': { name: 'เช้า', time: '08.30-16.30' },
-            'บ่าย': { name: 'บ่าย', time: '16.30-23.59' }, 'ดึก': { name: 'ดึก', time: '23.59-08.30' }
+            'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' },
+            'เช้า': { name: 'เช้า', time: '08.30-16.30' },
+            'บ่าย': { name: 'บ่าย', time: '16.30-23.59' },
+            'ดึก': { name: 'ดึก', time: '23.55-08.30' }
         };
+
         const PERSONS = { 'A': { name: 'A', color: '#1E90FF', icon: '👨‍⚕️' }, 'Nanti': { name: 'Nanti', color: '#DB7093', icon: '👩‍⚕️' } };
         const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
         
@@ -630,8 +630,6 @@
             navLinks: true,
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
-            // --- ส่วนที่เพิ่มเข้ามา: จำกัดจำนวนกิจกรรมต่อวัน ---
-            dayMaxEvents: 3, // แสดงสูงสุด 3 กิจกรรม ถ้าเกินจะขึ้นเป็น "+X more"
             dayCellDidMount: function(arg) {
                 const year = arg.date.getFullYear();
                 const month = String(arg.date.getMonth() + 1).padStart(2, '0');
@@ -660,13 +658,27 @@
 
         // --- 4. HELPER & RENDER FUNCTIONS ---
         function createMakePayload(data, actionType, firebaseKey = null) {
-            const shiftInfo = SHIFTS[data.shift];
-            if (!shiftInfo) {
-                console.error("Cannot create payload: shiftInfo not found for shift:", data.shift);
-                return null;
+            if (actionType === 'delete') {
+                return { ...data, firebaseKey: firebaseKey, actionType: actionType };
             }
-
-            const [start, end] = shiftInfo.time.split('-');
+            
+            let shiftTime;
+            if (data.shift === 'เช้า' && data.room === 'Extend') {
+                shiftTime = '09.00-13.00';
+            } else if (data.shift === 'เช้า' && data.room === 'CHEMO') {
+                shiftTime = '08.30-12.30';
+            } else if (data.shift === 'บ่าย' && (data.room === 'Extend' || data.room === 'SMC')) {
+                shiftTime = '16.30-20.30';
+            } else {
+                const shiftInfo = SHIFTS[data.shift];
+                if (!shiftInfo) {
+                    console.error("Cannot create payload: shiftInfo not found for shift:", data.shift);
+                    return null;
+                }
+                shiftTime = shiftInfo.time;
+            }
+            
+            const [start, end] = shiftTime.split('-');
             const startTimeStr = `${data.date}T${start.replace('.',':')}:00`;
             
             let endDateTime = new Date(`${data.date}T${end.replace('.',':')}:00`);
@@ -777,7 +789,19 @@
                         mainInfo = `❌ <strong style="color: #7f8c8d;">ยกเลิกเวร</strong> ของ <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <span style="text-decoration: line-through;">${item.shift} / ${item.room}</span> | เหตุผล: <strong>${item.notes || ''}</strong>`;
                     } else {
                         itemColor = PERSONS[item.person]?.color || '#777777';
-                        mainInfo = `${personIcon} <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>${item.shift}</strong> (${SHIFTS[item.shift]?.time || 'N/A'}) ที่ห้อง <strong>${item.room}</strong>`;
+                        
+                        let displayTime;
+                        if (item.shift === 'เช้า' && item.room === 'Extend') {
+                            displayTime = '09.00-13.00';
+                        } else if (item.shift === 'เช้า' && item.room === 'CHEMO') {
+                            displayTime = '08.30-12.30';
+                        } else if (item.shift === 'บ่าย' && (item.room === 'Extend' || item.room === 'SMC')) {
+                            displayTime = '16.30-20.30';
+                        } else {
+                            displayTime = SHIFTS[item.shift]?.time || 'N/A';
+                        }
+
+                        mainInfo = `${personIcon} <strong>${item.person}</strong> | 📅 ${new Date(item.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric'})} | <strong>${item.shift}</strong> (${displayTime}) ที่ห้อง <strong>${item.room}</strong>`;
                         if(item.medOption){ mainInfo += ` | <strong style="color: #c0392b;">สถานะ: ${item.medOption}</strong>`; }
                         if (item.notes) { notesHTML = `<div class="notes"><strong>หมายเหตุ:</strong> ${item.notes}</div>`; }
                     }
@@ -1086,7 +1110,7 @@
                         `).join('')}
                     </div>
                     <label for="swal-shift" class="swal2-input-label">เลือกช่วงเวลา</label>
-                    <select id="swal-shift" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}">${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <select id="swal-shift" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}">${availableShifts[s].name}</option>`).join('')}</select>
                     <label for="swal-room" class="swal2-input-label">เวร</label>
                     <select id="swal-room" class="swal2-select"></select>
                     <div id="med-options-container" style="display: none; margin-top: 1em;">
@@ -1101,29 +1125,38 @@
                     const shiftSelect = document.getElementById('swal-shift');
                     const roomSelect = document.getElementById('swal-room');
                     const medContainer = document.getElementById('med-options-container');
+                    
                     const updateFormFields = () => {
+                        if (!shiftSelect || !roomSelect) return;
                         const selectedShift = shiftSelect.value;
                         const currentRoomValue = roomSelect.value;
                         let availableRooms = [];
                         const dayOfWeek = new Date(dateStr).getDay();
+
                         if (selectedShift === 'รุ่งอรุณ') {
-                            if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                            availableRooms = ['ER', 'OPD'];
                         } else if (selectedShift === 'เช้า') {
-                            availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
-                            if (isSpecialDay(dateStr)) availableRooms.push('CHEMO');
+                            availableRooms = ['ER', 'MED', 'SURG', 'Extend', 'CHEMO'];
                         } else if (selectedShift === 'บ่าย') {
-                            if (isSpecialDay(dateStr)) { availableRooms = ['ER', 'MED']; } else {
-                                availableRooms = ['ER', 'MED', 'Extend'];
-                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC');}
-                            }
-                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                            availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                        } else if (selectedShift === 'ดึก') {
+                            availableRooms = ['ER'];
+                        }
+                        
                         roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoomValue ? 'selected' : ''}>${r}</option>`).join('');
                         if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        
                         const showMedField = isSpecialDay(dateStr) && selectedShift === 'เช้า' && roomSelect.value === 'MED';
                         medContainer.style.display = showMedField ? 'block' : 'none';
                     };
-                    shiftSelect.addEventListener('change', updateFormFields);
-                    roomSelect.addEventListener('change', updateFormFields);
+
+                    if (shiftSelect) {
+                        shiftSelect.addEventListener('change', updateFormFields);
+                    }
+                    if (roomSelect) {
+                        roomSelect.addEventListener('change', updateFormFields);
+                    }
+                    
                     updateFormFields();
                 },
                 preConfirm: () => {
@@ -1350,10 +1383,12 @@
                     cancelButtonText: 'ปิด', confirmButtonColor: '#d33'
                 });
                 if (result.isConfirmed) {
+                    const dataToDelete = allShiftsData[shiftId];
                     remove(ref(database, `shifts/${shiftId}`))
                         .then(() => {
                             Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
-                            // ไม่ส่ง Webhook ตอนลบ
+                            const payload = createMakePayload(dataToDelete, 'delete', shiftId);
+                            sendToMakeWebhook(payload);
                         })
                         .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                 }
@@ -1382,7 +1417,7 @@
                         `).join('')}
                     </div>
                     <label for="swal-shift-edit" class="swal2-input-label">ช่วงเวลา</label>
-                    <select id="swal-shift-edit" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}" ${s === shift ? 'selected' : ''}>${availableShifts[s].name} (${availableShifts[s].time})</option>`).join('')}</select>
+                    <select id="swal-shift-edit" class="swal2-select">${Object.keys(availableShifts).map(s => `<option value="${s}" ${s === shift ? 'selected' : ''}>${availableShifts[s].name}</option>`).join('')}</select>
                     <label for="swal-room-edit" class="swal2-input-label">เวร</label>
                     <select id="swal-room-edit" class="swal2-select"></select>
                     <div id="med-options-container-edit" style="display: none; margin-top: 1em;">
@@ -1396,30 +1431,35 @@
                     const shiftSelect = document.getElementById('swal-shift-edit');
                     const roomSelect = document.getElementById('swal-room-edit');
                     const medContainer = document.getElementById('med-options-container-edit');
+                    
                     const updateFormFields = () => {
+                        if (!shiftSelect || !roomSelect) return;
                         const selectedShift = shiftSelect.value;
                         const currentRoom = roomSelect.value || room;
                         let availableRooms = [];
                         const dayOfWeek = new Date(eventDateStr).getDay();
                         if (selectedShift === 'รุ่งอรุณ') {
-                           if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['OPD', 'ER']; }
+                           availableRooms = ['ER', 'OPD'];
                         } else if (selectedShift === 'เช้า') {
-                           availableRooms = ['ER', 'MED', 'SURG', 'Extend'];
-                           if (isSpecialDay(eventDateStr)) availableRooms.push('CHEMO');
+                           availableRooms = ['ER', 'MED', 'SURG', 'Extend', 'CHEMO'];
                         } else if (selectedShift === 'บ่าย') {
-                            if (isSpecialDay(eventDateStr)) { availableRooms = ['ER', 'MED']; } 
-                            else {
-                                availableRooms = ['ER', 'MED', 'Extend'];
-                                if (dayOfWeek >= 1 && dayOfWeek <= 4) { availableRooms.push('SMC'); }
-                            }
-                        } else if (selectedShift === 'ดึก') { availableRooms = ['ER']; }
+                           availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                        } else if (selectedShift === 'ดึก') {
+                           availableRooms = ['ER'];
+                        }
                         roomSelect.innerHTML = availableRooms.map(r => `<option value="${r}" ${r === currentRoom ? 'selected' : ''}>${r}</option>`).join('');
                         if (!availableRooms.includes(roomSelect.value)) roomSelect.value = availableRooms[0] || '';
+                        
                         const showMedField = dateIsSpecial && selectedShift === 'เช้า' && roomSelect.value === 'MED';
                         medContainer.style.display = showMedField ? 'block' : 'none';
                     };
-                    shiftSelect.addEventListener('change', updateFormFields);
-                    roomSelect.addEventListener('change', updateFormFields);
+
+                    if(shiftSelect) {
+                        shiftSelect.addEventListener('change', updateFormFields);
+                    }
+                    if(roomSelect) {
+                        roomSelect.addEventListener('change', updateFormFields);
+                    }
                     updateFormFields();
                 },
                 preConfirm: () => {
@@ -1458,16 +1498,19 @@
                         set(ref(database, `shifts/${shiftId}`), cancelledData)
                             .then(() => {
                                 Swal.fire('บันทึกการยกเลิกแล้ว', 'เดี๋ยวจัดการให้นะ', 'info');
-                                // ไม่ส่ง Webhook ตอนยกเลิก
+                                const payload = createMakePayload(cancelledData, 'cancel', shiftId);
+                                sendToMakeWebhook(payload);
                             })
                             .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
                     } else { 
                         const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะ!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                         if(deleteConfirmation.isConfirmed){
+                            const dataToDelete = allShiftsData[shiftId];
                             remove(ref(database, `shifts/${shiftId}`))
                                 .then(() => {
                                     Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
-                                    // ไม่ส่ง Webhook ตอนลบ
+                                    const payload = createMakePayload(dataToDelete, 'delete', shiftId);
+                                    sendToMakeWebhook(payload);
                                 })
                                 .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                         }
