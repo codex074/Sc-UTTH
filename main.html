@@ -20,36 +20,38 @@
     <style>
         /* --- CUTE CAT THEME --- */
         :root {
-            --theme-bg: #F5FBEF; /* Light Green background */
+            --theme-bg: #F5FBEF;
             --container-bg: #ffffff;
-            --primary-color: #76BC43; /* Main Green */
-            --primary-hover: #65a33a; /* Darker Green */
-            --secondary-color: #7DD8C9; /* Soft Teal */
-            --text-color: #384C27; /* Dark Green-Brown */
-            --border-color: #E8F5E9; /* Light Green */
-            --weekend-bg: #E8F5E9;
+            --primary-color: #76BC43;
+            --primary-hover: #65a33a;
+            --secondary-color: #7DD8C9;
+            --text-color: #384C27;
+            --border-color: #E8F5E9;
+            --weekend-bg: #F1F8E9;
             --reminder-bg: #01A6BA; 
             --reminder-text: #ffffff; 
-            --holiday-red: #ff8e8e;
+            --holiday-red: #D32F2F; /* Darker red for text */
+            --holiday-bg: #FFEBEE; /* More saturated pink */
             --cancelled-color: #c3c3c3;
             --post-night-shift-color: #a0a0a0;
             --clear-btn-red: #ff6b6b;
             --clear-btn-red-hover: #e05d5d;
-            --today-color: #219DFF; 
-            --today-bg-tint: rgba(33, 157, 255, 0.15); 
+            --today-color: #2196F3; /* New Blue for today */
+            --today-bg-tint: rgba(33, 150, 243, 0.15);
+            --today-glow: rgba(33, 150, 243, 0.5);
         }
 
         body {
             font-family: 'Mitr', sans-serif;
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
         
-        /* --- New Animated Gradient Background --- */
+        /* --- Animated Gradient Background --- */
         .animated-gradient-bg {
             background: linear-gradient(-45deg, #e8f5e9, #c8e6c9, #a5d6a7, #dcedc8);
             background-size: 400% 400%;
@@ -68,46 +70,54 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Place it behind everything */
+            z-index: -1;
         }
 
         #app-container {
             max-width: 1200px;
             margin: auto;
-            background: var(--container-bg);
-            padding: 30px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 20px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
-            position: relative; /* For positioning the logout button */
-            animation: fadeIn 0.8s ease-out; /* New fade-in animation */
+            position: relative; 
+            animation: fadeIn 0.8s ease-out; 
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- New User Info & Logout Container Style --- */
+        /* --- Responsive Header --- */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        h1 { 
+            font-size: 2.5em;
+            margin: 0;
+            padding: 0;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+
         #user-info-container {
-            position: absolute;
-            top: 30px;
-            right: 40px;
             display: flex;
             align-items: center;
             gap: 15px;
-            z-index: 1000;
         }
 
         #welcome-message {
             background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
             padding: 8px 16px;
             border-radius: 20px;
             font-weight: 500;
@@ -129,38 +139,24 @@
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: all 0.2s ease-in-out;
+            flex-shrink: 0;
         }
         #logout-btn-top-right:hover {
             background-color: var(--clear-btn-red-hover);
             transform: translateY(-2px) scale(1.05);
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
-
-        h1, h2 {
-            color: var(--primary-color);
-            text-align: center;
-            font-weight: 500;
-            margin-top: 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
-        }
         
-        h1 { 
-            font-size: 2.8em;
-            margin-bottom: 30px;
-            border-bottom: 2px dashed var(--border-color);
-            padding-bottom: 25px;
-        }
         h2 { 
             font-size: 1.8em; 
             margin-top: 40px; 
             padding-bottom: 15px;
             border-bottom: none;
+            color: var(--primary-color);
+            text-align: center;
         }
         
-        #calendar-wrapper {
-            position: relative;
-        }
-
+        #calendar-wrapper { position: relative; }
         #calendar { max-width: 100%; margin: 25px auto 0; }
 
         #filter-container {
@@ -179,11 +175,9 @@
         .filter-group {
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease-out; /* New transition */
+            transition: transform 0.2s ease-out;
         }
-        .filter-group:hover {
-            transform: translateY(-3px); /* New hover effect */
-        }
+        .filter-group:hover { transform: translateY(-3px); }
         .filter-group label {
             margin-bottom: 8px; font-size: 0.9em;
             font-weight: 400; color: var(--text-color);
@@ -229,7 +223,9 @@
         #chart-container {
             flex: 1 1 300px;
             max-width: 350px;
+            min-height: 350px;
             margin: 0 auto;
+            position: relative;
         }
         #data-summary {
             flex: 1 1 300px;
@@ -311,43 +307,69 @@
             opacity: 0.4;
         }
 
-        .fc { font-size: 1em; --fc-border-color: #dce9d8; }
+        /* --- Updated Calendar Styles --- */
+        .fc { 
+            font-size: 1em; 
+            --fc-border-color: #B0BEC5; /* Darker grid lines */
+            --fc-today-bg-color: var(--today-bg-tint);
+        }
         
         .fc .fc-col-header-cell { 
-            background-color: #f0f8e8;
-            border-bottom: 1px solid var(--fc-border-color); 
+            background-color: var(--theme-bg);
+            border: none;
+            padding: 10px 0;
         }
         .fc .fc-col-header-cell a { 
             color: var(--primary-color) !important; 
-            font-weight: 600 !important;
+            font-weight: 500 !important;
             font-size: 1em;
         }
 
         .fc-event {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 0.85em !important; border: none !important;
-            padding: 5px 8px; border-radius: 8px !important; color: white !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 0.85em !important; 
+            border: 1px solid rgba(0,0,0,0.05) !important;
+            padding: 5px 8px; 
+            border-radius: 8px !important; 
+            color: white !important;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .fc-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
         .fc-daygrid-day.fc-day-today { 
             background-color: var(--today-bg-tint) !important; 
-            position: relative;
         }
-         .fc-daygrid-day.fc-day-today::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            border: 2px solid var(--today-color);
-            border-radius: 4px;
-            pointer-events: none;
+        .fc-day-today .fc-daygrid-day-number {
+           background-color: var(--today-color) !important;
+           color: white !important;
+           border-radius: 50%;
+           width: 2.2em;
+           height: 2.2em;
+           line-height: 2.2em;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-weight: 500;
+           margin: 4px auto 0;
+           box-shadow: 0 0 12px var(--today-glow);
         }
-        .fc-toolbar-title { font-size: 1.8em !important; color: var(--text-color); font-weight: 500; }
+
+        .fc-toolbar-title { 
+            font-size: 1.8em !important; 
+            color: var(--text-color); 
+            font-weight: 500; 
+        }
         .fc-button {
-            background-color: var(--primary-color) !important; border: none !important;
-            text-transform: capitalize !important; box-shadow: none !important;
-            border-radius: 12px !important; transition: background-color 0.2s ease, transform 0.1s ease;
+            background-color: var(--primary-color) !important; 
+            border: none !important;
+            text-transform: capitalize !important; 
+            box-shadow: none !important;
+            border-radius: 12px !important; 
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .fc-button:hover { background-color: var(--primary-hover) !important; }
         .fc-button:active { transform: scale(0.96); }
@@ -356,42 +378,75 @@
         }
         
         .weekend-cell { background-color: var(--weekend-bg); }
+        
+        .holiday-cell {
+            background-color: var(--holiday-bg) !important;
+        }
         .holiday-cell .fc-daygrid-day-number {
-            background-color: var(--holiday-red);
-            border-radius: 50%;
+            color: var(--holiday-red);
+            font-weight: 500;
         }
-        .fc-day-today .fc-daygrid-day-number {
-           color: var(--today-color) !important;
-           font-weight: bold;
-           background-color: transparent !important;
-        }
+        
         .fc .fc-daygrid-day-number {
             padding: 4px;
             position: relative;
             z-index: 4;
             text-align: right;
-            width: auto;
-            height: auto;
-            line-height: normal;
         }
         .fc .fc-day-other {
-            background-color: #f7f7f7;
-            opacity: 0.4;
+            background-color: #fcfcfc;
+            opacity: 0.7;
         }
         
-        .swal2-popup { font-family: 'Mitr', sans-serif !important; border-radius: 20px !important; }
-        .swal2-title { color: var(--text-color) !important; font-weight: 500; }
+        /* --- Updated SweetAlert2 Styles --- */
+        .swal2-popup { 
+            font-family: 'Mitr', sans-serif !important; 
+            border-radius: 24px !important; 
+            padding: 1.5em 2em 2em !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        }
+        .swal2-title { 
+            color: var(--text-color) !important; 
+            font-weight: 500; 
+            font-size: 1.8em !important;
+            padding-top: 0.5em !important;
+        }
         .swal2-input-label {
-            font-weight: 400; margin: 1em 0 0.5em !important; color: var(--text-color) !important;
-            text-align: left; width: 80%; margin-left: 10%;
+            font-weight: 400; 
+            margin: 1em 0 0.5em !important; 
+            color: var(--text-color) !important;
+            text-align: left; 
+            width: 100%;
         }
         .swal2-select, .swal2-input {
-            width: 80% !important; margin: 0 auto !important; padding: 12px;
-            font-size: 1em; border-radius: 10px; border: 1px solid var(--border-color);
+            width: 100% !important; 
+            margin: 0 auto !important; 
+            padding: 12px;
+            font-size: 1em; 
+            border-radius: 10px; 
+            border: 1px solid var(--border-color);
         }
-        .swal2-confirm { border-radius: 10px !important; background-color: var(--primary-color) !important; }
-        .swal2-deny, .swal2-cancel { border-radius: 10px !important; }
-        .swal2-html-container { text-align: left !important; margin: 1em 10% !important; }
+        .swal2-confirm { 
+            border-radius: 12px !important; 
+            background-color: var(--primary-color) !important; 
+            padding: 0.7em 2em !important;
+            font-size: 1em !important;
+            box-shadow: 0 4px 10px rgba(118, 188, 67, 0.3) !important;
+        }
+        .swal2-deny, .swal2-cancel { 
+            border-radius: 12px !important; 
+            padding: 0.7em 2em !important;
+            font-size: 1em !important;
+        }
+        .swal2-html-container { 
+            text-align: center !important; 
+            margin: 1em 0 !important; 
+            font-size: 1.1em !important;
+        }
+        .swal2-icon.swal2-warning {
+            border-color: #facea8 !important;
+            color: #f8bb86 !important;
+        }
 
         .post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
         .reminder-event {
@@ -408,7 +463,7 @@
             justify-content: center;
             margin-top: 5px !important;
             margin-bottom: 15px !important;
-            padding: 0 10%;
+            padding: 0;
         }
         .radio-option input[type="radio"] {
             display: none;
@@ -474,6 +529,7 @@
             list-style: none;
             padding: 0;
             margin-top: 0;
+            text-align: left !important;
         }
         .swal2-html-container li.reminder-item-in-list {
             display: flex;
@@ -516,25 +572,11 @@
         }
 
         @media (max-width: 768px) {
-            #app-container {
-                padding: 15px;
-            }
-            #user-info-container {
-                top: 15px;
-                right: 15px;
-                gap: 8px;
+            h1 {
+                font-size: 1.6em;
             }
             #welcome-message {
-                padding: 6px 12px;
-                font-size: 0.9em;
-            }
-            #logout-btn-top-right {
-                width: 40px;
-                height: 40px;
-            }
-            h1 {
-                font-size: 1.8em;
-                padding-right: 50px; /* Make space for logout button */
+                display: none; /* Hide text on small screens */
             }
             .fc-toolbar.fc-header-toolbar {
                 display: flex;
@@ -559,6 +601,22 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.4em;
+            }
+            .header-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #user-info-container {
+                position: static;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
         #backup-btn, #export-excel-btn {
             background-color: var(--primary-color);
             color: white;
@@ -583,21 +641,22 @@
     </style>
 </head>
 <body class="animated-gradient-bg">
-    <!-- New Particle Canvas -->
     <canvas id="particle-canvas-main"></canvas>
 
     <div id="app-container">
-        <!-- User Info & Logout Container -->
-        <div id="user-info-container">
-            <div id="welcome-message">
-                <!-- Username will be inserted here by JS -->
+        <!-- Updated Header -->
+        <div class="header-container">
+            <h1>🐾 ตารางเภสัชแมวมีม 🐾</h1>
+            <div id="user-info-container">
+                <div id="welcome-message">
+                    <!-- Username will be inserted here by JS -->
+                </div>
+                <button id="logout-btn-top-right" title="ออกจากระบบ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
             </div>
-            <button id="logout-btn-top-right" title="ออกจากระบบ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            </button>
         </div>
 
-        <h1>🐾 ตารางเภสัชแมวมีม 🐾</h1>
         <div id="calendar-wrapper">
             <div id='calendar'></div>
         </div>
@@ -658,43 +717,117 @@
     </footer>
 
     <script type="module">
-        // --- Particle Animation Script (New) ---
+        // --- Medicine Themed Particle Animation Script ---
         const canvas = document.getElementById('particle-canvas-main');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         let particlesArray;
+
         class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
-                this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color;
+            constructor(x, y, directionX, directionY, size, type) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.type = type; // 'pill', 'cross', or 'syringe'
+                this.angle = Math.random() * 360;
+                this.spin = (Math.random() - 0.5) * 0.5;
+                
+                if (this.type === 'pill') {
+                    this.color1 = Math.random() > 0.5 ? 'rgba(255, 255, 255, 0.7)' : 'rgba(173, 216, 230, 0.7)'; // White or Light Blue
+                    this.color2 = Math.random() > 0.5 ? 'rgba(255, 105, 97, 0.7)' : 'rgba(144, 238, 144, 0.7)'; // Light Red or Light Green
+                } else {
+                    this.color = 'rgba(255, 255, 255, 0.7)'; // White for cross and syringe
+                }
             }
+
             draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                
+                if (this.type === 'pill') {
+                    const width = this.size * 2.5;
+                    const height = this.size;
+                    
+                    ctx.fillStyle = this.color1;
+                    ctx.beginPath();
+                    ctx.arc(-width / 4, 0, height / 2, Math.PI / 2, -Math.PI / 2, false);
+                    ctx.fillRect(-width / 4, -height / 2, width / 4, height);
+                    ctx.fill();
+
+                    ctx.fillStyle = this.color2;
+                    ctx.beginPath();
+                    ctx.arc(width / 4, 0, height / 2, -Math.PI / 2, Math.PI / 2, false);
+                    ctx.fillRect(0, -height / 2, width / 4, height);
+                    ctx.fill();
+
+                } else if (this.type === 'cross') {
+                    ctx.fillStyle = this.color;
+                    const armLength = this.size * 1.5;
+                    const armWidth = this.size / 2;
+                    ctx.fillRect(-armLength / 2, -armWidth / 2, armLength, armWidth);
+                    ctx.fillRect(-armWidth / 2, -armLength / 2, armWidth, armLength);
+                
+                } else if (this.type === 'syringe') {
+                    ctx.fillStyle = this.color;
+                    const bodyHeight = this.size * 3;
+                    const bodyWidth = this.size * 0.6;
+                    const needleHeight = this.size * 1.5;
+                    const needleWidth = this.size * 0.15;
+                    const plungerWidth = this.size * 1.2;
+                    const plungerHeight = this.size * 0.3;
+
+                    // Barrel
+                    ctx.fillRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
+                    // Plunger
+                    ctx.fillRect(-plungerWidth / 2, -bodyHeight / 2 - plungerHeight, plungerWidth, plungerHeight);
+                    // Needle
+                    ctx.fillRect(-needleWidth / 2, bodyHeight / 2, needleWidth, needleHeight);
+                }
+                
+                ctx.restore();
             }
+
             update() {
-                if (this.x > canvas.width || this.x < 0) { this.directionX = -this.directionX; }
-                if (this.y > canvas.height || this.y < 0) { this.directionY = -this.directionY; }
+                if (this.y > canvas.height + this.size * 2) {
+                    this.y = 0 - this.size * 2;
+                    this.x = Math.random() * canvas.width;
+                }
+                
+                this.angle += this.spin;
                 this.x += this.directionX;
                 this.y += this.directionY;
                 this.draw();
             }
         }
+
         function initParticles() {
             particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 25000; // Fewer particles than login page
+            let numberOfParticles = (canvas.height * canvas.width) / 15000;
             for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2) + 1; // Smaller particles
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * .2) - .1; // Slower movement
-                let directionY = (Math.random() * .2) - .1; // Slower movement
-                let color = 'rgba(255, 255, 255, 0.7)'; // Soft white particles
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                let size = (Math.random() * 5) + 4;
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let directionX = (Math.random() - 0.5) * 0.2;
+                let directionY = Math.random() * 0.4 + 0.2; // Fall downwards
+                
+                const rand = Math.random();
+                let type;
+                if (rand > 0.8) {
+                    type = 'syringe';
+                } else if (rand > 0.4) {
+                    type = 'cross';
+                } else {
+                    type = 'pill';
+                }
+                
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, type));
             }
         }
+
         function animateParticles() {
             requestAnimationFrame(animateParticles);
             ctx.clearRect(0, 0, innerWidth, innerHeight);
@@ -702,14 +835,15 @@
                 particlesArray[i].update();
             }
         }
+        
         window.addEventListener('resize', () => {
             canvas.width = innerWidth;
             canvas.height = innerHeight;
             initParticles();
         });
+
         initParticles();
         animateParticles();
-
 
         // --- 1. FIREBASE SETUP ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -786,10 +920,12 @@
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth', locale: 'th',
             buttonText: { month: 'เดือน', year: 'ปี' },
-            headerToolbar: { left: 'prev,next', center: 'title', right: 'dayGridMonth,dayGridYear' },
+            headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
             navLinks: true,
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
+            dayMaxEvents: 3,
+            moreLinkText: (num) => `+ ${num} เพิ่มเติม`,
             dayCellDidMount: function(arg) {
                 const year = arg.date.getFullYear();
                 const month = String(arg.date.getMonth() + 1).padStart(2, '0');
@@ -799,17 +935,6 @@
                 const dayOfWeek = arg.date.getDay();
                 if (isHoliday(dateStr)) { 
                     arg.el.classList.add('holiday-cell'); 
-                    const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
-                    if (dayNumberEl) {
-                        dayNumberEl.style.width = '2.3em';
-                        dayNumberEl.style.height = '2.3em';
-                        dayNumberEl.style.lineHeight = '2.3em';
-                        dayNumberEl.style.borderRadius = '50%';
-                        dayNumberEl.style.margin = '2px auto 0';
-                        dayNumberEl.style.textAlign = 'center';
-                        dayNumberEl.style.boxShadow = 'none';
-                        dayNumberEl.style.fontWeight = '500';
-                    }
                 } 
                 else if (dayOfWeek === 0 || dayOfWeek === 6) { arg.el.classList.add('weekend-cell'); }
             }
@@ -1100,20 +1225,86 @@
             if (shiftChartInstance) {
                 shiftChartInstance.destroy();
             }
+            
+            const centerText = {
+                id: 'centerText',
+                afterDraw(chart, args, options) {
+                    const { ctx, chartArea: { top, right, bottom, left, width, height } } = chart;
+                    ctx.save();
+                    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    ctx.font = 'bold 2.5em Mitr, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'var(--text-color)';
+                    ctx.fillText(total, width / 2, top + (height / 2) - 10);
+                    
+                    ctx.font = '1em Mitr, sans-serif';
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillText('เวร', width / 2, top + (height / 2) + 20);
+                    ctx.restore();
+                }
+            };
+
             shiftChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        label: 'จำนวนเวร', data: chartData, backgroundColor: chartColors,
-                        borderColor: 'var(--container-bg)', borderWidth: 4,
-                        hoverOffset: 15, offset: 8 
+                        label: 'จำนวนเวร',
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: 'var(--container-bg)',
+                        borderWidth: 5,
+                        hoverOffset: 20,
+                        hoverBorderColor: '#fff',
+                        hoverBorderWidth: 3,
+                        borderRadius: 8,
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { position: 'top', labels: { font: { family: 'Mitr, sans-serif', size: 14 } } } }
-                }
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Mitr, sans-serif', size: 14 },
+                                boxWidth: 20,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            titleFont: { family: 'Mitr, sans-serif', size: 16 },
+                            bodyFont: { family: 'Mitr, sans-serif', size: 14 },
+                            padding: 10,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                        label += `${context.raw} เวร (${percentage}%)`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1200,
+                        easing: 'easeInOutQuart'
+                    }
+                },
+                plugins: [centerText]
             });
         }
 
@@ -1649,7 +1840,7 @@
                 const { value: reason } = await Swal.fire({
                     title: 'จะยกเลิกเวรเหรอ?', input: 'text',
                     inputPlaceholder: 'บอกเหตุผลหน่อยสิ (ถ้าไม่บอกจะลบถาวรนะ)', showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                    confirmButtonText: 'ยืนัน', cancelButtonText: 'ยกเลิก'
                 });
                 if (reason !== undefined) { 
                     const currentShiftData = allShiftsData[shiftId]; 
@@ -1798,33 +1989,29 @@
         const logoutDueToInactivity = () => {
             Swal.fire({
                 title: 'เซสชันหมดอายุ',
-                text: 'คุณไม่ได้ใช้งานเป็นเวลานาน ระบบจะนำคุณกลับไปหน้าล็อคอิน',
+                text: 'คุณไม่ได้ใช้งานเป็นเวลานาน กรุณากด "ตกลง" เพื่อกลับไปที่หน้าล็อคอิน',
                 icon: 'warning',
-                timer: 5000, // แสดงข้อความ 5 วินาที
-                timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                showConfirmButton: false,
+                confirmButtonText: 'ตกลง',
             }).then(() => {
-                sessionStorage.removeItem('loggedInUser'); // **UPDATED**
+                sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
             });
         };
 
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(logoutDueToInactivity, 30 * 1000); // 30 วินาที
+            inactivityTimer = setTimeout(logoutDueToInactivity, 3 * 60 * 1000); // 3 minutes
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Check for logged in user (New) ---
+            // --- Check for logged in user ---
             const loggedInUser = sessionStorage.getItem('loggedInUser');
             if (!loggedInUser) {
-                // If no user is logged in, redirect to the login page immediately.
                 window.location.href = 'index.html';
-                return; // Stop further execution of the script
+                return; 
             } else {
-                // If user is logged in, display their name
                 const welcomeMessageEl = document.getElementById('welcome-message');
                 if (welcomeMessageEl) {
                     welcomeMessageEl.innerHTML = `<span>ยินดีต้อนรับ, <strong>${loggedInUser}</strong></span>`;
@@ -1848,7 +2035,7 @@
             if (topLogoutButton) {
                 topLogoutButton.addEventListener('click', () => {
                     clearTimeout(inactivityTimer);
-                    sessionStorage.removeItem('loggedInUser'); // **UPDATED**
+                    sessionStorage.removeItem('loggedInUser');
                     window.location.href = 'index.html';
                 });
             }
