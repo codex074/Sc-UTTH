@@ -6,12 +6,10 @@
     <title>ตารางเวร</title>
     <link rel="shortcut icon" href="cool.ico" type="image/x-icon">
     
-    <!-- Google Fonts: Mitr -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- External Libraries -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -644,13 +642,11 @@
     <canvas id="particle-canvas-main"></canvas>
 
     <div id="app-container">
-        <!-- Updated Header -->
         <div class="header-container">
             <h1>🐾 ตารางเภสัชแมวมีม 🐾</h1>
             <div id="user-info-container">
                 <div id="welcome-message">
-                    <!-- Username will be inserted here by JS -->
-                </div>
+                    </div>
                 <button id="logout-btn-top-right" title="ออกจากระบบ">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                 </button>
@@ -920,7 +916,7 @@
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth', locale: 'th',
             buttonText: { month: 'เดือน', year: 'ปี' },
-            headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
             navLinks: true,
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
