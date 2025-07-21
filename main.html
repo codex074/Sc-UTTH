@@ -720,7 +720,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.6.3</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.6.4</p>
     </footer>
 
     <script type="module">
@@ -936,6 +936,7 @@
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
             dayMaxEvents: 3,
+            eventOrder: 'order',
             moreLinkText: (num) => `+ ${num} เพิ่มเติม`,
             dayCellDidMount: function(arg) {
                 const year = arg.date.getFullYear();
@@ -1379,17 +1380,19 @@
                 }
 
                 fullSummaryData.push({ ...shiftData, key });
-                let title, eventColor;
+                let title, eventColor, order;
                 if (shiftData.isCancelled) {
                     title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}`;
                     eventColor = 'var(--cancelled-color)';
+                    order = 2;
                 } else {
                     title = `${PERSONS[shiftData.person].name}, ${shiftData.shift}, ${shiftData.room}`;
                     if (shiftData.medOption) { title += ` (${shiftData.medOption})`; }
                     if (shiftData.notes) { title += ' 📝'; }
                     eventColor = PERSONS[shiftData.person]?.color || '#777777';
+                    order = 1;
                 }
-                allEvents.push({ id: key, title, start: shiftData.date, backgroundColor: eventColor, borderColor: eventColor, extendedProps: { ...shiftData } });
+                allEvents.push({ id: key, title, start: shiftData.date, backgroundColor: eventColor, borderColor: eventColor, extendedProps: { ...shiftData }, order: order });
 
                 if (shiftData.shift === 'ดึก' && !shiftData.isCancelled) {
                     const nightShiftDate = new Date(shiftData.date + "T00:00:00");
@@ -1397,7 +1400,8 @@
                     const nextDayStr = toYYYYMMDD(nightShiftDate);
                     allEvents.push({
                         id: `${key}_off`, title: `⬇️ ${PERSONS[shiftData.person].name} (ลงดึก)`, start: nextDayStr, allDay: true,
-                        backgroundColor: 'var(--post-night-shift-color)', borderColor: 'var(--post-night-shift-color)', classNames: ['post-night-shift-event'] 
+                        backgroundColor: 'var(--post-night-shift-color)', borderColor: 'var(--post-night-shift-color)', classNames: ['post-night-shift-event'],
+                        order: 3
                     });
                     fullSummaryData.push({ key: `${key}_off`, isPostNightShift: true, date: nextDayStr, person: shiftData.person, createdAt: shiftData.createdAt });
                 }
@@ -1407,7 +1411,8 @@
                 const reminderData = allRemindersData[key];
                 allEvents.push({
                     id: key, title: `📌 ${reminderData.note}`, start: reminderData.startDate,
-                    classNames: ['reminder-event'], extendedProps: { ...reminderData, isReminder: true }
+                    classNames: ['reminder-event'], extendedProps: { ...reminderData, isReminder: true },
+                    order: 0
                 });
 
                 const startDate = new Date(reminderData.startDate + "T00:00:00");
@@ -2013,7 +2018,7 @@
 
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(logoutDueToInactivity, 1 * 60 * 1000); // 1 minutes
+            inactivityTimer = setTimeout(logoutDueToInactivity, 3 * 60 * 1000); // 3 minutes
         };
 
         document.addEventListener('DOMContentLoaded', () => {
