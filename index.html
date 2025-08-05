@@ -479,7 +479,7 @@
             margin: 0;
         }
 
-        #calendar-person-filter {
+        #calendar-person-filter, #show-cancelled-filter {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -628,6 +628,10 @@
             <button id="backup-btn">สำรองข้อมูล (JSON)</button>
             <button id="export-excel-btn">สำรองข้อมูล Excel</button>
             <div id="calendar-person-filter"></div>
+            <div id="show-cancelled-filter" class="person-filter-option">
+                <input type="checkbox" id="show-cancelled-checkbox" checked>
+                <label for="show-cancelled-checkbox">แสดงเวรที่ยกเลิก</label>
+            </div>
         </div>
         
         <div id="filter-container">
@@ -839,6 +843,7 @@
         const itemsPerPage = 10; 
         let shiftChartInstance = null; 
         let visiblePersons = []; 
+        let showCancelled = true;
 
         const SHIFTS = {
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' },
@@ -889,7 +894,7 @@
                 center: 'title', 
                 right: 'today' 
             },
-            navLinks: true,
+            navLinks: false,
             dateClick: handleDateClick, eventClick: handleEventClick,
             events: [], eventDisplay: 'block',
             dayMaxEvents: 3,
@@ -910,8 +915,14 @@
             datesSet: function(info) {
                 const currentDate = calendar.getDate();
                 if (window.yearSelect && window.monthSelect) {
-                    window.yearSelect.value = currentDate.getFullYear() + 543;
-                    window.monthSelect.value = currentDate.getMonth();
+                    const currentYearBuddhist = currentDate.getFullYear() + 543;
+                    if (Array.from(window.yearSelect.options).some(opt => opt.value == currentYearBuddhist)) {
+                         window.yearSelect.value = currentYearBuddhist;
+                    }
+                    updateMonthSelector(); 
+                    if (Array.from(window.monthSelect.options).some(opt => opt.value == currentDate.getMonth())) {
+                        window.monthSelect.value = currentDate.getMonth();
+                    }
                 }
             }
         });
@@ -1292,6 +1303,10 @@
             const roomFilter = document.getElementById('filter-room').value;
 
             let filteredData = fullSummaryData.filter(item => {
+                if (item.isCancelled && !showCancelled) {
+                    return false;
+                }
+                
                 let effectiveDate = new Date(item.date);
                 if (item.shift === 'ดึก' && !item.isCancelled) {
                     effectiveDate.setDate(effectiveDate.getDate() + 1);
@@ -1339,6 +1354,9 @@
                 const shiftData = allShiftsData[key];
                 
                 if (!visiblePersons.includes(shiftData.person)) {
+                    continue;
+                }
+                if (shiftData.isCancelled && !showCancelled) {
                     continue;
                 }
 
@@ -1395,6 +1413,24 @@
                 if (dateA < dateB) return 1;
                 return b.createdAt - a.createdAt;
             });
+
+            if (window.monthSelect && window.yearSelect) {
+                updateAvailableDates();
+                updateYearSelector();
+                updateMonthSelector();
+            
+                const currentDate = calendar.getDate();
+                const currentYear = currentDate.getFullYear() + 543;
+                const currentMonth = currentDate.getMonth();
+
+                if (Array.from(window.yearSelect.options).find(o => o.value == currentYear)) {
+                    window.yearSelect.value = currentYear;
+                }
+                 if (Array.from(window.monthSelect.options).find(o => o.value == currentMonth)) {
+                    window.monthSelect.value = currentMonth;
+                }
+            }
+
 
             calendar.addEventSource(allEvents);
             applyAndRenderFilters();
@@ -1465,14 +1501,20 @@
 
                         if (selectedShift === 'รุ่งอรุณ') {
                             if (dayOfWeek === 1) { // Monday
-                                availableRooms = ['ER'];
+                                availableRooms = ['OPD'];
                             } else {
                                 availableRooms = ['ER', 'OPD'];
                             }
                         } else if (selectedShift === 'เช้า') {
                             availableRooms = ['ER', 'MED', 'SURG', 'Extend', 'CHEMO'];
                         } else if (selectedShift === 'บ่าย') {
-                            availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                            if (isSpecialDay(dateStr)) {
+                                availableRooms = ['ER', 'MED'];
+                            } else if (dayOfWeek === 5) { // Friday
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                            } else {
+                                availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                            }
                         } else if (selectedShift === 'ดึก') {
                             availableRooms = ['ER'];
                         }
@@ -1775,14 +1817,20 @@
                         if (selectedShift === 'รุ่งอรุณ') {
                            const dayOfWeek = new Date(eventDateStr).getDay(); // Sunday - Saturday : 0 - 6
                            if (dayOfWeek === 1) { // If it's Monday
-                               availableRooms = ['ER'];
+                               availableRooms = ['OPD'];
                            } else {
                                availableRooms = ['ER', 'OPD'];
                            }
                         } else if (selectedShift === 'เช้า') {
                            availableRooms = ['ER', 'MED', 'SURG', 'Extend', 'CHEMO'];
                         } else if (selectedShift === 'บ่าย') {
-                           availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                            if (isSpecialDay(eventDateStr)) {
+                                availableRooms = ['ER', 'MED'];
+                            } else if (dayOfWeek === 5) { // Friday
+                                availableRooms = ['ER', 'MED', 'Extend'];
+                            } else {
+                                availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
+                            }
                         } else if (selectedShift === 'ดึก') {
                            availableRooms = ['ER'];
                         }
@@ -1877,39 +1925,86 @@
         // --- 7. INITIALIZATION & DATE SELECTORS ---
         let monthSelect, yearSelect;
         const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-        
+        let availableDates = {};
+
+        function updateAvailableDates() {
+            availableDates = {};
+            const allData = [...Object.values(allShiftsData), ...Object.values(allRemindersData)];
+            allData.forEach(item => {
+                const date = new Date(item.date);
+                const year = date.getFullYear() + 543;
+                const month = date.getMonth();
+                if (!availableDates[year]) {
+                    availableDates[year] = new Set();
+                }
+                availableDates[year].add(month);
+            });
+        }
+
+        function updateYearSelector() {
+            if (!yearSelect) return;
+            const currentSelectedYear = yearSelect.value;
+            yearSelect.innerHTML = '';
+            const sortedYears = Object.keys(availableDates).sort((a, b) => b - a);
+            
+            if (sortedYears.length === 0) {
+                const year = new Date().getFullYear() + 543;
+                yearSelect.innerHTML = `<option value="${year}">${year}</option>`;
+            } else {
+                sortedYears.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+            }
+
+            if (sortedYears.includes(currentSelectedYear)) {
+                yearSelect.value = currentSelectedYear;
+            }
+        }
+
+        function updateMonthSelector() {
+            if (!monthSelect || !yearSelect) return;
+            const currentSelectedMonth = monthSelect.value;
+            const selectedYear = yearSelect.value;
+            monthSelect.innerHTML = '';
+            
+            const availableMonths = availableDates[selectedYear] ? Array.from(availableDates[selectedYear]).sort((a, b) => a - b) : [];
+
+            if (availableMonths.length === 0) {
+                const month = new Date().getMonth();
+                monthSelect.innerHTML = `<option value="${month}">${thaiMonths[month]}</option>`;
+            } else {
+                availableMonths.forEach(monthIndex => {
+                    const option = document.createElement('option');
+                    option.value = monthIndex;
+                    option.textContent = thaiMonths[monthIndex];
+                    monthSelect.appendChild(option);
+                });
+            }
+
+            if (availableMonths.includes(parseInt(currentSelectedMonth))) {
+                monthSelect.value = currentSelectedMonth;
+            }
+        }
+
         function createMonthYearSelectors() {
             const titleContainer = document.querySelector('.fc-toolbar-title');
             if (!titleContainer) return;
 
-            titleContainer.innerHTML = ''; // Clear existing title
+            titleContainer.innerHTML = '';
 
             monthSelect = document.createElement('select');
             monthSelect.id = 'month-select';
-            thaiMonths.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
+            window.monthSelect = monthSelect;
 
             yearSelect = document.createElement('select');
             yearSelect.id = 'year-select';
-            const startYear = 2025; // Start year is 2025 AD
-            const currentYear = new Date().getFullYear();
-            for (let i = startYear; i <= currentYear + 10; i++) {
-                const option = document.createElement('option');
-                option.value = i + 543; // Buddhist Year
-                option.textContent = i + 543;
-                yearSelect.appendChild(option);
-            }
+            window.yearSelect = yearSelect;
             
             titleContainer.appendChild(monthSelect);
             titleContainer.appendChild(yearSelect);
-
-            // Make them global for the callback
-            window.monthSelect = monthSelect;
-            window.yearSelect = yearSelect;
 
             function navigateCalendar() {
                 const yearAD = parseInt(yearSelect.value) - 543;
@@ -1920,7 +2015,10 @@
             }
 
             monthSelect.addEventListener('change', navigateCalendar);
-            yearSelect.addEventListener('change', navigateCalendar);
+            yearSelect.addEventListener('change', () => {
+                updateMonthSelector();
+                navigateCalendar();
+            });
         }
 
         function initializeAppUI() {
@@ -1933,6 +2031,7 @@
             const backupButton = document.getElementById('backup-btn');
             const exportExcelButton = document.getElementById('export-excel-btn');
             const calendarPersonFilterEl = document.getElementById('calendar-person-filter');
+            const showCancelledCheckbox = document.getElementById('show-cancelled-checkbox');
 
             // Populate main filters
             personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
@@ -1966,6 +2065,11 @@
                     .map(cb => cb.value);
                 renderCalendarAndSummary();
             }
+
+            showCancelledCheckbox.addEventListener('change', () => {
+                showCancelled = showCancelledCheckbox.checked;
+                renderCalendarAndSummary();
+            });
 
             [personFilterEl, shiftFilterEl, roomFilterEl, dateStartEl, dateEndEl].forEach(el => {
                 el.addEventListener('change', () => {
@@ -2021,8 +2125,8 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             initializeAppUI();
-            calendar.render();
             createMonthYearSelectors();
+            calendar.render();
             
             onValue(shiftsRef, (snapshot) => {
                 allShiftsData = snapshot.val() || {}; 
