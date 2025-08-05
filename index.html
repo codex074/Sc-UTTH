@@ -618,7 +618,7 @@
 
     <div id="app-container">
         <div class="header-container">
-            <h1>🐾 ตารางเภสัชแมวมีม 🐾</h1>
+            <h1>🐾 ตารางเว๊น 🐾</h1>
         </div>
 
         <div id="calendar-wrapper">
@@ -629,7 +629,7 @@
             <button id="export-excel-btn">สำรองข้อมูล Excel</button>
             <div id="calendar-person-filter"></div>
             <div id="show-cancelled-filter" class="person-filter-option">
-                <input type="checkbox" id="show-cancelled-checkbox" checked>
+                <input type="checkbox" id="show-cancelled-checkbox">
                 <label for="show-cancelled-checkbox">แสดงเวรที่ยกเลิก</label>
             </div>
         </div>
@@ -681,7 +681,7 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.6.1</p>
+        <p>&copy; <span id="copyright-year"></span> แมวมีมเภสัช จำกัด | เวอร์ชั่น 2.7.1</p>
     </footer>
 
     <script type="module">
@@ -843,7 +843,7 @@
         const itemsPerPage = 10; 
         let shiftChartInstance = null; 
         let visiblePersons = []; 
-        let showCancelled = true;
+        let showCancelled = false;
 
         const SHIFTS = {
             'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' },
@@ -1876,7 +1876,7 @@
                 const { value: reason } = await Swal.fire({
                     title: 'จะยกเลิกเวรเหรอ?', input: 'text',
                     inputPlaceholder: 'บอกเหตุผลหน่อยสิ (ถ้าไม่บอกจะลบถาวรนะ)', showCancelButton: true,
-                    confirmButtonText: 'ยืนัน', cancelButtonText: 'ยกเลิก'
+                    confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
                 });
                 if (reason !== undefined) { 
                     const currentShiftData = allShiftsData[shiftId]; 
