@@ -1,0 +1,818 @@
+/* --- PURPLE THEME --- */
+:root {
+    --theme-bg: #F5EEFF; /* Light Lavender */
+    --container-bg: #ffffff;
+    --primary-color: #8A2BE2; /* Blue Violet */
+    --primary-hover: #7A23D0; /* Darker Blue Violet */
+    --secondary-color: #DA70D6; /* Orchid */
+    --text-color: #4B0082; /* Indigo */
+    --border-color: #E6D0FF; /* Lighter Purple */
+    --weekend-bg: #F0E6FA; /* Light Purple Grey */
+    --reminder-bg: #6A5ACD; /* Slate Blue */
+    --reminder-text: #ffffff;
+    --holiday-red: #C71585; /* Medium Violet Red */
+    --holiday-bg: #FFEBFA; /* Pinkish Lavender */
+    --cancelled-color: #c3c3c3; /* Stays grey for neutrality */
+    --post-night-shift-color: #a0a0a0; /* Stays grey for neutrality */
+    --clear-btn-red: #ff6b6b; /* Stays red for warning */
+    --clear-btn-red-hover: #e05d5d;
+    --today-color: #9370DB; /* Medium Purple */
+    --today-bg-tint: rgba(147, 112, 219, 0.15); /* Light tint of Medium Purple */
+    --today-glow: rgba(147, 112, 219, 0.5);
+}
+
+body {
+    font-family: 'Sarabun', sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* --- Animated Gradient Background --- */
+.animated-gradient-bg {
+    background: linear-gradient(-45deg, #e6d0ff, #d0bfff, #bc7ee6, #a58ee3); /* Purple gradient */
+    background-size: 400% 400%;
+    animation: gradientBG 25s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#particle-canvas-main {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#app-container {
+    max-width: 1200px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    position: relative;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive Header --- */
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px dashed var(--border-color);
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 2.8em;
+    margin: 0;
+    padding: 0;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    text-align: center;
+    position: relative;
+    display: inline-block;
+    animation: textFlicker 3s infinite alternate ease-in-out,
+               textGlow 2s infinite alternate ease-in-out;
+}
+
+/* Keyframes สำหรับ animation ชื่อเว็บ */
+@keyframes textFlicker {
+    0%, 100% {
+        opacity: 1;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.05),
+                     0 0 5px rgba(138, 43, 226, 0.3), /* Primary color glow */
+                     0 0 10px rgba(138, 43, 226, 0.2);
+    }
+    50% {
+        opacity: 0.95;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.1),
+                     0 0 8px rgba(138, 43, 226, 0.5),
+                     0 0 15px rgba(138, 43, 226, 0.3);
+    }
+}
+
+@keyframes textGlow {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.01);
+    }
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-top: 40px;
+    padding-bottom: 15px;
+    border-bottom: none;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+#calendar-wrapper { position: relative; }
+#calendar { max-width: 100%; margin: 0 auto; }
+
+#filter-container {
+    padding: 20px;
+    margin-top: 40px;
+    border-radius: 20px;
+    background-color: #fcf6ff; /* Lighter tint of purple */
+    border: 1px solid var(--border-color);
+}
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    align-items: flex-end;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-out;
+}
+.filter-group:hover { transform: translateY(-3px); }
+.filter-group label {
+    margin-bottom: 8px; font-size: 0.9em;
+    font-weight: 400; color: var(--text-color);
+    opacity: 0.8;
+}
+.filter-group select,
+.filter-group input {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border-color); background-color: var(--container-bg);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95em;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2); /* Adjust shadow to purple */
+}
+
+#clear-filters-btn {
+    width: 100%; padding: 10px 12px;
+    background-color: var(--clear-btn-red);
+    color: white;
+    border: none;
+    border-radius: 10px; cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95em; font-weight: 400;
+}
+#clear-filters-btn:hover { background-color: var(--clear-btn-red-hover); }
+#clear-filters-btn:active { transform: scale(0.97); }
+
+#chart-summary-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px dashed var(--border-color);
+}
+#chart-container {
+    flex: 1 1 300px;
+    max-width: 350px;
+    min-height: 350px;
+    margin: 0 auto;
+    position: relative;
+}
+#data-summary {
+    flex: 1 1 300px;
+    font-size: 1.1em;
+    padding-left: 20px;
+}
+#data-summary h3 {
+    margin-top: 0;
+    font-size: 1.4em;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+#data-summary p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+ #data-summary p strong {
+    color: var(--primary-color);
+    font-weight: 300;
+}
+
+
+#summary-container { margin-top: 20px; padding-top: 20px; }
+
+.summary-item {
+    background-color: var(--container-bg); padding: 15px 20px; margin-bottom: 12px;
+    border-radius: 16px; font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-left: 6px solid var(--secondary-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.summary-item:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+.summary-item strong { color: var(--text-color); font-weight: 500; }
+.summary-item .notes {
+    font-size: 0.9em; color: var(--text-color); opacity: 0.7; margin-top: 8px;
+    padding-top: 8px; border-top: 1px dashed var(--border-color);
+}
+.summary-item .timestamp {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-left: 10px;
+}
+#pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0 10px 0;
+}
+.pagination-btn {
+    background-color: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    opacity: 0.7;
+    padding: 8px 14px;
+    margin: 0 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9em;
+}
+.pagination-btn:hover {
+    background-color: var(--border-color);
+    opacity: 1;
+}
+.pagination-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    opacity: 1;
+    font-weight: 500;
+}
+.pagination-btn.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+/* --- Updated Calendar Styles --- */
+.fc {
+    font-size: 1em;
+    --fc-border-color: #B0BEC5;
+    --fc-today-bg-color: var(--today-bg-tint);
+}
+
+.fc .fc-col-header-cell {
+    background-color: var(--theme-bg);
+    border: none;
+    padding: 10px 0;
+}
+.fc .fc-col-header-cell a {
+    color: var(--primary-color) !important;
+    font-weight: 500 !important;
+    font-size: 1em;
+}
+
+.fc-event {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 0.85em !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+    padding: 5px 8px;
+    border-radius: 8px !important;
+    color: white !important;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.fc-event:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.fc-daygrid-day.fc-day-today {
+    background-color: var(--today-bg-tint) !important;
+}
+.fc-day-today .fc-daygrid-day-number {
+   background-color: var(--today-color) !important;
+   color: white !important;
+   border-radius: 50%;
+   width: 2.2em;
+   height: 2.2em;
+   line-height: 2.2em;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: 500;
+   margin: 4px auto 0;
+   box-shadow: 0 0 12px var(--today-glow);
+}
+
+.fc .fc-toolbar {
+    display: none;
+}
+
+.fc-button {
+    background-color: var(--primary-color) !important;
+    border: none !important;
+    text-transform: capitalize !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.fc-button:hover { background-color: var(--primary-hover) !important; }
+.fc-button:active { transform: scale(0.96); }
+.fc .fc-button-group > .fc-button {
+    margin: 0 2px;
+}
+
+.weekend-cell { background-color: var(--weekend-bg); }
+
+.holiday-cell {
+    background-color: var(--holiday-bg) !important;
+}
+.holiday-cell .fc-daygrid-day-number {
+    color: var(--holiday-red);
+    font-weight: 500;
+}
+
+.fc .fc-daygrid-day-number {
+    padding: 4px;
+    position: relative;
+    z-index: 4;
+    text-align: right;
+}
+.fc .fc-day-other {
+    background-color: #fcfcfc;
+    opacity: 0.7;
+}
+
+/* --- Updated SweetAlert2 Styles --- */
+.swal2-popup {
+    font-family: 'Sarabun', sans-serif !important;
+    border-radius: 24px !important;
+    padding: 1.5em 2em 2em !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+.swal2-title {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    font-size: 1.8em !important;
+    padding-top: 0.5em !important;
+}
+.swal2-input-label {
+    font-weight: 400;
+    margin: 1em 0 0.5em !important;
+    color: var(--text-color) !important;
+    text-align: left;
+    width: 100%;
+}
+.swal2-select, .swal2-input {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+.swal2-confirm {
+    border-radius: 12px !important;
+    background-color: var(--primary-color) !important;
+    padding: 0.7em 2em !important;
+    font-size: 1em !important;
+    box-shadow: 0 4px 10px rgba(138, 43, 226, 0.3) !important; /* Adjust shadow to purple */
+}
+.swal2-deny, .swal2-cancel {
+    border-radius: 12px !important;
+    padding: 0.7em 2em !important;
+    font-size: 1em !important;
+}
+.swal2-html-container {
+    text-align: center !important;
+    margin: 1em 0 !important;
+    font-size: 1.1em !important;
+}
+.swal2-icon.swal2-warning {
+    border-color: #e0b4ff !important; /* Lighter warning border */
+    color: #bb86fc !important; /* Lighter warning icon */
+}
+
+.post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
+.reminder-event {
+    background-color: transparent !important; border: none !important;
+    color: var(--reminder-text) !important; font-size: 0.8em !important;
+    font-weight: 500; padding-top: 2px !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.radio-group-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 5px !important;
+    margin-bottom: 15px !important;
+    padding: 0;
+}
+.radio-option input[type="radio"] {
+    display: none;
+}
+.radio-option span {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: var(--text-color);
+    text-shadow: none;
+}
+.radio-option span:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+.radio-option input[type="radio"]:checked + span {
+    border-color: var(--text-color);
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+}
+
+footer {
+    text-align: center;
+    padding: 25px 0 10px 0;
+    margin-top: 40px;
+    border-top: 2px dashed var(--border-color);
+    color: var(--text-color);
+    opacity: 0.6;
+    font-size: 0.9em;
+}
+footer p {
+    margin: 0;
+}
+
+#calendar-person-filter, #show-cancelled-filter, #show-dawn-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    background-color: #fcf6ff; /* Lighter tint of purple */
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.person-filter-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.person-filter-option input {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+.person-filter-option label {
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.swal2-html-container ul.reminder-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 0;
+    text-align: left !important;
+}
+.swal2-html-container li.reminder-item-in-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+.swal2-html-container li.reminder-item-in-list:last-child {
+    border-bottom: none;
+}
+.swal2-html-container .reminder-text {
+    flex-grow: 1;
+}
+.swal2-html-container .reminder-actions button {
+    background: none;
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.2s;
+}
+.swal2-html-container .reminder-actions .edit-btn {
+    color: #bb86fc; /* Purple tint for edit */
+    border-color: #bb86fc;
+}
+.swal2-html-container .reminder-actions .edit-btn:hover {
+    background: #bb86fc;
+    color: white;
+}
+.swal2-html-container .reminder-actions .delete-btn {
+    color: var(--clear-btn-red);
+    border-color: var(--clear-btn-red);
+}
+.swal2-html-container .reminder-actions .delete-btn:hover {
+    background: var(--clear-btn-red);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.6em;
+    }
+    .fc-toolbar.fc-header-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .fc-toolbar-chunk:nth-child(2) { /* title */
+        order: -1;
+        width: 100%;
+        text-align: center;
+        padding-bottom: 10px;
+    }
+    .fc-toolbar-title {
+        font-size: 1.2em !important;
+    }
+    .fc .fc-button {
+        padding: 5px 8px !important;
+        font-size: 0.8em !important;
+    }
+    .filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.4em;
+    }
+    .header-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+#backup-btn, #export-excel-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+#export-excel-btn {
+    background-color: #6A5ACD; /* Slate Blue for Excel button */
+}
+#backup-btn:hover {
+    background-color: var(--primary-hover);
+}
+#export-excel-btn:hover {
+    background-color: #483D8B; /* Darker Slate Blue */
+}
+
+
+/* --- START: CSS สำหรับ Calendar Navigation Bar (Purple Themed) --- */
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #fdfbff; /* Very light purple */
+    border-bottom: 2px solid #e9d9ff; /* Light purple border */
+    border-radius: 20px 20px 0 0;
+    margin-bottom: 5px;
+}
+
+.nav-left-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-center-title {
+    flex-grow: 1;
+    text-align: center;
+    padding: 0 15px;
+}
+
+.view-selector {
+    display: flex;
+    gap: 5px;
+    background: white;
+    border-radius: 25px;
+    padding: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.view-btn {
+    font-family: 'Sarabun', sans-serif;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--primary-color); /* Primary purple color */
+}
+
+.view-btn.active {
+    background: linear-gradient(135deg, #a788ff, #bb7ef0); /* Purple gradient */
+    color: white;
+    box-shadow: 0 2px 8px rgba(167, 136, 255, 0.3);
+}
+
+.view-btn:hover:not(.active) {
+    background: #f6f0ff; /* Lighter purple on hover */
+}
+
+.nav-btn {
+    background: linear-gradient(135deg, #a788ff, #bb7ef0); /* Purple gradient */
+    color: white;
+    border: none;
+    padding: 0; /* เอา padding ออกเพื่อให้ icon อยู่กลางเป๊ะ */
+    border-radius: 12px; /* <-- แก้ไขตรงนี้เพื่อให้ขอบมน */
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(167, 136, 255, 0.3);
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167, 136, 255, 0.4);
+}
+
+.today-btn {
+    font-family: 'Sarabun', sans-serif;
+    background: rgba(167, 136, 255, 0.1); /* Light purple tint */
+    color: var(--primary-color); /* Primary purple color */
+    border: 2px solid var(--primary-color);
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.today-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.current-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color); /* Primary purple color */
+    font-family: 'Sarabun', sans-serif;
+}
+/* --- END: CSS สำหรับ Calendar Navigation Bar --- */
+
+
+/* --- START: CSS สำหรับ Custom Year View --- */
+#year-view-container {
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 10px;
+}
+
+@media (max-width: 1024px) {
+    #year-view-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    #year-view-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mini-calendar-container {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+}
+
+.mini-calendar-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.mini-calendar-header {
+    text-align: center;
+    padding: 8px 4px;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--primary-color);
+}
+
+.mini-calendar {
+    font-size: 11px;
+}
+
+.mini-calendar .fc-col-header-cell-cushion {
+    font-size: 1em;
+    padding: 4px 0;
+    font-weight: 500;
+}
+
+.mini-calendar .fc-daygrid-day-number {
+    font-size: 0.9em;
+    padding: 1px;
+    box-sizing: border-box;
+}
+
+.mini-calendar .fc-daygrid-body .fc-row {
+    min-height: 22px;
+}
+
+.mini-calendar .fc-daygrid-day-frame {
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini-calendar .fc-day-today .fc-daygrid-day-number {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-radius: 50%;
+    width: 1.8em;
+    height: 1.8em;
+    line-height: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-calendar .fc-event {
+    display: none;
+}
+/* --- END: CSS สำหรับ Custom Year View --- */
+
+/* --- START: ⭐ CSS สำหรับช่องวันในปฏิทิน --- */
+/* บังคับให้แถวของปฏิทินมีความสูงคงที่ ไม่ขยายตามเนื้อหา */
+.fc .fc-daygrid-body-unbalanced .fc-scrollgrid-sync-table,
+.fc .fc-daygrid-body-unbalanced .fc-scrollgrid-sync-table tr {
+    height: 115px; /* สามารถปรับค่าได้ตามความเหมาะสม */
+}
+
+.fc-daygrid-day-events {
+    overflow: hidden; /* ซ่อน event ที่อาจจะล้นออกมา */
+}
+/* --- END: ⭐ CSS สำหรับช่องวันในปฏิทิน --- */
