@@ -670,8 +670,8 @@ footer p {
     background: linear-gradient(135deg, #a788ff, #bb7ef0); /* Purple gradient */
     color: white;
     border: none;
-    padding: 0; /* เอา padding ออกเพื่อให้ icon อยู่กลางเป๊ะ */
-    border-radius: 12px; /* <-- แก้ไขตรงนี้เพื่อให้ขอบมน */
+    padding: 0;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 1.5rem;
     font-weight: 500;
@@ -719,9 +719,8 @@ footer p {
 
 
 /* --- START: CSS สำหรับ Custom Year View --- */
-/* --- START: CSS สำหรับ Custom Year View (ฉบับปรับปรุง) --- */
 #year-view-container {
-    display: none; 
+    display: none;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     padding: 10px;
@@ -762,40 +761,20 @@ footer p {
     color: var(--primary-color);
 }
 
-/* ⭐ เริ่มการปรับขนาดปฏิทินเล็กให้กระชับ ⭐ */
-
 .mini-calendar {
-    /* ลดขนาด font โดยรวมเพื่อให้หน่วย em เล็กลง */
-    font-size: 10px; /* ลดขนาด font พื้นฐาน */
+    --fc-daygrid-cell-aspect-ratio: 1.5;
+    font-size: 12px;
 }
 
 .mini-calendar .fc-col-header-cell-cushion {
-    /* ลดขนาดและระยะห่างของหัวตาราง (อา-ส) */
-    font-size: 1em;
-    padding: 2px 0; /* ลด padding */
-    font-weight: 500;
+    font-size: 0.9em;
+    padding: 4px 0;
 }
 
 .mini-calendar .fc-daygrid-day-number {
-    /* ปรับขนาดและตำแหน่งตัวเลขวันที่ */
-    font-size: 1em; /* ใช้ 1em ของ font-size หลักที่เล็กลง */
-    padding: 0;
-    box-sizing: border-box;
+    font-size: 0.9em;
+    padding: 2px;
 }
-
-/* ทำให้แถวของปฏิทินมีความสูงที่กระชับขึ้น */
-.mini-calendar .fc-daygrid-body .fc-row {
-    min-height: 18px; /* ลดความสูงขั้นต่ำของแถว */
-}
-
-.mini-calendar .fc-daygrid-day-frame {
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* ⭐ สิ้นสุดการปรับขนาด ⭐ */
 
 .mini-calendar .fc-day-today .fc-daygrid-day-number {
     background-color: var(--primary-color) !important;
@@ -813,17 +792,13 @@ footer p {
     display: none;
 }
 /* --- END: CSS สำหรับ Custom Year View --- */
-}
-/* --- END: CSS สำหรับ Custom Year View --- */
 
-/* --- START: ⭐ CSS สำหรับช่องวันในปฏิทิน --- */
-/* บังคับให้แถวของปฏิทินมีความสูงคงที่ ไม่ขยายตามเนื้อหา */
-.fc .fc-daygrid-body-unbalanced .fc-scrollgrid-sync-table,
-.fc .fc-daygrid-body-unbalanced .fc-scrollgrid-sync-table tr {
-    height: 115px; /* สามารถปรับค่าได้ตามความเหมาะสม */
+/* --- START: Fix Month View Row Height --- */
+.fc-daygrid-body .fc-row {
+    height: 115px;
 }
 
 .fc-daygrid-day-events {
-    overflow: hidden; /* ซ่อน event ที่อาจจะล้นออกมา */
+    overflow: hidden;
 }
-/* --- END: ⭐ CSS สำหรับช่องวันในปฏิทิน --- */
+/* --- END: Fix Month View Row Height --- */
