@@ -719,8 +719,9 @@ footer p {
 
 
 /* --- START: CSS สำหรับ Custom Year View --- */
+/* --- START: CSS สำหรับ Custom Year View (ฉบับปรับปรุง) --- */
 #year-view-container {
-    display: none;
+    display: none; 
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     padding: 10px;
@@ -761,24 +762,30 @@ footer p {
     color: var(--primary-color);
 }
 
+/* ⭐ เริ่มการปรับขนาดปฏิทินเล็กให้กระชับ ⭐ */
+
 .mini-calendar {
-    font-size: 11px;
+    /* ลดขนาด font โดยรวมเพื่อให้หน่วย em เล็กลง */
+    font-size: 10px; /* ลดขนาด font พื้นฐาน */
 }
 
 .mini-calendar .fc-col-header-cell-cushion {
+    /* ลดขนาดและระยะห่างของหัวตาราง (อา-ส) */
     font-size: 1em;
-    padding: 4px 0;
+    padding: 2px 0; /* ลด padding */
     font-weight: 500;
 }
 
 .mini-calendar .fc-daygrid-day-number {
-    font-size: 0.9em;
-    padding: 1px;
+    /* ปรับขนาดและตำแหน่งตัวเลขวันที่ */
+    font-size: 1em; /* ใช้ 1em ของ font-size หลักที่เล็กลง */
+    padding: 0;
     box-sizing: border-box;
 }
 
+/* ทำให้แถวของปฏิทินมีความสูงที่กระชับขึ้น */
 .mini-calendar .fc-daygrid-body .fc-row {
-    min-height: 22px;
+    min-height: 18px; /* ลดความสูงขั้นต่ำของแถว */
 }
 
 .mini-calendar .fc-daygrid-day-frame {
@@ -787,6 +794,8 @@ footer p {
     justify-content: center;
     align-items: center;
 }
+
+/* ⭐ สิ้นสุดการปรับขนาด ⭐ */
 
 .mini-calendar .fc-day-today .fc-daygrid-day-number {
     background-color: var(--primary-color) !important;
@@ -802,6 +811,8 @@ footer p {
 
 .mini-calendar .fc-event {
     display: none;
+}
+/* --- END: CSS สำหรับ Custom Year View --- */
 }
 /* --- END: CSS สำหรับ Custom Year View --- */
 
