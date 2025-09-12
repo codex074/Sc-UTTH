@@ -802,3 +802,29 @@ footer p {
     overflow: hidden;
 }
 /* --- END: Fix Month View Row Height --- */
+/* จัด layout ปุ่มมุมมองปฏิทินให้พอดีกับจอมือถือ */
+.view-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.view-selector .view-btn {
+    flex: 1 1 auto;
+    min-width: 60px;
+    padding: 8px 10px;
+    font-size: 0.9em;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* สำหรับจอเล็กมาก ๆ */
+@media (max-width: 480px) {
+    .view-selector .view-btn {
+        font-size: 0.8em;
+        padding: 6px 8px;
+    }
+}
