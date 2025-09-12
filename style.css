@@ -828,3 +828,48 @@ footer p {
         padding: 6px 8px;
     }
 }
+/* จัดให้ navigation กับชื่อเดือนอยู่ตรงกลาง */
+.calendar-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+/* ชื่อเดือนตรงกลาง */
+.nav-center-title {
+    flex: 1 1 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 5px;
+}
+
+/* กล่องปุ่มเลือกมุมมอง (วัน / สัปดาห์ / เดือน / ปี) */
+.view-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+.view-selector .view-btn {
+    flex: 1 1 auto;
+    min-width: 60px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* สำหรับมือถือเล็ก */
+@media (max-width: 480px) {
+    .nav-center-title {
+        font-size: 1em;
+    }
+    .view-selector .view-btn {
+        font-size: 0.8em;
+        padding: 6px 8px;
+    }
+}
