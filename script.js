@@ -128,7 +128,7 @@ animateParticles();
 
 // --- 1. FIREBASE SETUP ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBiiXFhlwYdfC7IddBcBu-Sq3vJanTQNR0",
@@ -146,9 +146,16 @@ const db = getFirestore(app);
 const shiftsCollection = collection(db, 'shifts');
 const remindersCollection = collection(db, 'reminders');
 
-// --- 2. APPLICATION CONSTANTS & STATE ---
-const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/76i25nftjg91mvpv2civ5e4r7j4ikajv"; 
+// --- 1.5 GOOGLE CALENDAR API SETUP ---
+const API_KEY = 'AIzaSyDzdQninaBs9C2Kob49TEm-T_xrxt-qOE8';
+const CLIENT_ID = '155216356915-i5dpqhc96jfi4ecsg3l41v1579i5rb2h.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/calendar';
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+const authBtn = document.getElementById('auth-btn');
 
+// --- 2. APPLICATION CONSTANTS & STATE ---
 let allShiftsData = {}; 
 let allRemindersData = {};
 let fullSummaryData = [];
@@ -169,7 +176,10 @@ const SHIFTS = {
     'ดึก': { name: 'ดึก', time: '23.55-08.30' }
 };
 
-const PERSONS = { 'A': { name: 'A', color: '#1E90FF', icon: '👨‍⚕️' }, 'Nanti': { name: 'Nanti', color: '#DB7093', icon: '👩‍⚕️' } };
+const PERSONS = {
+    'A': { name: 'A', color: '#1E90FF', icon: '👨‍⚕️', calendarId: 'a198692195b061c813c187648b8414f25269feb1f6ff3e23c1ca50eb7bf2744b@group.calendar.google.com' },
+    'Nanti': { name: 'Nanti', color: '#DB7093', icon: '👩‍⚕️', calendarId: 'f737780ab865134a2bc9ee4370bfd5c5d0dccf20a8c5f52899e3c61ddfe9336a@group.calendar.google.com' }
+};
 const ALL_ROOMS = ['ER', 'MED', 'OPD', 'SURG', 'Extend', 'CHEMO', 'SMC'];
 
 let THAI_HOLIDAYS = new Map();
@@ -211,83 +221,134 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
     }
 });
 
-// --- 4. MAKE.COM INTEGRATION ---
-function createMakePayload(data, actionType, documentId = null) {
-    if (actionType === 'delete') {
-        return { firebaseKey: documentId, person: data.person, actionType: actionType };
+// --- 4. GOOGLE CALENDAR INTEGRATION ---
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
+async function initializeGapiClient() {
+    await gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+    });
+    gapiInited = true;
+}
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined later
+    });
+    gisInited = true;
+}
+function handleAuthClick() {
+    if (gapi.client.getToken() === null) {
+        tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) {
+                throw (resp);
+            }
+            authBtn.innerText = 'Sign Out';
+            authBtn.onclick = handleSignoutClick;
+        };
+        if (gapi.client.getToken() === null) {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        }
     }
-    
+}
+function handleSignoutClick() {
+    const token = gapi.client.getToken();
+    if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+        authBtn.innerText = 'Sign in with Google';
+        authBtn.onclick = handleAuthClick;
+    }
+}
+
+function createGoogleCalendarEventPayload(data) {
     let shiftTime;
     if (data.shift === 'เช้า' && data.room === 'Extend') {
-        shiftTime = '09.00-13.00';
+        shiftTime = '09:00-13:00';
     } else if (data.shift === 'เช้า' && data.room === 'CHEMO') {
-        shiftTime = '08.30-12.30';
+        shiftTime = '08:30-12:30';
     } else if (data.shift === 'บ่าย' && (data.room === 'Extend' || data.room === 'SMC')) {
-        shiftTime = '16.30-20.30';
+        shiftTime = '16:30-20:30';
     } else {
         const shiftInfo = SHIFTS[data.shift];
-        if (!shiftInfo) {
-            console.error("Cannot create payload: shiftInfo not found for shift:", data.shift);
-            return null;
-        }
-        shiftTime = shiftInfo.time;
+        if (!shiftInfo) return null;
+        shiftTime = shiftInfo.time.replace(/\./g, ':');
     }
     
     const [start, end] = shiftTime.split('-');
-    const startTimeStr = `${data.date}T${start.replace('.',':')}:00`;
-    
-    let endDateTime = new Date(`${data.date}T${end.replace('.',':')}:00`);
-    if (data.shift === 'ดึก' || end < start) {
-        endDateTime.setDate(endDateTime.getDate() + 1);
+    const startDate = new Date(`${data.date}T${start}:00`);
+    let endDate = new Date(`${data.date}T${end}:00`);
+
+    if (data.shift === 'ดึก' || endDate < startDate) {
+        endDate.setDate(endDate.getDate() + 1);
     }
     
     const timeZone = 'Asia/Bangkok';
-
-    const formattedStartTime = new Date(startTimeStr).toISOString();
-    const formattedEndTime = endDateTime.toISOString();
-
     const summary = `${PERSONS[data.person]?.icon || ''} ${PERSONS[data.person]?.name || data.person} - เวร${data.shift} (${data.room})`;
     let description = '';
     if (data.medOption) { description += `สถานะ: ${data.medOption}\n`; }
     if (data.notes) { description += `หมายเหตุ: ${data.notes}`; }
 
-
     return {
-        ...data,
-        summary: summary,
-        description: description,
-        startTime: formattedStartTime,
-        endTime: formattedEndTime,
-        timeZone: timeZone,
-        firebaseKey: documentId,
-        actionType: actionType
+        'summary': summary,
+        'description': description,
+        'start': { 'dateTime': startDate.toISOString(), 'timeZone': timeZone },
+        'end': { 'dateTime': endDate.toISOString(), 'timeZone': timeZone },
+        'reminders': { 'useDefault': true }
     };
 }
-
-async function sendToMakeWebhook(payload) {
-    if (!MAKE_WEBHOOK_URL || !MAKE_WEBHOOK_URL.startsWith('https://')) {
-        console.log("Make Webhook URL is not set. Skipping.");
-        return;
+async function addEventToGoogleCalendar(calendarId, eventPayload) {
+    if (!gapi.client.getToken()) {
+        Swal.fire('ต้องการสิทธิ์!', 'กรุณาล็อกอินด้วย Google ก่อนเพื่อจัดการปฏิทิน', 'warning');
+        handleAuthClick();
+        return null;
     }
-    if (!payload) {
-        console.log("Invalid payload for Make. Skipping.");
-        return;
-    }
-
     try {
-        const response = await fetch(MAKE_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        const response = await gapi.client.calendar.events.insert({
+            'calendarId': calendarId,
+            'resource': eventPayload
         });
-
-        if (!response.ok) {
-            console.error('Failed to send data to Make.com:', response.statusText);
-        } else {
-            console.log('Successfully sent data to Make.com:', payload);
-        }
+        console.log('Event created: ', response.result);
+        return response.result;
     } catch (error) {
-        console.error('Error sending data to Make.com:', error);
+        console.error('Error creating Google Calendar event:', error);
+        Swal.fire('ผิดพลาด!', `ไม่สามารถสร้าง Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+        return null;
+    }
+}
+async function updateGoogleCalendarEvent(calendarId, eventId, eventPayload) {
+    if (!gapi.client.getToken()) return;
+    try {
+        const response = await gapi.client.calendar.events.update({
+            'calendarId': calendarId,
+            'eventId': eventId,
+            'resource': eventPayload
+        });
+        console.log('Event updated: ', response.result);
+        return response.result;
+    } catch (error) {
+        console.error('Error updating Google Calendar event:', error);
+        Swal.fire('ผิดพลาด!', `ไม่สามารถอัปเดต Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+    }
+}
+async function deleteGoogleCalendarEvent(calendarId, eventId) {
+    if (!gapi.client.getToken()) return;
+    try {
+        await gapi.client.calendar.events.delete({
+            'calendarId': calendarId,
+            'eventId': eventId
+        });
+        console.log('Event deleted successfully.');
+    } catch (error) {
+        console.error('Error deleting Google Calendar event:', error);
+         if (error.result && error.result.error && error.result.error.code === 404) {
+            console.warn('Event not found in Google Calendar, it might have been deleted already.');
+        } else {
+            Swal.fire('ผิดพลาด!', `ไม่สามารถลบ Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+        }
     }
 }
 
@@ -315,13 +376,19 @@ function isPersonPostNightShift(person, dateStr) {
 }
 
 function saveShiftToFirebase(data) {
-    const dataToSave = { ...data, createdAt: serverTimestamp() };
+    const dataToSave = { ...data, createdAt: serverTimestamp(), isCancelled: false };
     
     addDoc(shiftsCollection, dataToSave)
-        .then((docRef) => { 
+        .then(async (docRef) => { 
+            const eventPayload = createGoogleCalendarEventPayload(dataToSave);
+            const calendarId = PERSONS[data.person]?.calendarId;
+            if (eventPayload && calendarId) {
+                const googleEvent = await addEventToGoogleCalendar(calendarId, eventPayload);
+                if (googleEvent && googleEvent.id) {
+                    await updateDoc(doc(db, 'shifts', docRef.id), { googleEventId: googleEvent.id });
+                }
+            }
             Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเวรเรียบร้อยแล้ว', 'success');
-            const payload = createMakePayload(dataToSave, 'create', docRef.id);
-            sendToMakeWebhook(payload);
         })
         .catch(error => Swal.fire('ผิดพลาด!', `ไม่สามารถบันทึกข้อมูลได้: ${error.message}`, 'error'));
 }
@@ -738,6 +805,12 @@ function renderCalendarAndSummary() {
 
 // --- 6. EVENT HANDLER FUNCTIONS ---
 async function promptAddShift(dateStr) {
+    if (!gapi.client.getToken()) {
+        Swal.fire('ต้องการสิทธิ์!', 'กรุณาล็อกอินด้วย Google ก่อนเพื่อเพิ่มเวร', 'warning');
+        handleAuthClick();
+        return;
+    }
+    
     const clickedDate = new Date(dateStr + "T00:00:00");
     const reminderOnDay = Object.values(allRemindersData).find(r => {
         const startDate = new Date(r.startDate + "T00:00:00");
@@ -1046,6 +1119,12 @@ async function handleEventClick(arg) {
         return;
     }
     if (shiftId.endsWith('_off')) { return; }
+    
+    if (!gapi.client.getToken()) {
+        Swal.fire('ต้องการสิทธิ์!', 'กรุณาล็อกอินด้วย Google ก่อนเพื่อแก้ไขเวร', 'warning');
+        handleAuthClick();
+        return;
+    }
 
     const originalProps = allShiftsData[shiftId]; 
     const { person, shift, room, notes, medOption, isCancelled } = originalProps;
@@ -1059,6 +1138,7 @@ async function handleEventClick(arg) {
             cancelButtonText: 'ปิด', confirmButtonColor: '#d33'
         });
         if (result.isConfirmed) {
+            // Event ใน Calendar ควรจะถูกลบไปแล้วตอนยกเลิก
             deleteDoc(doc(db, 'shifts', shiftId))
                 .then(() => {
                     Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
@@ -1175,41 +1255,63 @@ async function handleEventClick(arg) {
             confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
         });
         if (reason !== undefined) { 
-            if (reason) { 
+            if (reason) { // ยกเลิกเวร
                 const cancelledData = { ...originalProps, notes: reason, isCancelled: true };
+                
+                if (originalProps.googleEventId) {
+                    const calendarId = PERSONS[originalProps.person]?.calendarId;
+                    await deleteGoogleCalendarEvent(calendarId, originalProps.googleEventId);
+                }
+                
+                // ไม่ต้องเก็บ googleEventId แล้ว เพราะลบจาก Calendar ไปแล้ว
+                delete cancelledData.googleEventId; 
+
                 setDoc(doc(db, 'shifts', shiftId), cancelledData)
-                    .then(() => {
-                        Swal.fire('บันทึกการยกเลิกแล้ว', '', 'info');
-                        const payload = createMakePayload(cancelledData, 'cancel', shiftId);
-                        sendToMakeWebhook(payload);
-                    })
+                    .then(() => Swal.fire('บันทึกการยกเลิกแล้ว', '', 'info'))
                     .catch((error) => Swal.fire('ผิดพลาด!', `บันทึกไม่ได้: ${error.message}`, 'error'));
-            } else { 
+
+            } else { // ลบถาวร
                 const deleteConfirmation = await Swal.fire({ title: 'แน่ใจนะว่าจะลบถาวร?', text: 'ข้อมูลนี้จะหายไปเลยนะ!', icon: 'warning', showCancelButton: true, confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก' });
                 if(deleteConfirmation.isConfirmed){
-                    const dataToDelete = allShiftsData[shiftId];
+                    if (originalProps.googleEventId) {
+                        const calendarId = PERSONS[originalProps.person]?.calendarId;
+                        await deleteGoogleCalendarEvent(calendarId, originalProps.googleEventId);
+                    }
                     deleteDoc(doc(db, 'shifts', shiftId))
-                        .then(() => {
-                            Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success');
-                            const payload = createMakePayload(dataToDelete, 'delete', shiftId);
-                            sendToMakeWebhook(payload);
-                        })
+                        .then(() => Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบออกจากระบบแล้ว', 'success'))
                         .catch((error) => Swal.fire('ผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${error.message}`, 'error'));
                 }
             }
         }
-    } else if (result.isConfirmed) {
+    } else if (result.isConfirmed) { // อัปเดตเวร
         const formValues = result.value;
         if(formValues) {
             const updateConfirmation = await Swal.fire({ title: 'จะอัปเดตข้อมูลแน่นะ?', icon: 'question', showCancelButton: true, confirmButtonText: 'ใช่, อัปเดตเลย!', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#28a745' });
             if (updateConfirmation.isConfirmed) {
                 const updatedData = { ...originalProps, ...formValues, date: eventDateStr };
+                const originalPerson = originalProps.person;
+                const newPerson = updatedData.person;
+
+                // ตรวจสอบว่าเปลี่ยนคนหรือไม่
+                if (originalPerson !== newPerson && originalProps.googleEventId) {
+                    // Logic: ลบของเก่า สร้างของใหม่
+                    const oldCalendarId = PERSONS[originalPerson]?.calendarId;
+                    await deleteGoogleCalendarEvent(oldCalendarId, originalProps.googleEventId);
+
+                    const newCalendarId = PERSONS[newPerson]?.calendarId;
+                    const eventPayload = createGoogleCalendarEventPayload(updatedData);
+                    const newGoogleEvent = await addEventToGoogleCalendar(newCalendarId, eventPayload);
+                    updatedData.googleEventId = newGoogleEvent ? newGoogleEvent.id : null;
+
+                } else if (originalProps.googleEventId) {
+                    // Logic: อัปเดตของเดิม
+                    const calendarId = PERSONS[newPerson]?.calendarId;
+                    const eventPayload = createGoogleCalendarEventPayload(updatedData);
+                    await updateGoogleCalendarEvent(calendarId, originalProps.googleEventId, eventPayload);
+                }
+
                 setDoc(doc(db, 'shifts', shiftId), updatedData)
-                    .then(() => {
-                        Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลเวรเรียบร้อยแล้ว', 'success');
-                        const payload = createMakePayload(updatedData, 'update', shiftId);
-                        sendToMakeWebhook(payload);
-                    })
+                    .then(() => Swal.fire('สำเร็จ!', 'อัปเดตข้อมูลเวรเรียบร้อยแล้ว', 'success'))
                     .catch((error) => Swal.fire('ผิดพลาด!', `อัปเดตไม่ได้: ${error.message}`, 'error'));
             }
         }
@@ -1459,6 +1561,18 @@ function initializeAppUI() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     
+    // Initialize Google Auth button
+    authBtn.onclick = handleAuthClick;
+    const gapiScript = document.createElement('script');
+    gapiScript.src = 'https://apis.google.com/js/api.js';
+    gapiScript.onload = gapiLoaded;
+    document.body.appendChild(gapiScript);
+
+    const gisScript = document.createElement('script');
+    gisScript.src = 'https://accounts.google.com/gsi/client';
+    gisScript.onload = gisLoaded;
+    document.body.appendChild(gisScript);
+
     try {
         const response = await fetch('holidays.json');
         if (!response.ok) {
