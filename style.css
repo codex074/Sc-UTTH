@@ -1,24 +1,26 @@
-/* --- PURPLE THEME --- */
+/* --- MOONLIT ASTEROID THEME --- */
 :root {
-    --theme-bg: #F5EEFF; /* Light Lavender */
-    --container-bg: #ffffff;
-    --primary-color: #8A2BE2; /* Blue Violet */
-    --primary-hover: #7A23D0; /* Darker Blue Violet */
-    --secondary-color: #DA70D6; /* Orchid */
-    --text-color: #4B0082; /* Indigo */
-    --border-color: #E6D0FF; /* Lighter Purple */
-    --weekend-bg: #F0E6FA; /* Light Purple Grey */
-    --reminder-bg: #6A5ACD; /* Slate Blue */
-    --reminder-text: #ffffff;
-    --holiday-red: #C71585; /* Medium Violet Red */
-    --holiday-bg: #FFEBFA; /* Pinkish Lavender */
-    --cancelled-color: #c3c3c3; /* Stays grey for neutrality */
-    --post-night-shift-color: #a0a0a0; /* Stays grey for neutrality */
-    --clear-btn-red: #ff6b6b; /* Stays red for warning */
-    --clear-btn-red-hover: #e05d5d;
-    --today-color: #9370DB; /* Medium Purple */
-    --today-bg-tint: rgba(147, 112, 219, 0.15); /* Light tint of Medium Purple */
-    --today-glow: rgba(147, 112, 219, 0.5);
+    --theme-bg: #141d2b; /* Deep Space Blue */
+    --container-bg: #ffffff; /* White content background */
+    --primary-color: #00BFFF; /* Deep Sky Blue Accent */
+    --primary-hover: #009ACD; /* Darker Sky Blue */
+    --secondary-color: #B0C4DE; /* Light Steel Blue / Silver */
+    --text-color: #2c3e50; /* Dark text for white backgrounds */
+    --text-color-light: #E2E8F0; /* Light text for dark backgrounds */
+    --border-color: #e1e5ea; /* Light grey border for containers */
+    --dark-border-color: #314269; /* Border for dark elements */
+    --weekend-bg: #f7f9fc; /* Very light grey for weekends on white bg */
+    --reminder-bg: #B0C4DE; /* Reminder highlight */
+    --reminder-text: #141d2b;
+    --holiday-red: #E74C3C; /* Bright Red for holidays */
+    --holiday-bg: #fff5f5; /* Light pink holiday background */
+    --cancelled-color: #95a5a6; /* Grey for cancelled items */
+    --post-night-shift-color: #7f8c8d; /* Muted grey */
+    --clear-btn-red: #e74c3c;
+    --clear-btn-red-hover: #c0392b;
+    --today-color: var(--primary-color);
+    --today-bg-tint: rgba(0, 191, 255, 0.1);
+    --today-glow: rgba(0, 191, 255, 0.5);
 }
 
 body {
@@ -33,7 +35,7 @@ body {
 
 /* --- Animated Gradient Background --- */
 .animated-gradient-bg {
-    background: linear-gradient(-45deg, #e6d0ff, #d0bfff, #bc7ee6, #a58ee3); /* Purple gradient */
+    background: linear-gradient(-45deg, #0b121e, #141d2b, #1e293b, #0b121e);
     background-size: 400% 400%;
     animation: gradientBG 25s ease infinite;
 }
@@ -56,11 +58,11 @@ body {
 #app-container {
     max-width: 1200px;
     margin: auto;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--container-bg);
     backdrop-filter: blur(5px);
     padding: 20px;
     border-radius: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--border-color);
     position: relative;
     animation: fadeIn 0.8s ease-out;
@@ -86,7 +88,7 @@ h1 {
     margin: 0;
     padding: 0;
     color: var(--primary-color);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
     text-align: center;
     position: relative;
     display: inline-block;
@@ -94,19 +96,14 @@ h1 {
                textGlow 2s infinite alternate ease-in-out;
 }
 
-/* Keyframes สำหรับ animation ชื่อเว็บ */
 @keyframes textFlicker {
     0%, 100% {
         opacity: 1;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.05),
-                     0 0 5px rgba(138, 43, 226, 0.3), /* Primary color glow */
-                     0 0 10px rgba(138, 43, 226, 0.2);
+        text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
     }
     50% {
         opacity: 0.95;
-        text-shadow: 2px 2px 6px rgba(0,0,0,0.1),
-                     0 0 8px rgba(138, 43, 226, 0.5),
-                     0 0 15px rgba(138, 43, 226, 0.3);
+        text-shadow: 0 0 12px rgba(0, 191, 255, 0.6);
     }
 }
 
@@ -124,7 +121,7 @@ h2 {
     margin-top: 40px;
     padding-bottom: 15px;
     border-bottom: none;
-    color: var(--primary-color);
+    color: #1c2a3e;
     text-align: center;
 }
 
@@ -135,7 +132,7 @@ h2 {
     padding: 20px;
     margin-top: 40px;
     border-radius: 20px;
-    background-color: #fcf6ff; /* Lighter tint of purple */
+    background-color: #f8f9fa; /* Light background for filter area */
     border: 1px solid var(--border-color);
 }
 .filter-grid {
@@ -152,16 +149,18 @@ h2 {
 .filter-group:hover { transform: translateY(-3px); }
 .filter-group label {
     margin-bottom: 8px; font-size: 0.9em;
-    font-weight: 400; color: var(--text-color);
+    font-weight: 400; color: #5a6a7b;
     opacity: 0.8;
 }
 .filter-group select,
 .filter-group input {
     width: 100%; padding: 10px 12px; border-radius: 10px;
-    border: 1px solid var(--border-color); background-color: var(--container-bg);
+    border: 1px solid #ced4da;
+    background-color: var(--container-bg);
+    color: var(--text-color);
     font-family: 'Sarabun', sans-serif;
     font-size: 0.95em;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     transition: border-color 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
 }
@@ -169,7 +168,7 @@ h2 {
 .filter-group input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2); /* Adjust shadow to purple */
+    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
 }
 
 #clear-filters-btn {
@@ -221,9 +220,8 @@ h2 {
 }
  #data-summary p strong {
     color: var(--primary-color);
-    font-weight: 300;
+    font-weight: 500;
 }
-
 
 #summary-container { margin-top: 20px; padding-top: 20px; }
 
@@ -281,20 +279,19 @@ h2 {
     opacity: 0.4;
 }
 
-/* --- Updated Calendar Styles --- */
 .fc {
     font-size: 1em;
-    --fc-border-color: #B0BEC5;
+    --fc-border-color: #dee2e6;
     --fc-today-bg-color: var(--today-bg-tint);
 }
 
 .fc .fc-col-header-cell {
-    background-color: var(--theme-bg);
+    background-color: #f8f9fa;
     border: none;
     padding: 10px 0;
 }
 .fc .fc-col-header-cell a {
-    color: var(--primary-color) !important;
+    color: #495057 !important;
     font-weight: 500 !important;
     font-size: 1em;
 }
@@ -306,6 +303,7 @@ h2 {
     padding: 5px 8px;
     border-radius: 8px !important;
     color: white !important;
+    font-weight: 400;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -338,6 +336,7 @@ h2 {
 
 .fc-button {
     background-color: var(--primary-color) !important;
+    color: white !important;
     border: none !important;
     text-transform: capitalize !important;
     box-shadow: none !important;
@@ -371,12 +370,12 @@ h2 {
     opacity: 0.7;
 }
 
-/* --- Updated SweetAlert2 Styles --- */
 .swal2-popup {
     font-family: 'Sarabun', sans-serif !important;
     border-radius: 24px !important;
     padding: 1.5em 2em 2em !important;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    background-color: var(--container-bg) !important;
 }
 .swal2-title {
     color: var(--text-color) !important;
@@ -398,13 +397,16 @@ h2 {
     font-size: 1em;
     border-radius: 10px;
     border: 1px solid var(--border-color);
+    background-color: #fdfdff !important;
+    color: var(--text-color) !important;
 }
 .swal2-confirm {
     border-radius: 12px !important;
     background-color: var(--primary-color) !important;
+    color: white !important;
     padding: 0.7em 2em !important;
     font-size: 1em !important;
-    box-shadow: 0 4px 10px rgba(138, 43, 226, 0.3) !important; /* Adjust shadow to purple */
+    box-shadow: 0 4px 10px rgba(0, 191, 255, 0.2) !important;
 }
 .swal2-deny, .swal2-cancel {
     border-radius: 12px !important;
@@ -415,10 +417,11 @@ h2 {
     text-align: center !important;
     margin: 1em 0 !important;
     font-size: 1.1em !important;
+    color: var(--text-color) !important;
 }
 .swal2-icon.swal2-warning {
-    border-color: #e0b4ff !important; /* Lighter warning border */
-    color: #bb86fc !important; /* Lighter warning icon */
+    border-color: #ffc107 !important;
+    color: #ffc107 !important;
 }
 
 .post-night-shift-event { cursor: default !important; opacity: 0.8; font-style: normal; background-color: var(--post-night-shift-color) !important; color: white !important; }
@@ -426,7 +429,7 @@ h2 {
     background-color: transparent !important; border: none !important;
     color: var(--reminder-text) !important; font-size: 0.8em !important;
     font-weight: 500; padding-top: 2px !important;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.1);
 }
 
 .radio-group-horizontal {
@@ -454,14 +457,13 @@ h2 {
     text-shadow: none;
 }
 .radio-option span:hover {
-    background-color: rgba(0,0,0,0.05);
+    background-color: #f1f3f5;
 }
 .radio-option input[type="radio"]:checked + span {
-    border-color: var(--text-color);
+    border-color: var(--primary-color);
     transform: scale(1.05);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    color: white;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: white; /* Text color on colored background */
 }
 
 footer {
@@ -469,13 +471,11 @@ footer {
     padding: 25px 0 10px 0;
     margin-top: 40px;
     border-top: 2px dashed var(--border-color);
-    color: var(--text-color);
+    color: var(--text-color-light);
     opacity: 0.6;
     font-size: 0.9em;
 }
-footer p {
-    margin: 0;
-}
+footer p { margin: 0; }
 
 #calendar-person-filter, #show-cancelled-filter, #show-dawn-filter {
     display: flex;
@@ -483,7 +483,7 @@ footer p {
     align-items: center;
     gap: 15px;
     padding: 10px 15px;
-    background-color: #fcf6ff; /* Lighter tint of purple */
+    background-color: #f8f9fa;
     border-radius: 12px;
     border: 1px solid var(--border-color);
 }
@@ -534,11 +534,11 @@ footer p {
     transition: all 0.2s;
 }
 .swal2-html-container .reminder-actions .edit-btn {
-    color: #bb86fc; /* Purple tint for edit */
-    border-color: #bb86fc;
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
 }
 .swal2-html-container .reminder-actions .edit-btn:hover {
-    background: #bb86fc;
+    background: var(--secondary-color);
     color: white;
 }
 .swal2-html-container .reminder-actions .delete-btn {
@@ -551,46 +551,31 @@ footer p {
 }
 
 @media (max-width: 768px) {
-    h1 {
-        font-size: 1.6em;
-    }
+    h1 { font-size: 1.6em; }
     .fc-toolbar.fc-header-toolbar {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
     }
-    .fc-toolbar-chunk:nth-child(2) { /* title */
-        order: -1;
-        width: 100%;
-        text-align: center;
-        padding-bottom: 10px;
+    .fc-toolbar-chunk:nth-child(2) {
+        order: -1; width: 100%;
+        text-align: center; padding-bottom: 10px;
     }
-    .fc-toolbar-title {
-        font-size: 1.2em !important;
-    }
-    .fc .fc-button {
-        padding: 5px 8px !important;
-        font-size: 0.8em !important;
-    }
-    .filter-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+    .fc-toolbar-title { font-size: 1.2em !important; }
+    .fc .fc-button { padding: 5px 8px !important; font-size: 0.8em !important; }
+    .filter-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 1.4em;
-    }
-    .header-container {
-        flex-direction: column;
-        gap: 10px;
-    }
+    h1 { font-size: 1.4em; }
+    .header-container { flex-direction: column; gap: 10px; }
 }
 
 #backup-btn, #export-excel-btn {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-weight: 500;
     border: none;
     border-radius: 10px;
     padding: 10px 15px;
@@ -599,277 +584,136 @@ footer p {
     cursor: pointer;
     transition: background-color 0.3s;
 }
-#export-excel-btn {
-    background-color: #6A5ACD; /* Slate Blue for Excel button */
-}
-#backup-btn:hover {
-    background-color: var(--primary-hover);
-}
-#export-excel-btn:hover {
-    background-color: #483D8B; /* Darker Slate Blue */
-}
+#export-excel-btn { background-color: #1D6F42; color: white; }
+#backup-btn:hover { background-color: #9ab0ce; }
+#export-excel-btn:hover { background-color: #145A32; }
 
+#auth-btn {
+    background-color: #4285F4; color: white; border: none;
+    border-radius: 10px; padding: 10px 15px;
+    font-family: 'Sarabun', sans-serif; font-size: 1em; cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+#auth-btn:hover { background-color: #3367D6; }
+#auth-btn:active { transform: scale(0.98); }
 
-/* --- START: CSS สำหรับ Calendar Navigation Bar (Purple Themed) --- */
 .calendar-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: #fdfbff; /* Very light purple */
-    border-bottom: 2px solid #e9d9ff; /* Light purple border */
-    border-radius: 20px 20px 0 0;
-    margin-bottom: 5px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 20px; background: var(--container-bg);
+    border-bottom: 2px solid var(--border-color);
+    border-radius: 20px 20px 0 0; margin-bottom: 5px;
 }
-
-.nav-left-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.nav-center-title {
-    flex-grow: 1;
-    text-align: center;
-    padding: 0 15px;
-}
+.nav-left-group { display: flex; align-items: center; gap: 10px; }
+.nav-center-title { flex-grow: 1; text-align: center; padding: 0 15px; }
 
 .view-selector {
-    display: flex;
-    gap: 5px;
-    background: white;
-    border-radius: 25px;
-    padding: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex; gap: 5px; background: #f8f9fa;
+    border-radius: 25px; padding: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
-
 .view-btn {
-    font-family: 'Sarabun', sans-serif;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    background: transparent;
-    color: var(--primary-color); /* Primary purple color */
+    font-family: 'Sarabun', sans-serif; padding: 8px 16px;
+    border: none; border-radius: 20px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 500; transition: all 0.3s ease;
+    background: transparent; color: var(--primary-color);
 }
-
 .view-btn.active {
-    background: linear-gradient(135deg, #a788ff, #bb7ef0); /* Purple gradient */
-    color: white;
-    box-shadow: 0 2px 8px rgba(167, 136, 255, 0.3);
+    background: var(--primary-color); color: white;
+    box-shadow: 0 2px 8px rgba(0, 191, 255, 0.2);
 }
-
-.view-btn:hover:not(.active) {
-    background: #f6f0ff; /* Lighter purple on hover */
-}
+.view-btn:hover:not(.active) { background: #e9ecef; }
 
 .nav-btn {
-    background: linear-gradient(135deg, #a788ff, #bb7ef0); /* Purple gradient */
-    color: white;
-    border: none;
-    padding: 0;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(167, 136, 255, 0.3);
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
+    background: var(--secondary-color); color: var(--text-color);
+    border: none; padding: 0; border-radius: 12px;
+    cursor: pointer; font-size: 1.5rem; font-weight: 500;
+    transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 45px; height: 45px; display: flex;
+    align-items: center; justify-content: center; line-height: 1;
 }
-
 .nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(167, 136, 255, 0.4);
+    transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .today-btn {
     font-family: 'Sarabun', sans-serif;
-    background: rgba(167, 136, 255, 0.1); /* Light purple tint */
-    color: var(--primary-color); /* Primary purple color */
-    border: 2px solid var(--primary-color);
-    padding: 6px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    background: transparent; color: var(--primary-color);
+    border: 2px solid var(--primary-color); padding: 6px 16px;
+    border-radius: 20px; cursor: pointer; font-size: 0.85rem;
+    font-weight: 500; transition: all 0.3s ease;
 }
-
 .today-btn:hover {
-    background: var(--primary-color);
-    color: white;
+    background: var(--primary-color); color: white;
     transform: translateY(-1px);
 }
 
 .current-month {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--primary-color); /* Primary purple color */
-    font-family: 'Sarabun', sans-serif;
+    font-size: 1.5rem; font-weight: 600;
+    color: var(--primary-color); font-family: 'Sarabun', sans-serif;
 }
-/* --- END: CSS สำหรับ Calendar Navigation Bar --- */
 
-
-/* --- START: CSS สำหรับ Custom Year View --- */
 #year-view-container {
-    display: none;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 10px;
+    display: none; grid-template-columns: repeat(4, 1fr);
+    gap: 20px; padding: 10px;
 }
-
-@media (max-width: 1024px) {
-    #year-view-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    #year-view-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+@media (max-width: 1024px) { #year-view-container { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) { #year-view-container { grid-template-columns: repeat(2, 1fr); } }
 
 .mini-calendar-container {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    background-color: #fff;
+    border: 1px solid var(--border-color); border-radius: 12px;
+    overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: var(--container-bg);
 }
-
 .mini-calendar-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
-
 .mini-calendar-header {
-    text-align: center;
-    padding: 8px 4px;
-    font-weight: bold;
-    font-size: 1.1em;
-    color: var(--primary-color);
+    text-align: center; padding: 8px 4px; font-weight: bold;
+    font-size: 1.1em; color: var(--primary-color);
 }
-
-.mini-calendar {
-    --fc-daygrid-cell-aspect-ratio: 1.5;
-    font-size: 12px;
-}
-
-.mini-calendar .fc-col-header-cell-cushion {
-    font-size: 0.9em;
-    padding: 4px 0;
-}
-
-.mini-calendar .fc-daygrid-day-number {
-    font-size: 0.9em;
-    padding: 2px;
-}
-
+.mini-calendar { --fc-daygrid-cell-aspect-ratio: 1.5; font-size: 12px; }
+.mini-calendar .fc-col-header-cell-cushion { font-size: 0.9em; padding: 4px 0; }
+.mini-calendar .fc-daygrid-day-number { font-size: 0.9em; padding: 2px; }
 .mini-calendar .fc-day-today .fc-daygrid-day-number {
-    background-color: var(--primary-color) !important;
-    color: white !important;
-    border-radius: 50%;
-    width: 1.8em;
-    height: 1.8em;
-    line-height: 1.8em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: var(--primary-color) !important; color: white !important;
+    border-radius: 50%; width: 1.8em; height: 1.8em; line-height: 1.8em;
+    display: flex; align-items: center; justify-content: center;
 }
+.mini-calendar .fc-event { display: none; }
 
-.mini-calendar .fc-event {
-    display: none;
-}
-/* --- END: CSS สำหรับ Custom Year View --- */
+.fc-daygrid-body .fc-row { height: 115px; }
+.fc-daygrid-day-events { overflow: hidden; }
 
-/* --- START: Fix Month View Row Height --- */
-.fc-daygrid-body .fc-row {
-    height: 115px;
-}
-
-.fc-daygrid-day-events {
-    overflow: hidden;
-}
-/* --- END: Fix Month View Row Height --- */
-/* จัด layout ปุ่มมุมมองปฏิทินให้พอดีกับจอมือถือ */
 .view-selector {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    width: 100%;
-    margin-top: 8px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; width: 100%; margin-top: 8px;
 }
-
 .view-selector .view-btn {
-    flex: 1 1 auto;
-    min-width: 60px;
-    padding: 8px 10px;
-    font-size: 0.9em;
-    border-radius: 8px;
-    text-align: center;
+    flex: 1 1 auto; min-width: 60px;
+    padding: 8px 10px; font-size: 0.9em;
+    border-radius: 8px; text-align: center;
+}
+@media (max-width: 480px) {
+    .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
 
-/* สำหรับจอเล็กมาก ๆ */
-@media (max-width: 480px) {
-    .view-selector .view-btn {
-        font-size: 0.8em;
-        padding: 6px 8px;
-    }
-}
-/* จัดให้ navigation กับชื่อเดือนอยู่ตรงกลาง */
 .calendar-nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
+    display: flex; flex-wrap: wrap; justify-content: center;
+    align-items: center; gap: 10px; text-align: center;
 }
-
-/* ชื่อเดือนตรงกลาง */
 .nav-center-title {
-    flex: 1 1 100%;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-top: 5px;
+    flex: 1 1 100%; text-align: center; font-weight: bold;
+    font-size: 1.2em; margin-top: 5px;
 }
-
-/* กล่องปุ่มเลือกมุมมอง (วัน / สัปดาห์ / เดือน / ปี) */
 .view-selector {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 8px;
-    width: 100%;
+    display: flex; justify-content: center; gap: 8px;
+    margin-top: 8px; width: 100%;
 }
 .view-selector .view-btn {
-    flex: 1 1 auto;
-    min-width: 60px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-align: center;
+    flex: 1 1 auto; min-width: 60px;
+    padding: 8px 12px; border-radius: 8px; text-align: center;
 }
-
-/* สำหรับมือถือเล็ก */
 @media (max-width: 480px) {
-    .nav-center-title {
-        font-size: 1em;
-    }
-    .view-selector .view-btn {
-        font-size: 0.8em;
-        padding: 6px 8px;
-    }
+    .nav-center-title { font-size: 1em; }
+    .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
