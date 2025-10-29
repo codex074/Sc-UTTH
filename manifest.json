@@ -1,6 +1,6 @@
 {
   "name": "ตารางเว๊น",
-  "short_name": "ตารางเวร",
+  "short_name": "ตารางเว๊น",
   "description": "แอปพลิเคชันสำหรับจัดการและดูตารางเวร",
   "start_url": ".",
   "display": "standalone",
