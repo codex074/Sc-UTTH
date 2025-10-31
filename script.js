@@ -181,9 +181,10 @@ const SHIFT_ABBREVIATIONS = {
     'บ่าย': 'บ',
     'ดึก': 'ดึก'
 };
+// ⭐ แก้ไขอักษรย่อกลับเป็นชื่อเต็มสำหรับ MED และ Surg
 const ROOM_ABBREVIATIONS = {
-    'SURG': 'S',
-    'MED': 'M',
+    'SURG': 'Surg',
+    'MED': 'MED',
     'ER': 'ER',
     'Extend': 'คก',
     'SMC': 'SMC',
@@ -658,7 +659,7 @@ function updateChartAndSummary(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        font: { family: 'Sarabun, sans-serif', size: 14 },
+                        font: { family: 'Sarabun', sans-serif', size: 14 },
                         boxWidth: 20,
                         padding: 20,
                         color: '#6c757d'
