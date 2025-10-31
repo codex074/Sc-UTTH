@@ -17,10 +17,10 @@ class Particle {
         this.spin = (Math.random() - 0.5) * 0.5;
         
         if (this.type === 'pill') {
-            this.color1 = Math.random() > 0.5 ? 'rgba(255, 255, 255, 0.7)' : 'rgba(173, 216, 230, 0.7)'; // White or Light Blue
-            this.color2 = Math.random() > 0.5 ? 'rgba(255, 105, 97, 0.7)' : 'rgba(144, 238, 144, 0.7)'; // Light Red or Light Green
+            this.color1 = 'rgba(176, 196, 222, 0.7)'; // LightSteelBlue
+            this.color2 = 'rgba(226, 232, 240, 0.7)'; // Lightest Slate
         } else {
-            this.color = 'rgba(255, 255, 255, 0.7)'; // White for cross and syringe
+            this.color = 'rgba(226, 232, 240, 0.7)'; // Lightest Slate for cross and syringe
         }
     }
 
@@ -176,6 +176,21 @@ const SHIFTS = {
     'ดึก': { name: 'ดึก', time: '23.55-08.30' }
 };
 
+const SHIFT_ABBREVIATIONS = {
+    'เช้า': 'ช',
+    'บ่าย': 'บ',
+    'ดึก': 'ดึก'
+};
+const ROOM_ABBREVIATIONS = {
+    'SURG': 'S',
+    'MED': 'M',
+    'ER': 'ER',
+    'Extend': 'คก',
+    'SMC': 'SMC',
+    'CHEMO': 'Chem',
+    'OPD': 'OPD'
+};
+
 const PERSONS = {
     'A': { name: 'A', color: '#1E90FF', icon: '👨‍⚕️', calendarId: 'a198692195b061c813c187648b8414f25269feb1f6ff3e23c1ca50eb7bf2744b@group.calendar.google.com' },
     'Nanti': { name: 'Nanti', color: '#DB7093', icon: '👩‍⚕️', calendarId: 'f737780ab865134a2bc9ee4370bfd5c5d0dccf20a8c5f52899e3c61ddfe9336a@group.calendar.google.com' }
@@ -223,7 +238,6 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
 
 // --- 4. GOOGLE CALENDAR INTEGRATION ---
 
-// ⭐ 1. สร้างฟังก์ชันกลางสำหรับอัปเดต UI ของปุ่มล็อกอิน/ล็อกเอาต์
 function updateUiForLoginState(isLoggedIn) {
     if (isLoggedIn) {
         authBtn.innerText = 'Sign Out';
@@ -238,7 +252,6 @@ function gapiLoaded() {
     gapi.load('client', initializeGapiClient);
 }
 
-// ⭐ 2. แก้ไข initializeGapiClient ให้ตรวจสอบ Token จาก localStorage ตอนเริ่ม
 async function initializeGapiClient() {
     await gapi.client.init({
         apiKey: API_KEY,
@@ -246,15 +259,12 @@ async function initializeGapiClient() {
     });
     gapiInited = true;
     
-    // ตรวจสอบว่ามี Token ที่เคยบันทึกไว้หรือไม่
     const storedToken = localStorage.getItem('google_auth_token');
     if (storedToken) {
-        // ถ้ามี, ให้ตั้งค่า Token ให้กับ gapi client
         gapi.client.setToken(JSON.parse(storedToken));
-        updateUiForLoginState(true); // อัปเดต UI เป็นสถานะ "ล็อกอินแล้ว"
+        updateUiForLoginState(true);
         console.log("Restored login from saved session.");
     } else {
-        // ถ้าไม่มี, ให้แสดงปุ่ม "Sign In" ปกติ
         updateUiForLoginState(false);
     }
 }
@@ -268,16 +278,14 @@ function gisLoaded() {
     gisInited = true;
 }
 
-// ⭐ 3. แก้ไข handleAuthClick ให้บันทึก Token ลงใน localStorage
 function handleAuthClick() {
     if (gisInited && gapiInited) {
         tokenClient.callback = async (resp) => {
             if (resp.error !== undefined) {
                 throw (resp);
             }
-            // หลังจากล็อกอินสำเร็จ ให้บันทึก Token ลง localStorage
             localStorage.setItem('google_auth_token', JSON.stringify(gapi.client.getToken()));
-            updateUiForLoginState(true); // อัปเดต UI
+            updateUiForLoginState(true);
         };
 
         if (gapi.client.getToken() === null) {
@@ -286,16 +294,14 @@ function handleAuthClick() {
     }
 }
 
-// ⭐ 4. แก้ไข handleSignoutClick ให้ลบ Token ออกจาก localStorage
 function handleSignoutClick() {
     const token = gapi.client.getToken();
     if (token !== null) {
-        // ลบ Token ออกจาก localStorage ก่อน
         localStorage.removeItem('google_auth_token');
         
         google.accounts.oauth2.revoke(token.access_token);
         gapi.client.setToken('');
-        updateUiForLoginState(false); // อัปเดต UI
+        updateUiForLoginState(false);
     }
 }
 
@@ -654,7 +660,8 @@ function updateChartAndSummary(data) {
                     labels: {
                         font: { family: 'Sarabun, sans-serif', size: 14 },
                         boxWidth: 20,
-                        padding: 20
+                        padding: 20,
+                        color: '#6c757d'
                     }
                 },
                 tooltip: {
@@ -761,13 +768,28 @@ function renderCalendarAndSummary() {
 
         let title, eventColor, order;
         if (shiftData.isCancelled) {
-            title = `[ยกเลิก] ${shiftData.person}: ${shiftData.shift}`;
+            title = `[ยกเลิก]`;
             eventColor = 'var(--cancelled-color)';
             order = 2;
         } else {
-            title = `${PERSONS[shiftData.person].name}, ${shiftData.shift}, ${shiftData.room}`;
-            if (shiftData.medOption) { title += ` (${shiftData.medOption})`; }
-            if (shiftData.notes) { title += ' 📝'; }
+            let displayTitle = '';
+            const shiftAbbr = SHIFT_ABBREVIATIONS[shiftData.shift];
+            const roomAbbr = ROOM_ABBREVIATIONS[shiftData.room];
+
+            if (shiftData.shift === 'ดึก') {
+                displayTitle = 'ดึก';
+            } else if (shiftData.shift === 'รุ่งอรุณ') {
+                displayTitle = `รุ่ง ${roomAbbr || shiftData.room}`;
+            } else if (['Extend', 'SMC', 'CHEMO'].includes(shiftData.room)) {
+                displayTitle = roomAbbr || shiftData.room;
+            } else {
+                displayTitle = `${shiftAbbr || shiftData.shift} ${roomAbbr || shiftData.room}`;
+            }
+    
+            if (shiftData.medOption) { displayTitle += ` (${shiftData.medOption})`; }
+            if (shiftData.notes) { displayTitle += ' 📝'; }
+
+            title = displayTitle;
             eventColor = PERSONS[shiftData.person]?.color || '#777777';
             order = 1;
         }
@@ -839,33 +861,10 @@ function renderCalendarAndSummary() {
 }
 
 // --- 6. EVENT HANDLER FUNCTIONS ---
-async function promptAddShift(dateStr) {
-    if (!gapi.client.getToken()) {
-        Swal.fire('ต้องการสิทธิ์!', 'กรุณาล็อกอินด้วย Google ก่อนเพื่อเพิ่มเวร', 'warning');
-        handleAuthClick();
-        return;
-    }
-    
-    const clickedDate = new Date(dateStr + "T00:00:00");
-    const reminderOnDay = Object.values(allRemindersData).find(r => {
-        const startDate = new Date(r.startDate + "T00:00:00");
-        const endDate = r.endDate ? new Date(r.endDate + "T00:00:00") : startDate;
-        return clickedDate >= startDate && clickedDate <= endDate;
-    });
-
-    if (reminderOnDay) {
-        const confirmation = await Swal.fire({
-            title: 'เดี๋ยวก่อนนะ!',
-            html: `วันนี้มีบันทึกว่า: "<b>${reminderOnDay.note}</b>"<br>จะเพิ่มเวรจริงๆ เหรอ?`,
-            icon: 'warning', showCancelButton: true,
-            confirmButtonText: 'ใช่, เพิ่มเวรเลย', cancelButtonText: 'ไม่ดีกว่า',
-        });
-        if (!confirmation.isConfirmed) return;
-    }
-    
+async function showShiftFormAndSave(dateStr) {
     const dateIsSpecial = isSpecialDay(dateStr);
     const availableShifts = {...SHIFTS};
-    if(dateIsSpecial) { 
+    if (dateIsSpecial) { 
         delete availableShifts['รุ่งอรุณ'];
     } else {
         delete availableShifts['เช้า'];
@@ -879,7 +878,7 @@ async function promptAddShift(dateStr) {
                 ${Object.keys(PERSONS).map((p, index) => `
                     <label class="radio-option">
                         <input type="radio" name="swal-person" value="${p}" ${index === 0 ? 'checked' : ''}>
-                        <span style="background-color:${PERSONS[p].color};">${PERSONS[p].name}</span>
+                        <span style="--person-color: ${PERSONS[p].color};">${PERSONS[p].name}</span>
                     </label>
                 `).join('')}
             </div>
@@ -908,21 +907,13 @@ async function promptAddShift(dateStr) {
                 const dayOfWeek = new Date(dateStr).getDay();
 
                 if (selectedShift === 'รุ่งอรุณ') {
-                    if (dayOfWeek === 1) { // Monday
-                        availableRooms = ['OPD'];
-                    } else {
-                        availableRooms = ['ER', 'OPD'];
-                    }
+                    if (dayOfWeek === 1) { availableRooms = ['OPD']; } else { availableRooms = ['ER', 'OPD']; }
                 } else if (selectedShift === 'เช้า') {
                     availableRooms = ['ER', 'MED', 'SURG', 'Extend', 'CHEMO'];
                 } else if (selectedShift === 'บ่าย') {
-                    if (isSpecialDay(dateStr)) {
-                        availableRooms = ['ER', 'MED'];
-                    } else if (dayOfWeek === 5) { // Friday
-                        availableRooms = ['ER', 'MED', 'Extend'];
-                    } else {
-                        availableRooms = ['ER', 'MED', 'Extend', 'SMC'];
-                    }
+                    if (isSpecialDay(dateStr)) { availableRooms = ['ER', 'MED']; }
+                    else if (dayOfWeek === 5) { availableRooms = ['ER', 'MED', 'Extend']; }
+                    else { availableRooms = ['ER', 'MED', 'Extend', 'SMC']; }
                 } else if (selectedShift === 'ดึก') {
                     availableRooms = ['ER'];
                 }
@@ -934,13 +925,8 @@ async function promptAddShift(dateStr) {
                 medContainer.style.display = showMedField ? 'block' : 'none';
             };
 
-            if (shiftSelect) {
-                shiftSelect.addEventListener('change', updateFormFields);
-            }
-            if (roomSelect) {
-                roomSelect.addEventListener('change', updateFormFields);
-            }
-            
+            if (shiftSelect) { shiftSelect.addEventListener('change', updateFormFields); }
+            if (roomSelect) { roomSelect.addEventListener('change', updateFormFields); }
             updateFormFields();
         },
         preConfirm: () => {
@@ -974,6 +960,35 @@ async function promptAddShift(dateStr) {
         } else {
             saveShiftToFirebase({ date: dateStr, ...formValues });
         }
+    }
+}
+
+async function promptAddShift(dateStr) {
+    if (!gapi.client.getToken()) {
+        Swal.fire('ต้องการสิทธิ์!', 'กรุณาล็อกอินด้วย Google ก่อนเพื่อเพิ่มเวร', 'warning');
+        handleAuthClick();
+        return;
+    }
+    
+    const clickedDate = new Date(dateStr + "T00:00:00");
+    const reminderOnDay = Object.values(allRemindersData).find(r => {
+        const startDate = new Date(r.startDate + "T00:00:00");
+        const endDate = r.endDate ? new Date(r.endDate + "T00:00:00") : startDate;
+        return clickedDate >= startDate && clickedDate <= endDate;
+    });
+
+    if (reminderOnDay) {
+        const confirmation = await Swal.fire({
+            title: 'เดี๋ยวก่อนนะ!',
+            html: `วันนี้มีบันทึกว่า: "<b>${reminderOnDay.note}</b>"<br>จะเพิ่มเวรจริงๆ เหรอ?`,
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'ใช่, เพิ่มเวรเลย', cancelButtonText: 'ไม่ดีกว่า',
+        });
+        if (confirmation.isConfirmed) {
+            await showShiftFormAndSave(dateStr);
+        }
+    } else {
+        await showShiftFormAndSave(dateStr);
     }
 }
 
@@ -1141,9 +1156,9 @@ async function handleDateClick(arg) {
         confirmButtonColor: 'var(--primary-color)', denyButtonColor: '#28a745'
     });
     if (action) { 
-        promptAddShift(arg.dateStr); 
+        await promptAddShift(arg.dateStr); 
     } else if (action === false) { 
-        showRemindersForDate(arg.dateStr); 
+        await showRemindersForDate(arg.dateStr); 
     }
 }
 
@@ -1199,7 +1214,7 @@ async function handleEventClick(arg) {
                 ${Object.keys(PERSONS).map(p => `
                     <label class="radio-option">
                         <input type="radio" name="swal-person-edit" value="${p}" ${p === person ? 'checked' : ''}>
-                        <span style="background-color:${PERSONS[p].color};">${PERSONS[p].name}</span>
+                        <span style="--person-color: ${PERSONS[p].color};">${PERSONS[p].name}</span>
                     </label>
                 `).join('')}
             </div>
@@ -1511,6 +1526,19 @@ function initializeAppUI() {
     const showCancelledCheckbox = document.getElementById('show-cancelled-checkbox');
     const showDawnCheckbox = document.getElementById('show-dawn-checkbox');
 
+    const colorLegendEl = document.getElementById('color-legend');
+    let legendHTML = '';
+    for (const personKey in PERSONS) {
+        const person = PERSONS[personKey];
+        legendHTML += `
+            <div class="legend-item">
+                <span class="legend-color-box" style="background-color: ${person.color};"></span>
+                <span>${person.name}</span>
+            </div>
+        `;
+    }
+    colorLegendEl.innerHTML = legendHTML;
+
     personFilterEl.innerHTML = '<option value="all">ทั้งหมด</option>' + Object.keys(PERSONS).map(p => `<option value="${p}">${PERSONS[p].name}</option>`).join('');
     shiftFilterEl.innerHTML = '<option value="all">ทุกช่วงเวลา</option>' + Object.keys(SHIFTS).map(s => `<option value="${s}">${SHIFTS[s].name}</option>`).join('');
     roomFilterEl.innerHTML = '<option value="all">ทุกเวร</option>' + ALL_ROOMS.map(r => `<option value="${r}">${r}</option>`).join('');
@@ -1605,8 +1633,6 @@ function initializeAppUI() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    // ⭐ ไม่ต้องกำหนด authBtn.onclick ที่นี่แล้ว เพราะจะจัดการใน initializeGapiClient
     
     const gisScript = document.createElement('script');
     gisScript.src = 'https://accounts.google.com/gsi/client';

@@ -1,11 +1,11 @@
 {
-  "name": "ตารางเว๊น",
-  "short_name": "ตารางเว๊น",
-  "description": "แอปพลิเคชันสำหรับจัดการและดูตารางเวร",
+  "name": "ตารางเวร เภสัช",
+  "short_name": "ตารางเวร",
+  "description": "แอปพลิเคชันสำหรับจัดการและดูตารางเวรเภสัชกร",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#F5EEFF",
-  "theme_color": "#8A2BE2",
+  "background_color": "#141d2b",
+  "theme_color": "#141d2b",
   "icons": [
     {
       "src": "icons/icon-192x192.png",

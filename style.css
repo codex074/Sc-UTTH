@@ -130,7 +130,7 @@ h2 {
 
 #filter-container {
     padding: 20px;
-    margin-top: 40px;
+    margin-top: 20px;
     border-radius: 20px;
     background-color: #f8f9fa; /* Light background for filter area */
     border: 1px solid var(--border-color);
@@ -444,33 +444,35 @@ h2 {
 .radio-option input[type="radio"] {
     display: none;
 }
+/* ⭐ ปรับปรุงสไตล์ปุ่มเลือกเภสัช ⭐ */
 .radio-option span {
     display: inline-block;
     padding: 8px 16px;
     border-radius: 12px;
     border: 2px solid var(--border-color);
-    background-color: transparent;
+    background-color: transparent; /* ค่าเริ่มต้นไม่มีสีพื้นหลัง */
+    color: var(--text-color); /* ค่าเริ่มต้นตัวหนังสือสีเข้ม */
     cursor: pointer;
     transition: all 0.2s ease;
     font-weight: 500;
-    color: var(--text-color);
     text-shadow: none;
 }
 .radio-option span:hover {
     background-color: #f1f3f5;
 }
 .radio-option input[type="radio"]:checked + span {
-    border-color: var(--primary-color);
+    background-color: var(--person-color); /* ใช้สีจาก custom property */
+    border-color: var(--person-color); /* ใช้สีจาก custom property */
+    color: white; /* เปลี่ยนตัวหนังสือเป็นสีขาวเมื่อถูกเลือก */
     transform: scale(1.05);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    color: white; /* Text color on colored background */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 footer {
     text-align: center;
     padding: 25px 0 10px 0;
     margin-top: 40px;
-    border-top: 2px dashed var(--border-color);
+    border-top: 2px dashed var(--dark-border-color);
     color: var(--text-color-light);
     opacity: 0.6;
     font-size: 0.9em;
@@ -502,6 +504,30 @@ footer p { margin: 0; }
     font-weight: 500;
     color: var(--text-color);
     cursor: pointer;
+}
+
+/* ⭐ ปรับปรุงสไตล์แท็กสี ⭐ */
+.color-legend-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 0 10px 15px 10px; /* เพิ่ม padding ด้านล่าง */
+    flex-wrap: wrap;
+    border-bottom: 2px dashed var(--border-color); /* เพิ่มเส้นคั่น */
+    margin-bottom: 15px; /* เพิ่มระยะห่างก่อนถึงปฏิทิน */
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+.legend-color-box {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
 }
 
 .swal2-html-container ul.reminder-list {
@@ -711,7 +737,8 @@ footer p { margin: 0; }
 }
 .view-selector .view-btn {
     flex: 1 1 auto; min-width: 60px;
-    padding: 8px 12px; border-radius: 8px; text-align: center;
+    padding: 8px 12px; border-radius: 8px;
+    text-align: center;
 }
 @media (max-width: 480px) {
     .nav-center-title { font-size: 1em; }

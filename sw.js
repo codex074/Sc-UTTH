@@ -1,14 +1,12 @@
-// ⭐ อัปเดตเวอร์ชัน Cache เพื่อบังคับให้ Service Worker ติดตั้งใหม่
 const CACHE_NAME = 'utth-shift-cache-v2';
 
-// ⭐ เพิ่ม holidays.json เข้าไปในรายการไฟล์ที่จะ Cache
 const URLS_TO_CACHE = [
   '/',
   'index.html',
   'style.css',
   'script.js',
   'manifest.json',
-  'holidays.json', // <-- ไฟล์ใหม่ที่เพิ่มเข้ามา
+  'holidays.json',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
   'https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap',
@@ -20,7 +18,6 @@ const URLS_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'
 ];
 
-// Event: install - ติดตั้ง Service Worker และ Cache ไฟล์หลัก
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -32,7 +29,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Event: activate - จัดการ Cache เก่า
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -48,7 +44,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Event: fetch - ดักจับ request และตอบกลับจาก Cache ก่อน (Cache-First Strategy)
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('googleapis.com/calendar') || event.request.url.includes('firestore.googleapis.com')) {
     return;
