@@ -145,6 +145,7 @@ h2 {
     display: flex;
     flex-direction: column;
     transition: transform 0.2s ease-out;
+    min-width: 0;
 }
 .filter-group:hover { transform: translateY(-3px); }
 .filter-group label {
