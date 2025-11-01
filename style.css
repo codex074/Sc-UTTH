@@ -444,7 +444,6 @@ h2 {
 .radio-option input[type="radio"] {
     display: none;
 }
-/* ⭐ ปรับปรุงสไตล์ปุ่มเลือกเภสัช ⭐ */
 .radio-option span {
     display: inline-block;
     padding: 8px 16px;
@@ -506,7 +505,6 @@ footer p { margin: 0; }
     cursor: pointer;
 }
 
-/* ⭐ ปรับปรุงสไตล์แท็กสี ⭐ */
 .color-legend-container {
     display: flex;
     justify-content: center;

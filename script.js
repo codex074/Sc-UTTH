@@ -1,3 +1,7 @@
+// --- 1. FIREBASE SETUP (ย้ายมาไว้บนสุด) ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 // --- Medicine Themed Particle Animation Script ---
 const canvas = document.getElementById('particle-canvas-main');
 const ctx = canvas.getContext('2d');
@@ -126,10 +130,6 @@ window.addEventListener('resize', () => {
 initParticles();
 animateParticles();
 
-// --- 1. FIREBASE SETUP ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 const firebaseConfig = {
     apiKey: "AIzaSyBiiXFhlwYdfC7IddBcBu-Sq3vJanTQNR0",
     authDomain: "utth-shift.firebaseapp.com",
@@ -181,7 +181,6 @@ const SHIFT_ABBREVIATIONS = {
     'บ่าย': 'บ',
     'ดึก': 'ดึก'
 };
-// ⭐ แก้ไขอักษรย่อกลับเป็นชื่อเต็มสำหรับ MED และ Surg
 const ROOM_ABBREVIATIONS = {
     'SURG': 'Surg',
     'MED': 'MED',
@@ -659,7 +658,7 @@ function updateChartAndSummary(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        font: { family: 'Sarabun', sans-serif', size: 14 },
+                        font: { family: 'Sarabun, sans-serif', size: 14 },
                         boxWidth: 20,
                         padding: 20,
                         color: '#6c757d'
@@ -1633,6 +1632,7 @@ function initializeAppUI() {
     });
 }
 
+// ⭐ แก้ไข Event Listener ให้เรียกใช้ initializeAppUI() ⭐
 document.addEventListener('DOMContentLoaded', async () => {
     
     const gisScript = document.createElement('script');
@@ -1644,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadHolidays();
 
-    initializeAppUI();
+    initializeAppUI(); // <--- เพิ่มบรรทัดนี้กลับเข้ามา
     initializeCustomCalendarControls(); 
     calendar.render();
     

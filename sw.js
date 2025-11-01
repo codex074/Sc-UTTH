@@ -1,4 +1,5 @@
-const CACHE_NAME = 'utth-shift-cache-v2';
+// ⭐ เปลี่ยนเวอร์ชัน Cache เพื่อบังคับอัปเดต
+const CACHE_NAME = 'utth-shift-cache-v3';
 
 const URLS_TO_CACHE = [
   '/',
