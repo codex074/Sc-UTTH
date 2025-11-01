@@ -575,27 +575,21 @@ footer p { margin: 0; }
     }
     .fc-toolbar-title { font-size: 1.2em !important; }
     .fc .fc-button { padding: 5px 8px !important; font-size: 0.8em !important; }
-    .filter-grid { grid-template-columns: 1fr 1fr; }
+    
+    /* ⭐ แก้ไข: บังคับ 1 คอลัมน์สำหรับแท็บเล็ตและมือถือ */
+    .filter-grid { 
+        grid-template-columns: 1fr; 
+    }
 }
 
 @media (max-width: 480px) {
     h1 { font-size: 1.4em; }
     .header-container { flex-direction: column; gap: 10px; }
     
-    /* ⭐ แก้ไข: บังคับ 1 คอลัมน์ในหน้าจอที่เล็กมากๆ */
+    /* (กฎ 1fr จาก 768px ถูกนำมาใช้แล้ว) */
     .filter-container {
         padding-left: 15px;
         padding-right: 15px;
-    }
-    .filter-grid { 
-        grid-template-columns: 1fr; /* บังคับ 1 คอลัมน์ */
-        gap: 15px; /* คืนช่องว่างกลับเป็นปกติ */
-    }
-    .filter-group input[type="date"] {
-        /* ลบ hack ที่เคยใส่ กลับเป็นค่าปกติ */
-        padding-left: 12px; 
-        padding-right: 12px;
-        font-size: 0.95em; 
     }
 }
 
@@ -656,14 +650,15 @@ footer p { margin: 0; }
 }
 
 #clear-filters-btn:hover .text {
-    color: transparent;
-    transform: translateX(-25%); /* เลื่อนข้อความไปทางซ้าย */
+    /* 10. เปลี่ยนเป็นเลื่อนข้อความออกและจางหาย */
+    transform: translateX(-25%);
+    opacity: 0;
 }
 
 #clear-filters-btn:hover .icon {
-    width: 100%;
+    width: 100%; /* 11. ให้ไอคอนขยายเต็มความกว้างปุ่ม */
     border-left: none;
-    transform: translateX(0);
+    transform: translateX(0); /* 12. เลื่อนไอคอนเข้ามาตรงกลาง */
 }
 
 #clear-filters-btn:focus {
@@ -1023,3 +1018,4 @@ footer p { margin: 0; }
     .nav-center-title { font-size: 1em; }
     .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
+
