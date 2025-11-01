@@ -153,7 +153,8 @@ const SCOPES = 'https://www.googleapis.com/auth/calendar';
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-const authBtn = document.getElementById('auth-btn');
+const authSignInBtn = document.getElementById('auth-signin-btn');
+const authSignOutBtn = document.getElementById('auth-signout-btn');
 
 // --- 2. APPLICATION CONSTANTS & STATE ---
 let allShiftsData = {}; 
@@ -239,12 +240,17 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
 // --- 4. GOOGLE CALENDAR INTEGRATION ---
 
 function updateUiForLoginState(isLoggedIn) {
+    const authText = document.getElementById('auth-btn-text');
+    const authIcon = authSignInBtn.querySelector('.google-btn-icon'); // ใช้คลาสใหม่
+
     if (isLoggedIn) {
-        authBtn.innerText = 'Sign Out';
-        authBtn.onclick = handleSignoutClick;
+        authSignInBtn.style.display = 'none';
+        authSignOutBtn.style.display = 'inline-flex';
+        authSignOutBtn.onclick = handleSignoutClick;
     } else {
-        authBtn.innerText = 'Sign in with Google';
-        authBtn.onclick = handleAuthClick;
+        authSignInBtn.style.display = 'inline-flex';
+        authSignOutBtn.style.display = 'none';
+        authSignInBtn.onclick = handleAuthClick;
     }
 }
 
@@ -1632,7 +1638,6 @@ function initializeAppUI() {
     });
 }
 
-// ⭐ แก้ไข Event Listener ให้เรียกใช้ initializeAppUI() ⭐
 document.addEventListener('DOMContentLoaded', async () => {
     
     const gisScript = document.createElement('script');
@@ -1644,7 +1649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadHolidays();
 
-    initializeAppUI(); // <--- เพิ่มบรรทัดนี้กลับเข้ามา
+    initializeAppUI();
     initializeCustomCalendarControls(); 
     calendar.render();
     

@@ -16,8 +16,8 @@
     --holiday-bg: #fff5f5; /* Light pink holiday background */
     --cancelled-color: #95a5a6; /* Grey for cancelled items */
     --post-night-shift-color: #7f8c8d; /* Muted grey */
-    --clear-btn-red: #e74c3c;
-    --clear-btn-red-hover: #c0392b;
+    --clear-btn-red: #e62222; /* 1. สีแดงใหม่จาก Uiverse */
+    --clear-btn-red-hover: #ff3636; /* 2. สีแดงสว่าง Uiverse */
     --today-color: var(--primary-color);
     --today-bg-tint: rgba(0, 191, 255, 0.1);
     --today-glow: rgba(0, 191, 255, 0.5);
@@ -170,19 +170,6 @@ h2 {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
 }
-
-#clear-filters-btn {
-    width: 100%; padding: 10px 12px;
-    background-color: var(--clear-btn-red);
-    color: white;
-    border: none;
-    border-radius: 10px; cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 0.95em; font-weight: 400;
-}
-#clear-filters-btn:hover { background-color: var(--clear-btn-red-hover); }
-#clear-filters-btn:active { transform: scale(0.97); }
 
 #chart-summary-container {
     display: flex;
@@ -596,30 +583,303 @@ footer p { margin: 0; }
     .header-container { flex-direction: column; gap: 10px; }
 }
 
-#backup-btn, #export-excel-btn {
-    background-color: var(--secondary-color);
-    color: var(--text-color);
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 15px;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 1em;
+/* --- New Clear Filter Button (Animated) --- */
+#clear-filters-btn {
+    width: 100%;
+    height: 44px; /* ปรับความสูงให้เท่าช่อง input */
     cursor: pointer;
-    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    background: var(--clear-btn-red);
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+    transition: 200ms;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    font-family: 'Sarabun', sans-serif;
+    box-sizing: border-box;
 }
-#export-excel-btn { background-color: #1D6F42; color: white; }
-#backup-btn:hover { background-color: #9ab0ce; }
-#export-excel-btn:hover { background-color: #145A32; }
 
-#auth-btn {
-    background-color: #4285F4; color: white; border: none;
-    border-radius: 10px; padding: 10px 15px;
-    font-family: 'Sarabun', sans-serif; font-size: 1em; cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+#clear-filters-btn .text {
+    transform: translateX(0); /* ปรับให้ข้อความอยู่กลาง */
+    text-align: center;
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    font-size: 0.95em;
+    transition: 200ms;
 }
-#auth-btn:hover { background-color: #3367D6; }
-#auth-btn:active { transform: scale(0.98); }
+
+#clear-filters-btn .icon {
+    position: absolute;
+    top: 0;
+    left: 0; /* เริ่มจากด้านซ้าย */
+    width: 100%; /* กว้างเต็มปุ่ม */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-100%); /* ซ่อนไว้ด้านซ้าย */
+    transition: 200ms;
+    border-left: none; /* ไม่ต้องมีเส้นคั่น */
+}
+
+#clear-filters-btn .icon svg {
+    width: 15px;
+    fill: #eee;
+}
+
+#clear-filters-btn:hover {
+    background: var(--clear-btn-red-hover);
+}
+
+#clear-filters-btn:hover .text {
+    color: transparent;
+    transform: translateX(100%); /* เลื่อนข้อความออกด้านขวา */
+}
+
+#clear-filters-btn:hover .icon {
+    width: 100%;
+    transform: translateX(0); /* เลื่อนไอคอนเข้ามา */
+}
+
+#clear-filters-btn:focus {
+    outline: none;
+}
+
+#clear-filters-btn:active .icon svg {
+    transform: scale(0.8);
+}
+/* --- End Clear Filter Button --- */
+
+
+/* --- New Logout Button (Standard Style) --- */
+#auth-signout-btn.container-btn-file {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--clear-btn-red); /* 1. สีแดงหลัก */
+  color: #fff;
+  border-style: none;
+  
+  /* --- 2. ส่วนที่ปรับขนาดให้เท่าปุ่มอื่น --- */
+  padding: 10px 15px;
+  height: 44px;
+  font-size: 1em;
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  width: 220px; /* ⭐ ทำให้ความกว้างคงที่ */
+  /* --- จบส่วนที่ปรับขนาด --- */
+
+  border-radius: 0.5em;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
+  transition: all 250ms;
+  cursor: pointer;
+  box-sizing: border-box; 
+}
+
+#auth-signout-btn.container-btn-file > svg {
+  margin-right: 0.5em;
+  width: 20px;
+  height: 20px;
+}
+
+#auth-signout-btn.container-btn-file::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0;
+  border-radius: 0.5em;
+  background-color: var(--clear-btn-red-hover); /* 3. สีแดงเข้มตอน Hover */
+  z-index: -1;
+  transition: all 350ms;
+}
+
+#auth-signout-btn.container-btn-file:hover::before {
+  width: 100%;
+}
+
+#auth-signout-btn.container-btn-file:active {
+    transform: scale(0.98);
+}
+/* --- End New Logout Button --- */
+
+
+/* --- New JSON Backup Button Styles --- */
+#backup-btn.container-btn-file {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0ad4e; /* สีเหลืองหลัก */
+  color: #fff;
+  border-style: none;
+  
+  /* --- ส่วนที่ปรับขนาดให้เท่าปุ่มอื่น --- */
+  padding: 10px 15px;
+  height: 44px;
+  font-size: 1em;
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  width: 220px; /* ⭐ ทำให้ความกว้างคงที่ */
+  /* --- จบส่วนที่ปรับขนาด --- */
+
+  border-radius: 0.5em;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
+  transition: all 250ms;
+  cursor: pointer;
+  box-sizing: border-box; 
+}
+
+#backup-btn.container-btn-file > svg {
+  margin-right: 0.5em;
+  width: 20px;
+  height: 20px;
+}
+
+#backup-btn.container-btn-file::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0;
+  border-radius: 0.5em;
+  background-color: #f5c478; /* สีเหลืองอ่อนตอน Hover */
+  z-index: -1;
+  transition: all 350ms;
+}
+
+#backup-btn.container-btn-file:hover::before {
+  width: 100%;
+}
+
+#backup-btn.container-btn-file:active {
+    transform: scale(0.98);
+}
+/* --- End New JSON Button --- */
+
+/* --- New Export Excel Button Styles --- */
+#export-excel-btn.container-btn-file {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  background-color: #307750; /* Uiverse green */
+  color: #fff;
+  border-style: none;
+  
+  /* --- ส่วนที่ปรับขนาดให้เท่าปุ่มอื่น --- */
+  padding: 10px 15px; /* ใช้ padding เดิม */
+  height: 44px; /* ความสูงเท่าปุ่ม Google */
+  font-size: 1em; /* ขนาดฟอนต์เท่าปุ่มอื่น */
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  width: 220px; /* ⭐ ทำให้ความกว้างคงที่ */
+  /* --- จบส่วนที่ปรับขนาด --- */
+
+  border-radius: 0.5em; /* Uiverse style (โค้งมน) */
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
+  transition: all 250ms;
+  cursor: pointer;
+  box-sizing: border-box; /* เพิ่มเพื่อความแม่นยำของขนาด */
+}
+
+#export-excel-btn.container-btn-file > svg {
+  margin-right: 0.5em; /* ลดระยะห่างไอคอน */
+  width: 20px;
+  height: 20px;
+}
+
+#export-excel-btn.container-btn-file::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0;
+  border-radius: 0.5em;
+  background-color: #469b61; /* Uiverse hover green */
+  z-index: -1;
+  transition: all 350ms;
+}
+
+#export-excel-btn.container-btn-file:hover::before {
+  width: 100%;
+}
+
+#export-excel-btn.container-btn-file:active {
+    transform: scale(0.98);
+}
+/* --- End New Export Button --- */
+
+
+/* --- New Google Signin Button (Excel-like) --- */
+#auth-signin-btn.container-btn-file {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff; /* 1. พื้นหลังสีขาว */
+  color: #101010; /* 2. ตัวอักษรสีเข้ม */
+  border: 1px solid #dadce0; /* 3. ขอบสีเทาอ่อน (แบบ Google) */
+  border-style: solid;
+  
+  /* --- 4. ส่วนที่ปรับขนาดให้เท่าปุ่มอื่น --- */
+  padding: 10px 15px;
+  height: 44px;
+  font-size: 1em;
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  width: 220px; /* ⭐ ทำให้ความกว้างคงที่ */
+  white-space: nowrap; /* 5. บังคับให้อยู่บรรทัดเดียว */
+  /* --- จบส่วนที่ปรับขนาด --- */
+
+  border-radius: 0.5em; 
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356); 
+  transition: all 250ms;
+  cursor: pointer;
+  box-sizing: border-box; 
+}
+
+#auth-signin-btn.container-btn-file > svg.google-btn-icon {
+  margin-right: 0.5em;
+  width: 24px;
+  height: 24px;
+}
+
+#auth-signin-btn.container-btn-file > span {
+    margin-left: 0.5rem;
+}
+
+#auth-signin-btn.container-btn-file::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0;
+  border-radius: 0.5em;
+  background-color: #f8f9fa; /* สีเทาอ่อนมากตอน Hover */
+  z-index: -1;
+  transition: all 350ms;
+}
+
+#auth-signin-btn.container-btn-file:hover::before {
+  width: 100%;
+}
+
+#auth-signin-btn.container-btn-file:active {
+    transform: scale(0.98);
+    background-color: #f1f3f5; 
+}
+/* --- End New Google Button --- */
+
 
 .calendar-nav {
     display: flex; justify-content: space-between; align-items: center;

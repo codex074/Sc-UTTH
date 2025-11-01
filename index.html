@@ -10,11 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <!-- PWA Manifest and Theme Color -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#141d2b"/>
 
+    <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 
+    <!-- External Libraries -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,6 +33,7 @@
         </div>
 
         <div id="calendar-wrapper">
+            <!-- Color Legend Area -->
             <div id="color-legend" class="color-legend-container"></div>
             
             <div class="calendar-nav">
@@ -57,18 +61,55 @@
         </div>
         <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
             
-            <button id="auth-btn">Sign in with Google</button>
+            <!-- 1. ปุ่ม Sign in (โครงสร้างใหม่) -->
+            <button id="auth-signin-btn" class="container-btn-file">
+                <svg class="google-btn-icon" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" height="24px" width="24px">
+                    <g fill-rule="evenodd" fill="none" stroke-width="1" stroke="none">
+                      <g fill-rule="nonzero" transform="translate(3.000000, 2.000000)">
+                        <path fill="#4285F4" d="M57.8123233,30.1515267 C57.8123233,27.7263183 57.6155321,25.9565533 57.1896408,24.1212666 L29.4960833,24.1212666 L29.4960833,35.0674653 L45.7515771,35.0674653 C45.4239683,37.7877475 43.6542033,41.8844383 39.7213169,44.6372555 L39.6661883,45.0037254 L48.4223791,51.7870338 L49.0290201,51.8475849 C54.6004021,46.7020943 57.8123233,39.1313952 57.8123233,30.1515267"></path>
+                        <path fill="#34A853" d="M29.4960833,58.9921667 C37.4599129,58.9921667 44.1456164,56.3701671 49.0290201,51.8475849 L39.7213169,44.6372555 C37.2305867,46.3742596 33.887622,47.5868638 29.4960833,47.5868638 C21.6960582,47.5868638 15.0758763,42.4415991 12.7159637,35.3297782 L12.3700541,35.3591501 L3.26524241,42.4054492 L3.14617358,42.736447 C7.9965904,52.3717589 17.959737,58.9921667 29.4960833,58.9921667"></path>
+                        <path fill="#FBBC05" d="M12.7159637,35.3297782 C12.0932812,33.4944915 11.7329116,31.5279353 11.7329116,29.4960833 C11.7329116,27.4640054 12.0932812,25.4976752 12.6832029,23.6623884 L12.6667095,23.2715173 L3.44779955,16.1120237 L3.14617358,16.2554937 C1.14708246,20.2539019 0,24.7439491 0,29.4960833 C0,34.2482175 1.14708246,38.7380388 3.14617358,42.736447 L12.7159637,35.3297782"></path>
+                        <path fill="#EB4335" d="M29.4960833,11.4050769 C35.0347044,11.4050769 38.7707997,13.7975244 40.9011602,15.7968415 L49.2255853,7.66898166 C44.1130815,2.91684746 37.4599129,0 29.4960833,0 C17.959737,0 7.9965904,6.62018183 3.14617358,16.2554937 L12.6832029,23.6623884 C15.0758763,16.5505675 21.6960582,11.4050769 29.4960833,11.4050769"></path>
+                      </g>
+                    </g>
+                </svg>
+              <span id="auth-btn-text">Sign In with Google</span>
+            </button>
             
-            <button id="backup-btn">สำรองข้อมูล (JSON)</button>
-            <button id="export-excel-btn">สำรองข้อมูล Excel</button>
+            <!-- 2. ปุ่ม Sign out (ดีไซน์ใหม่) -->
+            <button id="auth-signout-btn" class="container-btn-file" style="display: none;">
+                <svg viewBox="0 0 512 512" width="20" height="20" fill="#fff">
+                    <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+                </svg>
+                Logout
+            </button>
+            
+            <!-- New JSON Backup Button -->
+            <button id="backup-btn" class="container-btn-file json-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 16 16">
+                <path d="M9.21 3.014a.5.5 0 0 0-.42.853L11.168 8l-2.378 4.133a.5.5 0 1 0 .84.482l2.5-4.333a.5.5 0 0 0 0-.482l-2.5-4.333a.5.5 0 0 0-.42-.267zM6.79 3.014a.5.5 0 0 1 .42.853L4.832 8l2.378 4.133a.5.5 0 1 1-.84.482l-2.5-4.333a.5.5 0 0 1 0-.482l2.5-4.333a.5.5 0 0 1 .42-.267z"/>
+              </svg>
+              Export JSON
+            </button>
+            
+            <!-- New Excel Export Button -->
+            <button id="export-excel-btn" class="container-btn-file">
+              <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 50 50">
+                <path d="M28.8125 .03125L.8125 5.34375C.339844 5.433594 0 5.863281 0 6.34375L0 43.65625C0 44.136719 .339844 44.566406 .8125 44.65625L28.8125 49.96875C28.875 49.980469 28.9375 50 29 50C29.230469 50 29.445313 49.929688 29.625 49.78125C29.855469 49.589844 30 49.296875 30 49L30 1C30 .703125 29.855469 .410156 29.625 .21875C29.394531 .0273438 29.105469 -.0234375 28.8125 .03125ZM32 6L32 13L34 13L34 15L32 15L32 20L34 20L34 22L32 22L32 27L34 27L34 29L32 29L32 35L34 35L34 37L32 37L32 44L47 44C48.101563 44 49 43.101563 49 42L49 8C49 6.898438 48.101563 6 47 6ZM36 13L44 13L44 15L36 15ZM6.6875 15.6875L11.8125 15.6875L14.5 21.28125C14.710938 21.722656 14.898438 22.265625 15.0625 22.875L15.09375 22.875C15.199219 22.511719 15.402344 21.941406 15.6875 21.21875L18.65625 15.6875L23.34375 15.6875L17.75 24.9375L23.5 34.375L18.53125 34.375L15.28125 28.28125C15.160156 28.054688 15.035156 27.636719 14.90625 27.03125L14.875 27.03125C14.8125 27.316406 14.664063 27.761719 14.4375 28.34375L11.1875 34.375L6.1875 34.375L12.15625 25.03125ZM36 20L44 20L44 22L36 22ZM36 27L44 27L44 29L36 29ZM36 35L44 35L44 37L36 37Z"></path>
+              </svg>
+              Export Excel
+            </button>
+
             <div id="calendar-person-filter"></div>
+            <!-- ⭐ แก้ไข Label ที่นี่ -->
             <div id="show-cancelled-filter" class="person-filter-option">
                 <input type="checkbox" id="show-cancelled-checkbox">
-                <label for="show-cancelled-checkbox">แสดงเวรที่ยกเลิก</label>
+                <label for="show-cancelled-checkbox">เวรที่ยกเลิก</label>
             </div>
+            <!-- ⭐ แก้ไข Label ที่นี่ -->
             <div id="show-dawn-filter" class="person-filter-option">
                 <input type="checkbox" id="show-dawn-checkbox" checked>
-                <label for="show-dawn-checkbox">แสดงเวรรุ่งอรุณ</label>
+                <label for="show-dawn-checkbox">เวรรุ่งอรุณ</label>
             </div>
         </div>
         
@@ -94,9 +135,18 @@
                     <label for="filter-room">เวร</label>
                     <select id="filter-room"></select>
                 </div>
+                <!-- New Clear Filter Button -->
                 <div class="filter-group">
                      <label>&nbsp;</label>
-                     <button id="clear-filters-btn">ล้างตัวกรอง</button>
+                     <!-- ⭐ โครงสร้างใหม่สำหรับปุ่ม Clear filter -->
+                     <button id="clear-filters-btn" class="noselect">
+                        <span class="text">Clear</span>
+                        <span class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -119,9 +169,10 @@
     </div>
 
     <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> ตารางเว๊น | เวอร์ชั่น 5.1 (Google Calendar Integration)</p>
+        <p>&copy; <span id="copyright-year"></span> ตารางเว๊น | เวอร์ชั่น 5.0 (Google Calendar Integration)</p>
     </footer>
 
+    <!-- Link to external JavaScript file -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
