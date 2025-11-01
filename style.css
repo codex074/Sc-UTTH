@@ -582,19 +582,20 @@ footer p { margin: 0; }
     h1 { font-size: 1.4em; }
     .header-container { flex-direction: column; gap: 10px; }
     
-    /* ⭐ ปรับปรุง: พยายามคง 2 คอลัมน์ โดยลดช่องว่างและ padding */
+    /* ⭐ แก้ไข: บังคับ 1 คอลัมน์ในหน้าจอที่เล็กมากๆ */
     .filter-container {
         padding-left: 15px;
         padding-right: 15px;
     }
     .filter-grid { 
-        /* 2-columns (1fr 1fr) is inherited from 768px rule */
-        gap: 10px; /* ลดช่องว่างจาก 15px */
+        grid-template-columns: 1fr; /* บังคับ 1 คอลัมน์ */
+        gap: 15px; /* คืนช่องว่างกลับเป็นปกติ */
     }
     .filter-group input[type="date"] {
-        padding-left: 5px; /* ลด padding ภายใน input */
-        padding-right: 5px;
-        font-size: 0.9em; /* พยายามย่อฟอนต์ในช่องวันที่ */
+        /* ลบ hack ที่เคยใส่ กลับเป็นค่าปกติ */
+        padding-left: 12px; 
+        padding-right: 12px;
+        font-size: 0.95em; 
     }
 }
 
@@ -1022,5 +1023,3 @@ footer p { margin: 0; }
     .nav-center-title { font-size: 1em; }
     .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
-
-
