@@ -581,8 +581,21 @@ footer p { margin: 0; }
 @media (max-width: 480px) {
     h1 { font-size: 1.4em; }
     .header-container { flex-direction: column; gap: 10px; }
-    /* ⭐ แก้ไข: บังคับ 1 คอลัมน์ในหน้าจอที่เล็กมากๆ */
-    .filter-grid { grid-template-columns: 1fr; }
+    
+    /* ⭐ ปรับปรุง: พยายามคง 2 คอลัมน์ โดยลดช่องว่างและ padding */
+    .filter-container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .filter-grid { 
+        /* 2-columns (1fr 1fr) is inherited from 768px rule */
+        gap: 10px; /* ลดช่องว่างจาก 15px */
+    }
+    .filter-group input[type="date"] {
+        padding-left: 5px; /* ลด padding ภายใน input */
+        padding-right: 5px;
+        font-size: 0.9em; /* พยายามย่อฟอนต์ในช่องวันที่ */
+    }
 }
 
 /* --- New Clear Filter Button (Animated) --- */
@@ -1009,4 +1022,5 @@ footer p { margin: 0; }
     .nav-center-title { font-size: 1em; }
     .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
+
 
