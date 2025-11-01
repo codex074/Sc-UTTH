@@ -581,6 +581,8 @@ footer p { margin: 0; }
 @media (max-width: 480px) {
     h1 { font-size: 1.4em; }
     .header-container { flex-direction: column; gap: 10px; }
+    /* ⭐ แก้ไข: บังคับ 1 คอลัมน์ในหน้าจอที่เล็กมากๆ */
+    .filter-grid { grid-template-columns: 1fr; }
 }
 
 /* --- New Clear Filter Button (Animated) --- */
@@ -610,20 +612,24 @@ footer p { margin: 0; }
     font-weight: bold;
     font-size: 0.95em;
     transition: 200ms;
+    /* ⭐ ปรับ padding ให้สมดุลกับไอคอนใหม่ */
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #clear-filters-btn .icon {
     position: absolute;
-    top: 0;
-    left: 0; /* เริ่มจากด้านซ้าย */
-    width: 100%; /* กว้างเต็มปุ่ม */
+    border-left: 1px solid #c41b1b;
+    transform: translateX(110%);
     height: 100%;
+    width: 44px; /* ปรับขนาดให้พอดีกับความสูง */
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: translateX(-100%); /* ซ่อนไว้ด้านซ้าย */
     transition: 200ms;
-    border-left: none; /* ไม่ต้องมีเส้นคั่น */
+    /* ⭐ ย้ายไอคอนไปด้านขวา */
+    right: 0; 
+    top: 0;
 }
 
 #clear-filters-btn .icon svg {
@@ -637,12 +643,13 @@ footer p { margin: 0; }
 
 #clear-filters-btn:hover .text {
     color: transparent;
-    transform: translateX(100%); /* เลื่อนข้อความออกด้านขวา */
+    transform: translateX(-25%); /* เลื่อนข้อความไปทางซ้าย */
 }
 
 #clear-filters-btn:hover .icon {
     width: 100%;
-    transform: translateX(0); /* เลื่อนไอคอนเข้ามา */
+    border-left: none;
+    transform: translateX(0);
 }
 
 #clear-filters-btn:focus {
@@ -1002,3 +1009,4 @@ footer p { margin: 0; }
     .nav-center-title { font-size: 1em; }
     .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
+
