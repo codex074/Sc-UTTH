@@ -1023,3 +1023,90 @@ footer p { margin: 0; }
     .nav-center-title { font-size: 1em; }
     .view-selector .view-btn { font-size: 0.8em; padding: 6px 8px; }
 }
+
+/* --- (⭐ เริ่มส่วนที่เพิ่ม/แก้ไขล่าสุด) --- */
+
+/* --- Summary Detail Trigger Button --- */
+.summary-detail-trigger {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px 6px 20px; /* เพิ่ม padding ด้านซ้ายเล็กน้อย */
+    margin: 4px 0;
+    font-size: 0.95em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.summary-detail-trigger:hover {
+    background-color: var(--today-bg-tint);
+    color: var(--primary-color);
+}
+
+.summary-detail-trigger span {
+    color: var(--text-color);
+    transition: color 0.2s;
+}
+.summary-detail-trigger:hover span {
+    color: var(--primary-color);
+}
+
+/* --- Modal Analysis Styles --- */
+.modal-chart-container {
+    width: 100%;
+    max-width: 250px;
+    height: 250px;
+    margin: 0 auto 20px auto;
+    position: relative;
+}
+
+.modal-summary-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.modal-summary-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1em;
+}
+
+.modal-summary-list li:last-child {
+    border-bottom: none;
+}
+
+.modal-color-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.modal-label {
+    font-weight: 500;
+    color: var(--text-color);
+    flex-grow: 1; /* ดันส่วนที่เหลือไปทางขวา */
+}
+
+.modal-percentage {
+    font-size: 0.9em;
+    color: #888;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.modal-count {
+    font-weight: 500;
+    color: var(--primary-color);
+    flex-shrink: 0;
+    min-width: 50px; /* จัดแนวให้ตรงกัน */
+    text-align: right;
+}
+/* --- (⭐ จบส่วนที่เพิ่ม/แก้ไขล่าสุด) --- */

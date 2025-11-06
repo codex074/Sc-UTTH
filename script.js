@@ -170,6 +170,19 @@ let showDawnShifts = true;
 let currentYearForView = new Date().getFullYear();
 let isYearViewActive = false;
 
+// --- 2.1 SWEETALERT TOAST CONFIG ---
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
 const SHIFTS = {
     'รุ่งอรุณ': { name: 'รุ่งอรุณ', time: '07.00-08.30' },
     'เช้า': { name: 'เช้า', time: '08.30-16.30' },
@@ -359,10 +372,12 @@ async function addEventToGoogleCalendar(calendarId, eventPayload) {
             'resource': eventPayload
         });
         console.log('Event created: ', response.result);
+        
+        Toast.fire({ icon: 'success', title: 'บันทึกใน Google Calendar แล้ว' });
+
         return response.result;
     } catch (error) {
-        console.error('Error creating Google Calendar event:', error);
-        Swal.fire('ผิดพลาด!', `ไม่สามารถสร้าง Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+        handleGoogleApiError(error, 'สร้าง Event ใน Google Calendar');
         return null;
     }
 }
@@ -375,10 +390,12 @@ async function updateGoogleCalendarEvent(calendarId, eventId, eventPayload) {
             'resource': eventPayload
         });
         console.log('Event updated: ', response.result);
+        
+        Toast.fire({ icon: 'success', title: 'อัปเดตใน Google Calendar แล้ว' });
+
         return response.result;
     } catch (error) {
-        console.error('Error updating Google Calendar event:', error);
-        Swal.fire('ผิดพลาด!', `ไม่สามารถอัปเดต Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+        handleGoogleApiError(error, 'อัปเดต Event ใน Google Calendar');
     }
 }
 async function deleteGoogleCalendarEvent(calendarId, eventId) {
@@ -390,12 +407,42 @@ async function deleteGoogleCalendarEvent(calendarId, eventId) {
         });
         console.log('Event deleted successfully.');
     } catch (error) {
-        console.error('Error deleting Google Calendar event:', error);
          if (error.result && error.result.error && error.result.error.code === 404) {
             console.warn('Event not found in Google Calendar, it might have been deleted already.');
         } else {
-            Swal.fire('ผิดพลาด!', `ไม่สามารถลบ Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
+            handleGoogleApiError(error, 'ลบ Event ใน Google Calendar');
         }
+    }
+}
+
+/**
+ * ฟังก์ชันใหม่สำหรับจัดการข้อผิดพลาดจาก Google API
+ * โดยจะตรวจสอบข้อผิดพลาด 401/403 (Auth Error)
+ */
+function handleGoogleApiError(error, actionMessage) {
+    console.error(`Google Calendar Error (${actionMessage}):`, error);
+
+    // ตรวจสอบว่า Error Code เป็น 401 (Unauthorized) หรือ 403 (Forbidden) หรือไม่
+    if (error.result && error.result.error && (error.result.error.code === 401 || error.result.error.code === 403)) {
+        
+        // 1. ล้างโทเค็นเก่าที่ใช้ไม่ได้ผลออก
+        handleSignoutClick(); 
+        
+        // 2. แสดง SweetAlert แจ้งเตือนผู้ใช้
+        Swal.fire({
+            title: 'เซสชั่นหมดอายุ',
+            text: 'โทเค็น Google ของคุณหมดอายุหรือถูกยกเลิก กรุณาล็อกอินใหม่อีกครั้ง',
+            icon: 'warning',
+            confirmButtonText: 'ตกลง'
+        }).then((result) => {
+            // 3. เมื่อผู้ใช้กด "ตกลง" ให้เรียกหน้าต่างล็อกอินขึ้นมา
+            if (result.isConfirmed) {
+                handleAuthClick();
+            }
+        });
+    } else {
+        // หากเป็นข้อผิดพลาดอื่น (เช่น 404, 500) ให้แสดงตามปกติ
+        Swal.fire('ผิดพลาด!', `ไม่สามารถ${actionMessage}ได้: ${error.details || error.message}`, 'error');
     }
 }
 
@@ -548,6 +595,9 @@ function renderPaginationControls(totalPages) {
     paginationContainer.appendChild(createButton('»', currentPage + 1, currentPage === totalPages));
 }
 
+//
+// ⭐ --- START: ฟังก์ชัน updateChartAndSummary (เวอร์ชั่นล่าสุด) --- ⭐
+//
 function updateChartAndSummary(data) {
     const dataSummaryEl = document.getElementById('data-summary');
     const personFilter = document.getElementById('filter-person').value;
@@ -562,34 +612,90 @@ function updateChartAndSummary(data) {
     };
     let totalRemuneration = 0;
 
+    // ⭐️ (ตัวแปรนี้ถูกย้ายเข้ามาใน if)
+    let detailedCounts = {}; 
+
     if (personFilter === 'all') {
-        const personCounts = {};
-        const shiftTypeCounts = {};
+        const personCounts = {}; // สำหรับ Pie Chart
 
         validShifts.forEach(item => {
+            // 1. นับยอดรวม Pie Chart
             personCounts[item.person] = (personCounts[item.person] || 0) + 1;
-            shiftTypeCounts[item.shift] = (shiftTypeCounts[item.shift] || 0) + 1;
+            
+            // 2. สร้างโครงสร้างข้อมูลเจาะลึก
+            const person = item.person;
+            const shift = item.shift;
+            const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room; 
+
+            if (!detailedCounts[person]) {
+                detailedCounts[person] = {};
+            }
+            if (!detailedCounts[person][shift]) {
+                detailedCounts[person][shift] = {};
+            }
+            detailedCounts[person][shift][countKey] = (detailedCounts[person][shift][countKey] || 0) + 1;
+
+            // 3. คำนวณค่าตอบแทน
             const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
             if (rate) totalRemuneration += rate;
         });
 
-        summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p><hr>`;
-        for(const person in PERSONS) {
-             const count = personCounts[person] || 0;
-             const percentage = validShifts.length > 0 ? (count / validShifts.length * 100).toFixed(1) : 0;
-            summaryHTML += `<p><span>${PERSONS[person].name}:</span> <strong>${count} เวร (${percentage}%)</strong></p>`;
+        // --- 4. สร้าง HTML สรุปผล ---
+        summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p>`;
+
+        // วนลูปตามรายชื่อเภสัชกร (PERSONS)
+        for (const personKey in PERSONS) {
+            if (!detailedCounts[personKey]) continue; 
+
+            const personData = detailedCounts[personKey]; 
+            const personTotal = personCounts[personKey] || 0;
+            const percentage = validShifts.length > 0 ? (personTotal / validShifts.length * 100).toFixed(1) : 0;
+
+            // หัวข้อของแต่ละคน
+            summaryHTML += `<hr><p style="margin-top: 10px;">
+                <span>${PERSONS[personKey].icon} <strong>${PERSONS[personKey].name}:</strong></span> 
+                <strong>${personTotal} เวร (${percentage}%)</strong>
+            </p>`;
+
+            // วนลูปตามช่วงเวลา (SHIFTS)
+            for (const shiftKey in SHIFTS) {
+                if (!personData[shiftKey]) continue; 
+
+                const shiftData = personData[shiftKey]; 
+                let shiftTotal = 0;
+                
+                for (const roomKey in shiftData) {
+                    const count = shiftData[roomKey];
+                    shiftTotal += count; 
+                }
+
+                // ⭐️ สร้าง <a class="summary-detail-trigger"> ที่กดเพื่อเปิด Modal
+                if (shiftTotal > 0) {
+                    summaryHTML += `
+                        <a class="summary-detail-trigger" 
+                           data-person="${personKey}" 
+                           data-shift="${shiftKey}"
+                           role="button">
+                            <span>&bull; ${SHIFTS[shiftKey].name}:</span> 
+                            <strong>${shiftTotal} เวร</strong>
+                        </a>
+                    `;
+                }
+            }
         }
-        summaryHTML += `<hr>`;
-        for(const shift in SHIFTS) {
-            summaryHTML += `<p><span>${SHIFTS[shift].name}:</span> <strong>${shiftTypeCounts[shift] || 0} เวร</strong></p>`;
-        }
+        
+        // ค่าตอบแทนรวม
         summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทนทั้งหมด:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
 
+        // 5. ข้อมูลสำหรับ Pie Chart
         chartLabels = Object.keys(personCounts);
         chartData = Object.values(personCounts);
         chartColors = chartLabels.map(label => PERSONS[label]?.color || '#cccccc');
 
     } else {
+        //
+        // --- ส่วน 'else' (กรณีเลือกเภสัชฯ คนเดียว) ไม่ได้แก้ไข ---
+        //
         const roomCounts = {};
         const personShifts = validShifts.filter(item => item.person === personFilter);
         
@@ -616,6 +722,35 @@ function updateChartAndSummary(data) {
     
     dataSummaryEl.innerHTML = summaryHTML;
 
+    //
+    // ⭐ --- START: ส่วนที่เพิ่มเข้ามา --- ⭐
+    //
+    // เพิ่ม Event Listeners ให้กับปุ่มที่เราสร้าง
+    // (ต้องทำหลังจาก .innerHTML)
+    //
+    if (personFilter === 'all') {
+        dataSummaryEl.querySelectorAll('.summary-detail-trigger').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                const personKey = target.dataset.person;
+                const shiftKey = target.dataset.shift;
+                
+                if (detailedCounts[personKey] && detailedCounts[personKey][shiftKey]) {
+                    const personName = PERSONS[personKey].name;
+                    const shiftName = SHIFTS[shiftKey].name;
+                    const shiftData = detailedCounts[personKey][shiftKey];
+                    
+                    // เรียกฟังก์ชันใหม่เพื่อแสดง Modal
+                    showShiftDetailModal(personName, shiftName, shiftData);
+                }
+            });
+        });
+    }
+    //
+    // ⭐ --- END: ส่วนที่เพิ่มเข้ามา --- ⭐
+    //
+
+    // (ส่วนการสร้าง Chart หลัก ไม่ได้แก้ไข)
     const ctx = document.getElementById('shift-chart').getContext('2d');
     if (shiftChartInstance) {
         shiftChartInstance.destroy();
@@ -703,7 +838,106 @@ function updateChartAndSummary(data) {
         plugins: [centerText]
     });
 }
+//
+// ⭐ --- END: สิ้นสุดฟังก์ชันที่แก้ไข --- ⭐
+//
 
+//
+// ⭐ --- START: ฟังก์ชันใหม่สำหรับ Modal --- ⭐
+//
+/**
+ * สร้างและแสดง Modal วิเคราะห์รายละเอียดเวร
+ * (ถูกเรียกใช้จาก updateChartAndSummary)
+ */
+function showShiftDetailModal(personName, shiftName, shiftData) {
+    let modalChartInstance = null;
+    const labels = Object.keys(shiftData);
+    const data = Object.values(shiftData);
+    const total = data.reduce((a, b) => a + b, 0);
+
+    // สีสำหรับ Chart และรายการ
+    const chartColors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+        '#9966FF', '#FF9F40', '#C9CBCF', '#E74C3C'
+    ];
+
+    // สร้าง HTML ที่จะแสดงใน Modal
+    let listHtml = '<ul class="modal-summary-list">';
+    labels.forEach((label, index) => {
+        const count = data[index];
+        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+        const color = chartColors[index % chartColors.length];
+        
+        listHtml += `
+            <li>
+                <span class="modal-color-box" style="background-color: ${color}"></span>
+                <span class="modal-label">${label}</span>
+                <span class="modal-percentage">(${percentage}%)</span>
+                <span class="modal-count">${count} เวร</span>
+            </li>
+        `;
+    });
+    listHtml += '</ul>';
+
+    Swal.fire({
+        title: `<strong>${personName} - เวร${shiftName}</strong>`,
+        html: `
+            <div class="modal-chart-container">
+                <canvas id="modal-shift-chart"></canvas>
+            </div>
+            ${listHtml}
+        `,
+        width: '500px',
+        showCloseButton: true,
+        showConfirmButton: false, // ซ่อนปุ่ม OK
+        didOpen: () => {
+            const ctx = document.getElementById('modal-shift-chart').getContext('2d');
+            if (ctx) {
+                modalChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: chartColors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }, // ซ่อน legend (เรามี list ของเราเอง)
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        const count = context.raw;
+                                        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                                        return `${label} ${count} เวร (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        },
+        willClose: () => {
+            // ทำลาย Chart instance เมื่อปิด Modal เพื่อป้องกัน memory leak
+            if (modalChartInstance) {
+                modalChartInstance.destroy();
+            }
+        }
+    });
+}
+//
+// ⭐ --- END: ฟังก์ชันใหม่สำหรับ Modal --- ⭐
+//
 
 function applyAndRenderFilters() {
     const personFilter = document.getElementById('filter-person').value;
