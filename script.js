@@ -4,7 +4,6 @@ import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, s
 
 // --- Medicine Themed Particle Animation Script ---
 const canvas = document.getElementById('particle-canvas-main');
-// ... (โค้ด Particle ทั้งหมดเหมือนเดิม) ...
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -240,35 +239,9 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
 
 // --- 4. GOOGLE CALENDAR INTEGRATION ---
 
-// ⭐ 1. สร้างฟังก์ชันสำหรับออกจากระบบ (เฉพาะในเครื่อง)
-function forceLocalSignout() {
-    localStorage.removeItem('google_auth_token');
-    if (gapi.client) {
-        gapi.client.setToken('');
-    }
-    updateUiForLoginState(false);
-    console.warn("Local session cleared.");
-}
-
-// ⭐ 2. สร้างฟังก์ชันใหม่สำหรับจัดการ Token หมดอายุ
-function handleTokenError() {
-    forceLocalSignout(); // ล้าง Token เก่า
-    Swal.fire({
-        title: 'เซสชันหมดอายุ!',
-        text: 'กรุณาล็อกอินใหม่อีกครั้งเพื่อดำเนินการต่อ',
-        icon: 'warning',
-        confirmButtonText: 'ตกลง'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // ⭐ เมื่อผู้ใช้กด "ตกลง" ให้เปิดหน้าต่างล็อกอินทันที
-            handleAuthClick();
-        }
-    });
-}
-
 function updateUiForLoginState(isLoggedIn) {
     const authText = document.getElementById('auth-btn-text');
-    const authIcon = authSignInBtn.querySelector('.google-btn-icon'); 
+    const authIcon = authSignInBtn.querySelector('.google-btn-icon'); // ใช้คลาสใหม่
 
     if (isLoggedIn) {
         authSignInBtn.style.display = 'none';
@@ -285,7 +258,6 @@ function gapiLoaded() {
     gapi.load('client', initializeGapiClient);
 }
 
-// ⭐ 3. แก้ไข initializeGapiClient เพื่อ "ทดสอบ" Token ที่กู้มา
 async function initializeGapiClient() {
     await gapi.client.init({
         apiKey: API_KEY,
@@ -296,17 +268,8 @@ async function initializeGapiClient() {
     const storedToken = localStorage.getItem('google_auth_token');
     if (storedToken) {
         gapi.client.setToken(JSON.parse(storedToken));
-        try {
-            // ทดสอบ Token โดยการเรียก API แบบเบาๆ (ขอรายการปฏิทิน 1 รายการ)
-            await gapi.client.calendar.calendarList.list({maxResults: 1});
-            // ถ้าสำเร็จ: Token ยังใช้ได้
-            updateUiForLoginState(true);
-            console.log("Restored login from saved session.");
-        } catch (error) {
-            // ถ้าล้มเหลว (401): Token หมดอายุ
-            console.warn("Restored token is invalid or expired. Forcing local signout.");
-            forceLocalSignout(); // บังคับออกจากระบบในเครื่อง (แบบเงียบๆ)
-        }
+        updateUiForLoginState(true);
+        console.log("Restored login from saved session.");
     } else {
         updateUiForLoginState(false);
     }
@@ -337,15 +300,15 @@ function handleAuthClick() {
     }
 }
 
-// ⭐ 4. แก้ไข handleSignoutClick ให้เรียกใช้ forceLocalSignout
 function handleSignoutClick() {
     const token = gapi.client.getToken();
     if (token !== null) {
-        google.accounts.oauth2.revoke(token.access_token, () => {
-            console.log('Token revoked from Google.');
-        });
+        localStorage.removeItem('google_auth_token');
+        
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+        updateUiForLoginState(false);
     }
-    forceLocalSignout(); // ลบ Token ในเครื่องและอัปเดต UI
 }
 
 function createGoogleCalendarEventPayload(data) {
@@ -399,12 +362,7 @@ async function addEventToGoogleCalendar(calendarId, eventPayload) {
         return response.result;
     } catch (error) {
         console.error('Error creating Google Calendar event:', error);
-        // ⭐ 5. เรียกใช้ฟังก์ชันใหม่
-        if (error.status === 401) {
-            handleTokenError();
-        } else {
-            Swal.fire('ผิดพลาด!', `ไม่สามารถสร้าง Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
-        }
+        Swal.fire('ผิดพลาด!', `ไม่สามารถสร้าง Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
         return null;
     }
 }
@@ -420,12 +378,7 @@ async function updateGoogleCalendarEvent(calendarId, eventId, eventPayload) {
         return response.result;
     } catch (error) {
         console.error('Error updating Google Calendar event:', error);
-        // ⭐ 5. เรียกใช้ฟังก์ชันใหม่
-        if (error.status === 401) {
-            handleTokenError();
-        } else {
-            Swal.fire('ผิดพลาด!', `ไม่สามารถอัปเดต Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
-        }
+        Swal.fire('ผิดพลาด!', `ไม่สามารถอัปเดต Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
     }
 }
 async function deleteGoogleCalendarEvent(calendarId, eventId) {
@@ -440,8 +393,6 @@ async function deleteGoogleCalendarEvent(calendarId, eventId) {
         console.error('Error deleting Google Calendar event:', error);
          if (error.result && error.result.error && error.result.error.code === 404) {
             console.warn('Event not found in Google Calendar, it might have been deleted already.');
-        } else if (error.status === 401) { // ⭐ 5. เรียกใช้ฟังก์ชันใหม่
-            handleTokenError();
         } else {
             Swal.fire('ผิดพลาด!', `ไม่สามารถลบ Event ใน Google Calendar ได้: ${error.details || error.message}`, 'error');
         }
@@ -451,7 +402,6 @@ async function deleteGoogleCalendarEvent(calendarId, eventId) {
 
 // --- 5. HELPER & RENDER FUNCTIONS ---
 function toYYYYMMDD(date) {
-// ... (โค้ดส่วนที่เหลือเหมือนเดิม) ...
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -1264,7 +1214,7 @@ async function handleEventClick(arg) {
     const result = await Swal.fire({
         title: `แก้ไข/ลบเวร`,
         html: `
-            <p style="margin-bottom: 20px;">วันที่ ${new Date(eventDateStr).toLocaleDateString('th-TH', { date Style: 'long' })}</p>
+            <p style="margin-bottom: 20px;">วันที่ ${new Date(eventDateStr).toLocaleDateString('th-TH', { dateStyle: 'long' })}</p>
             <label class="swal2-input-label">เภสัชกร</label>
             <div class="radio-group-horizontal">
                 ${Object.keys(PERSONS).map(p => `
