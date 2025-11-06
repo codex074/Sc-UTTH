@@ -623,21 +623,24 @@ footer p { margin: 0; }
     width: 100%;
     color: white;
     font-weight: bold;
-    font-size: 1em; /* 1. ปรับขนาดฟอนต์ให้ใหญ่ขึ้นเล็กน้อย */
+    font-size: 0.95em;
     transition: 200ms;
-    /* 2. ลบ padding ที่ไม่จำเป็นออก */
+    /* ⭐ ปรับ padding ให้สมดุลกับไอคอนใหม่ */
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #clear-filters-btn .icon {
     position: absolute;
-    border-left: 1px solid #c41b1b; /* 3. ใช้สีแดงที่เข้มกว่า */
-    transform: translateX(110%); /* ซ่อนไว้ด้านขวา */
-    height: 100%; 
-    width: 44px; 
+    border-left: 1px solid #c41b1b;
+    transform: translateX(110%);
+    height: 100%;
+    width: 44px; /* ปรับขนาดให้พอดีกับความสูง */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: 200ms;
+    /* ⭐ ย้ายไอคอนไปด้านขวา */
     right: 0; 
     top: 0;
 }
@@ -652,14 +655,15 @@ footer p { margin: 0; }
 }
 
 #clear-filters-btn:hover .text {
-    color: transparent;
-    transform: translateX(-25%); /* เลื่อนข้อความไปทางซ้าย */
+    /* 10. เปลี่ยนเป็นเลื่อนข้อความออกและจางหาย */
+    transform: translateX(-25%);
+    opacity: 0;
 }
 
 #clear-filters-btn:hover .icon {
-    width: 100%; /* ให้ไอคอนขยายเต็มความกว้างปุ่ม */
+    width: 100%; /* 11. ให้ไอคอนขยายเต็มความกว้างปุ่ม */
     border-left: none;
-    transform: translateX(0); /* เลื่อนไอคอนเข้ามาตรงกลาง */
+    transform: translateX(0); /* 12. เลื่อนไอคอนเข้ามาตรงกลาง */
 }
 
 #clear-filters-btn:focus {
