@@ -596,7 +596,7 @@ function renderPaginationControls(totalPages) {
 }
 
 //
-// ⭐ --- START: ฟังก์ชัน updateChartAndSummary (เวอร์ชั่นล่าสุด) --- ⭐
+// ⭐ --- START: ฟังก์ชัน updateChartAndSummary (เวอร์ชั่นล่าสุดที่แก้ไข 'รุ่งอรุณ') --- ⭐
 //
 function updateChartAndSummary(data) {
     const dataSummaryEl = document.getElementById('data-summary');
@@ -612,20 +612,19 @@ function updateChartAndSummary(data) {
     };
     let totalRemuneration = 0;
 
-    // ⭐️ (ตัวแปรนี้ถูกย้ายเข้ามาใน if)
     let detailedCounts = {}; 
 
     if (personFilter === 'all') {
-        const personCounts = {}; // สำหรับ Pie Chart
+        const personCounts = {}; 
 
         validShifts.forEach(item => {
-            // 1. นับยอดรวม Pie Chart
             personCounts[item.person] = (personCounts[item.person] || 0) + 1;
             
-            // 2. สร้างโครงสร้างข้อมูลเจาะลึก
             const person = item.person;
             const shift = item.shift;
-            const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room; 
+            
+            // ⭐ ใช้ item.room เสมอ เพื่อแยก 'รุ่งอรุณ' เป็น ER/OPD
+            const countKey = item.room; 
 
             if (!detailedCounts[person]) {
                 detailedCounts[person] = {};
@@ -635,15 +634,13 @@ function updateChartAndSummary(data) {
             }
             detailedCounts[person][shift][countKey] = (detailedCounts[person][shift][countKey] || 0) + 1;
 
-            // 3. คำนวณค่าตอบแทน
+            // คำนวณค่าตอบแทน
             const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
             if (rate) totalRemuneration += rate;
         });
 
-        // --- 4. สร้าง HTML สรุปผล ---
         summaryHTML += `<p><span>เวรทั้งหมด:</span> <strong>${validShifts.length} เวร</strong></p>`;
 
-        // วนลูปตามรายชื่อเภสัชกร (PERSONS)
         for (const personKey in PERSONS) {
             if (!detailedCounts[personKey]) continue; 
 
@@ -651,13 +648,11 @@ function updateChartAndSummary(data) {
             const personTotal = personCounts[personKey] || 0;
             const percentage = validShifts.length > 0 ? (personTotal / validShifts.length * 100).toFixed(1) : 0;
 
-            // หัวข้อของแต่ละคน
             summaryHTML += `<hr><p style="margin-top: 10px;">
                 <span>${PERSONS[personKey].icon} <strong>${PERSONS[personKey].name}:</strong></span> 
                 <strong>${personTotal} เวร (${percentage}%)</strong>
             </p>`;
 
-            // วนลูปตามช่วงเวลา (SHIFTS)
             for (const shiftKey in SHIFTS) {
                 if (!personData[shiftKey]) continue; 
 
@@ -669,7 +664,6 @@ function updateChartAndSummary(data) {
                     shiftTotal += count; 
                 }
 
-                // ⭐️ สร้าง <a class="summary-detail-trigger"> ที่กดเพื่อเปิด Modal
                 if (shiftTotal > 0) {
                     summaryHTML += `
                         <a class="summary-detail-trigger" 
@@ -684,34 +678,47 @@ function updateChartAndSummary(data) {
             }
         }
         
-        // ค่าตอบแทนรวม
         summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทนทั้งหมด:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
 
-        // 5. ข้อมูลสำหรับ Pie Chart
         chartLabels = Object.keys(personCounts);
         chartData = Object.values(personCounts);
         chartColors = chartLabels.map(label => PERSONS[label]?.color || '#cccccc');
 
     } else {
         //
-        // --- ส่วน 'else' (กรณีเลือกเภสัชฯ คนเดียว) ไม่ได้แก้ไข ---
+        // --- ส่วน 'else' (กรณีเลือกเภสัชฯ คนเดียว) ---
         //
         const roomCounts = {};
         const personShifts = validShifts.filter(item => item.person === personFilter);
         
         personShifts.forEach(item => {
-            const countKey = item.shift === 'รุ่งอรุณ' ? 'รุ่งอรุณ' : item.room;
+            // ⭐ ใช้ item.room เสมอ
+            const countKey = item.room; 
             roomCounts[countKey] = (roomCounts[countKey] || 0) + 1;
+            
+            // ⭐ คำนวณเงิน
             const rate = item.shift === 'รุ่งอรุณ' ? REMUNERATION_RATES['รุ่งอรุณ'] : REMUNERATION_RATES[item.room];
-            if (rate) totalRemuneration += rate;
+            if (rate) {
+                totalRemuneration += rate;
+            }
         });
 
         summaryHTML += `<p><span>เวรทั้งหมดของ ${PERSONS[personFilter].name}:</span> <strong>${personShifts.length} เวร</strong></p><hr>`;
+         
          for(const room in roomCounts) {
              const count = roomCounts[room];
              const percentage = personShifts.length > 0 ? (count / personShifts.length * 100).toFixed(1) : 0;
-             const remuneration = REMUNERATION_RATES[room] ? `(฿${(count * REMUNERATION_RATES[room]).toLocaleString()})` : '';
-            summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%) ${remuneration}</strong></p>`;
+             
+             // ⭐ คำนวณเงินในนี้ใหม่ เพื่อแยกเรท 'รุ่งอรุณ' ออกจากเรทห้องปกติ
+             let remuneration = 0;
+             const dawnShiftsInRoom = personShifts.filter(s => s.shift === 'รุ่งอรุณ' && s.room === room).length;
+             const otherShiftsInRoom = personShifts.filter(s => s.shift !== 'รุ่งอรุณ' && s.room === room).length;
+
+             remuneration = (dawnShiftsInRoom * REMUNERATION_RATES['รุ่งอรุณ']) + (otherShiftsInRoom * (REMUNERATION_RATES[room] || 0));
+             
+             const remunerationText = remuneration > 0 ? `(฿${remuneration.toLocaleString()})` : '';
+
+            summaryHTML += `<p><span>${room}:</span> <strong>${count} เวร (${percentage}%) ${remunerationText}</strong></p>`;
         }
         summaryHTML += `<hr style="margin: 15px 0;"><p><span><strong>รวมค่าตอบแทน:</strong></span> <strong>${totalRemuneration.toLocaleString()} บาท</strong></p>`;
 
@@ -723,10 +730,7 @@ function updateChartAndSummary(data) {
     dataSummaryEl.innerHTML = summaryHTML;
 
     //
-    // ⭐ --- START: ส่วนที่เพิ่มเข้ามา --- ⭐
-    //
-    // เพิ่ม Event Listeners ให้กับปุ่มที่เราสร้าง
-    // (ต้องทำหลังจาก .innerHTML)
+    // ⭐ --- เพิ่ม Event Listeners ให้กับปุ่ม (ต้องทำหลังจาก .innerHTML) --- ⭐
     //
     if (personFilter === 'all') {
         dataSummaryEl.querySelectorAll('.summary-detail-trigger').forEach(button => {
@@ -740,17 +744,15 @@ function updateChartAndSummary(data) {
                     const shiftName = SHIFTS[shiftKey].name;
                     const shiftData = detailedCounts[personKey][shiftKey];
                     
-                    // เรียกฟังก์ชันใหม่เพื่อแสดง Modal
                     showShiftDetailModal(personName, shiftName, shiftData);
                 }
             });
         });
     }
     //
-    // ⭐ --- END: ส่วนที่เพิ่มเข้ามา --- ⭐
+    // ⭐ --- จบส่วนเพิ่ม Event Listeners --- ⭐
     //
 
-    // (ส่วนการสร้าง Chart หลัก ไม่ได้แก้ไข)
     const ctx = document.getElementById('shift-chart').getContext('2d');
     if (shiftChartInstance) {
         shiftChartInstance.destroy();
