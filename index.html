@@ -1,178 +1,189 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตารางเว๊น</title>
-    <link rel="shortcut icon" href="icon.ico" type="image/x-icon">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- PWA Manifest and Theme Color -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#141d2b"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Exp OPD</title>
+  <link rel="shortcut icon" href="icons/icon.ico" type="image/x-icon">
 
-    <!-- Link to external CSS file -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- External Libraries -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Sarabun', sans-serif; background-color: #f0f2f5; touch-action: pan-y; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(241, 241, 241, 0.5); }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .action-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .action-card:hover { border-color: #60a5fa; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); transform: translateY(-2px); }
+    .action-card-input:checked + .action-card { background: linear-gradient(135deg, #2563eb, #06b6d4); color: white; border-color: transparent; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4); transform: scale(1.05) translateY(-2px); }
+    .action-card-input:checked + .action-card i, .action-card-input:checked + .action-card span { color: white !important; }
+    .modal-bg { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .back-to-top { position: fixed; bottom: 24px; right: 24px; z-index: 40; transition: all 0.3s; opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.8); }
+    .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+    .custom-loader { width: 50px; height: 50px; display: grid; }
+    .custom-loader::before, .custom-loader::after { content: ""; grid-area: 1/1; --c: radial-gradient(farthest-side,#2563eb 92%,#0000); background: var(--c) 50% 0, var(--c) 50% 100%, var(--c) 100% 50%, var(--c) 0 50%; background-size: 12px 12px; background-repeat: no-repeat; animation: s2 1s infinite; }
+    .custom-loader::before { margin: 4px; filter: hue-rotate(45deg); background-size: 8px 8px; animation-timing-function: linear; }
+    @keyframes s2 { 100% { transform: rotate(.5turn) } }
+    input[type="date"] { -webkit-appearance: none; min-height: 3rem; }
+  </style>
 </head>
-<body class="animated-gradient-bg">
-    <canvas id="particle-canvas-main"></canvas>
+<body class="bg-slate-50 relative h-full w-full text-slate-800 overflow-hidden">
+  <div class="fixed top-[-20%] left-[-10%] w-[500px] h-[500px] bg-purple-400/30 rounded-full mix-blend-multiply filter blur-[80px] animate-pulse z-0 pointer-events-none"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[80px] z-0 pointer-events-none"></div>
 
-    <div id="app-container">
-        <div class="header-container">
-            <h1>🐾 ตารางเว๊น 🐾</h1>
-        </div>
-
-        <div id="calendar-wrapper">
-            <!-- Color Legend Area -->
-            <div id="color-legend" class="color-legend-container"></div>
-            
-            <div class="calendar-nav">
-                <div class="nav-left-group">
-                    <button class="today-btn" id="calendar-today">วันนี้</button>
-                    <button class="nav-btn" id="calendar-prev">‹</button>
-                    <button class="nav-btn" id="calendar-next">›</button>
-                </div>
-
-                <div class="nav-center-title">
-                    <div class="current-month" id="calendar-title"></div>
-                </div>
-
-                <div class="view-selector">
-                    <button class="view-btn" id="view-day">วัน</button>
-                    <button class="view-btn" id="view-week">สัปดาห์</button>
-                    <button class="view-btn active" id="view-month">เดือน</button>
-                    <button class="view-btn" id="view-year">ปี</button>
-                </div>
-            </div>
-            
-            <div id='calendar'></div>
-            <div id="year-view-container"></div>
-
-        </div>
-        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
-            
-            <!-- 1. ปุ่ม Sign in (โครงสร้างใหม่) -->
-            <button id="auth-signin-btn" class="container-btn-file">
-                <svg class="google-btn-icon" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" height="24px" width="24px">
-                    <g fill-rule="evenodd" fill="none" stroke-width="1" stroke="none">
-                      <g fill-rule="nonzero" transform="translate(3.000000, 2.000000)">
-                        <path fill="#4285F4" d="M57.8123233,30.1515267 C57.8123233,27.7263183 57.6155321,25.9565533 57.1896408,24.1212666 L29.4960833,24.1212666 L29.4960833,35.0674653 L45.7515771,35.0674653 C45.4239683,37.7877475 43.6542033,41.8844383 39.7213169,44.6372555 L39.6661883,45.0037254 L48.4223791,51.7870338 L49.0290201,51.8475849 C54.6004021,46.7020943 57.8123233,39.1313952 57.8123233,30.1515267"></path>
-                        <path fill="#34A853" d="M29.4960833,58.9921667 C37.4599129,58.9921667 44.1456164,56.3701671 49.0290201,51.8475849 L39.7213169,44.6372555 C37.2305867,46.3742596 33.887622,47.5868638 29.4960833,47.5868638 C21.6960582,47.5868638 15.0758763,42.4415991 12.7159637,35.3297782 L12.3700541,35.3591501 L3.26524241,42.4054492 L3.14617358,42.736447 C7.9965904,52.3717589 17.959737,58.9921667 29.4960833,58.9921667"></path>
-                        <path fill="#FBBC05" d="M12.7159637,35.3297782 C12.0932812,33.4944915 11.7329116,31.5279353 11.7329116,29.4960833 C11.7329116,27.4640054 12.0932812,25.4976752 12.6832029,23.6623884 L12.6667095,23.2715173 L3.44779955,16.1120237 L3.14617358,16.2554937 C1.14708246,20.2539019 0,24.7439491 0,29.4960833 C0,34.2482175 1.14708246,38.7380388 3.14617358,42.736447 L12.7159637,35.3297782"></path>
-                        <path fill="#EB4335" d="M29.4960833,11.4050769 C35.0347044,11.4050769 38.7707997,13.7975244 40.9011602,15.7968415 L49.2255853,7.66898166 C44.1130815,2.91684746 37.4599129,0 29.4960833,0 C17.959737,0 7.9965904,6.62018183 3.14617358,16.2554937 L12.6832029,23.6623884 C15.0758763,16.5505675 21.6960582,11.4050769 29.4960833,11.4050769"></path>
-                      </g>
-                    </g>
-                </svg>
-              <span id="auth-btn-text">Sign In with Google</span>
-            </button>
-            
-            <!-- 2. ปุ่ม Sign out (ดีไซน์ใหม่) -->
-            <button id="auth-signout-btn" class="container-btn-file" style="display: none;">
-                <svg viewBox="0 0 512 512" width="20" height="20" fill="#fff">
-                    <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
-                </svg>
-                Logout
-            </button>
-            
-            <!-- New JSON Backup Button -->
-            <button id="backup-btn" class="container-btn-file json-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 16 16">
-                <path d="M9.21 3.014a.5.5 0 0 0-.42.853L11.168 8l-2.378 4.133a.5.5 0 1 0 .84.482l2.5-4.333a.5.5 0 0 0 0-.482l-2.5-4.333a.5.5 0 0 0-.42-.267zM6.79 3.014a.5.5 0 0 1 .42.853L4.832 8l2.378 4.133a.5.5 0 1 1-.84.482l-2.5-4.333a.5.5 0 0 1 0-.482l2.5-4.333a.5.5 0 0 1 .42-.267z"/>
-              </svg>
-              Export JSON
-            </button>
-            
-            <!-- New Excel Export Button -->
-            <button id="export-excel-btn" class="container-btn-file">
-              <svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 50 50">
-                <path d="M28.8125 .03125L.8125 5.34375C.339844 5.433594 0 5.863281 0 6.34375L0 43.65625C0 44.136719 .339844 44.566406 .8125 44.65625L28.8125 49.96875C28.875 49.980469 28.9375 50 29 50C29.230469 50 29.445313 49.929688 29.625 49.78125C29.855469 49.589844 30 49.296875 30 49L30 1C30 .703125 29.855469 .410156 29.625 .21875C29.394531 .0273438 29.105469 -.0234375 28.8125 .03125ZM32 6L32 13L34 13L34 15L32 15L32 20L34 20L34 22L32 22L32 27L34 27L34 29L32 29L32 35L34 35L34 37L32 37L32 44L47 44C48.101563 44 49 43.101563 49 42L49 8C49 6.898438 48.101563 6 47 6ZM36 13L44 13L44 15L36 15ZM6.6875 15.6875L11.8125 15.6875L14.5 21.28125C14.710938 21.722656 14.898438 22.265625 15.0625 22.875L15.09375 22.875C15.199219 22.511719 15.402344 21.941406 15.6875 21.21875L18.65625 15.6875L23.34375 15.6875L17.75 24.9375L23.5 34.375L18.53125 34.375L15.28125 28.28125C15.160156 28.054688 15.035156 27.636719 14.90625 27.03125L14.875 27.03125C14.8125 27.316406 14.664063 27.761719 14.4375 28.34375L11.1875 34.375L6.1875 34.375L12.15625 25.03125ZM36 20L44 20L44 22L36 22ZM36 27L44 27L44 29L36 29ZM36 35L44 35L44 37L36 37Z"></path>
-              </svg>
-              Export Excel
-            </button>
-
-            <div id="calendar-person-filter"></div>
-            <!-- ⭐ แก้ไข Label ที่นี่ -->
-            <div id="show-cancelled-filter" class="person-filter-option">
-                <input type="checkbox" id="show-cancelled-checkbox">
-                <label for="show-cancelled-checkbox">เวรที่ยกเลิก</label>
-            </div>
-            <!-- ⭐ แก้ไข Label ที่นี่ -->
-            <div id="show-dawn-filter" class="person-filter-option">
-                <input type="checkbox" id="show-dawn-checkbox" checked>
-                <label for="show-dawn-checkbox">เวรรุ่งอรุณ</label>
-            </div>
-        </div>
-        
-        <div id="filter-container">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="filter-person">เภสัชกร</label>
-                    <select id="filter-person"></select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-shift">ช่วงเวลา</label>
-                    <select id="filter-shift"></select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-start-date">ตั้งแต่วันที่</label>
-                    <input type="date" id="filter-start-date">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-end-date">ถึงวันที่</label>
-                    <input type="date" id="filter-end-date">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-room">เวร</label>
-                    <select id="filter-room"></select>
-                </div>
-                <!-- New Clear Filter Button -->
-                <div class="filter-group">
-                     <label>&nbsp;</label>
-                     <!-- ⭐ โครงสร้างใหม่สำหรับปุ่ม Clear filter -->
-                     <button id="clear-filters-btn" class="noselect">
-                        <span class="text">Clear</span>
-                        <span class="icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
-                            </svg>
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="chart-summary-container">
-            <div id="chart-container">
-                <canvas id="shift-chart"></canvas>
-            </div>
-            <div id="data-summary"></div>
-        </div>
-
-        <div id="summary-container">
-            <h2>สรุปรายการเวร</h2>
-            <div id="summary-list">
-                <p style="text-align:center; color:#888;">กำลังโหลดข้อมูล หรือยังไม่มีข้อมูล...</p>
-            </div>
-            <div id="pagination-container"></div>
-        </div>
-
+  <div class="relative z-10 w-full md:max-w-5xl mx-auto bg-white/80 backdrop-blur-xl h-full md:h-[95vh] md:my-[2.5vh] md:rounded-[2.5rem] md:shadow-2xl md:border md:border-white/50 flex flex-col transition-all duration-300 overflow-hidden">
+    <div class="bg-gradient-to-br from-blue-700 via-indigo-600 to-purple-700 p-5 md:rounded-t-[2.5rem] rounded-b-[2.5rem] shadow-lg shadow-indigo-200/50 text-white shrink-0 z-30 flex justify-between items-center relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
+      <div class="relative z-10">
+        <h1 class="text-2xl font-bold flex items-center gap-2 tracking-tight"><i class="fa-solid fa-prescription-bottle-medical text-blue-200"></i> OPD Pharmacy</h1>
+        <p class="text-blue-100 text-base opacity-90 font-medium tracking-wide">Expiry Management System</p>
+      </div>
+      <a href="https://docs.google.com/spreadsheets/d/1l7gEdZJrgfTbXPF3wWyM1DjfALJIKLM8zokXEfZLw_k/edit?usp=sharing" target="_blank" class="relative z-10 w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white border border-white/30 hover:scale-110 hover:rotate-12 transition-all duration-300 shadow-md cursor-pointer">
+        <i class="fa-solid fa-table-cells text-lg"></i>
+      </a>
     </div>
 
-    <footer id="page-footer">
-        <p>&copy; <span id="copyright-year"></span> ตารางเว๊น | เวอร์ชั่น 5.0 (Google Calendar Integration)</p>
-    </footer>
+    <div class="flex p-3 gap-3 shrink-0 mt-1 md:px-8">
+      <button onclick="switchTab('entry')" id="tab-entry" class="flex-1 py-2.5 px-4 rounded-2xl font-bold text-base transition-all duration-300 bg-blue-600 text-white shadow-lg shadow-blue-200 transform scale-100"><i class="fa-solid fa-plus mr-1"></i> Add Item</button>
+      <button onclick="switchTab('report')" id="tab-report" class="flex-1 py-2.5 px-4 rounded-2xl font-bold text-base transition-all duration-300 bg-white text-slate-500 border border-slate-200"><i class="fa-solid fa-list-ul mr-1"></i> Manage Item</button>
+    </div>
 
-    <!-- Link to external JavaScript file -->
-    <script type="module" src="script.js"></script>
+    <div id="mainContainer" class="flex-1 px-5 md:px-8 pb-32 overflow-y-auto overflow-x-hidden relative scroll-smooth">
+      <div id="view-entry" class="fade-in space-y-4 pt-2">
+        <form id="expiryForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+          <input type="hidden" id="generic" name="generic"><input type="hidden" id="unit" name="unit"><input type="hidden" id="strength" name="strength">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="group"><label class="block text-base font-bold text-slate-500 uppercase mb-1.5 tracking-wide ml-1 group-hover:text-blue-600 transition-colors">Transaction Date</label><input type="date" id="entryDate" name="entryDate" class="w-full h-12 px-4 rounded-xl bg-white border border-slate-200 focus:border-blue-500 outline-none transition-all font-medium text-lg text-slate-700 shadow-sm hover:border-blue-300" required></div>
+              <div class="relative group"><label class="block text-base font-bold text-slate-500 uppercase mb-1.5 tracking-wide ml-1 group-hover:text-blue-600 transition-colors">Drug Name</label><div class="relative"><i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 z-10 group-hover:text-blue-500 transition-colors text-lg"></i><input type="text" id="drugSearch" name="drugName" placeholder="Search Drug..." class="w-full h-12 pl-11 pr-10 px-4 rounded-xl bg-white border border-slate-200 focus:border-blue-500 outline-none transition-all font-medium text-lg shadow-sm hover:border-blue-300" autocomplete="off" required><button type="button" id="clearSearchBtn" onclick="clearDrugSearch()" class="absolute right-3 top-2.5 text-slate-400 hover:text-red-500 hidden z-20 w-8 h-8 rounded-full hover:bg-slate-100 transition flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button></div><ul id="drugList" class="hidden absolute z-30 w-full bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto mt-1 overflow-hidden text-base"></ul></div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div class="group"><label class="block text-base font-bold text-slate-500 uppercase mb-1.5 tracking-wide ml-1 group-hover:text-red-500 transition-colors">Expiry Date</label><input type="date" id="expiryDateInput" name="expiryDate" class="w-full h-12 px-4 rounded-xl bg-red-50/50 border border-red-100 focus:border-red-400 outline-none text-red-700 font-medium text-lg shadow-sm hover:border-red-300 transition-all" required></div>
+              
+              <div class="group">
+                 <label class="block text-base font-bold text-slate-500 uppercase mb-1.5 tracking-wide ml-1 group-hover:text-blue-600 transition-colors">Quantity</label>
+                 <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustQty(-1)" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 active:scale-95 transition-all text-lg font-bold flex items-center justify-center shadow-sm"><i class="fa-solid fa-minus"></i></button>
+                    <input type="number" id="qtyInput" name="qty" class="flex-1 h-12 text-center rounded-xl bg-white border border-slate-200 focus:border-blue-500 outline-none transition-all font-bold text-xl text-slate-700 shadow-sm hover:border-blue-300" placeholder="0" required>
+                    <button type="button" onclick="adjustQty(1)" class="w-12 h-12 rounded-xl bg-white border border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 active:scale-95 transition-all text-lg font-bold flex items-center justify-center shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                    <span id="unitDisplay" class="h-12 px-4 rounded-xl bg-blue-600 text-white font-bold border border-blue-600 flex items-center justify-center shadow-sm text-sm tracking-wider min-w-[60px]">UNIT</span>
+                 </div>
+              </div>
+          </div>
+          <div><label class="block text-base font-bold text-slate-500 uppercase mb-2 tracking-wide ml-1">Management Action <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="Sticker" class="action-card-input hidden" required onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-orange-300"><i class="fa-solid fa-tags text-xl text-orange-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">ติด Sticker</span></div></label>
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="Transfer" class="action-card-input hidden" onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-blue-300"><i class="fa-solid fa-share-from-square text-xl text-blue-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">ส่งต่อ</span></div></label>
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="Separate" class="action-card-input hidden" onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-red-300"><i class="fa-solid fa-box-open text-xl text-red-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">แยกเก็บ</span></div></label>
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="ContactWH" class="action-card-input hidden" onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-teal-300"><i class="fa-solid fa-phone-volume text-xl text-teal-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">ติดต่อคลัง</span></div></label>
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="ReturnWH" class="action-card-input hidden" onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-green-300"><i class="fa-solid fa-truck-ramp-box text-xl text-green-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">คืนคลัง</span></div></label>
+              <label class="cursor-pointer relative group"><input type="radio" name="actionType" value="Other" class="action-card-input hidden" onchange="toggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 shadow-sm group-hover:border-gray-300"><i class="fa-solid fa-ellipsis text-xl text-gray-500 mb-0.5"></i><span class="text-sm font-bold text-slate-600">อื่นๆ</span></div></label>
+            </div>
+          </div>
+          <div id="dynamicArea" class="p-4 bg-slate-100/80 rounded-2xl border border-slate-200 hidden fade-in">
+            <label class="block text-base font-bold text-slate-500 mb-2 uppercase" id="dynamicLabel">Additional Details</label>
+            <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <select id="inputTransfer" class="dynamic-input hidden w-full p-3 rounded-lg bg-slate-50 border border-slate-100 outline-none focus:border-blue-400 text-base"><option value="" disabled selected>-- เลือกปลายทาง --</option><option value="IPD MED">IPD MED</option><option value="IPD SURG">IPD SURG</option><option value="OPD SURG">OPD SURG</option><option value="ER">ER</option></select>
+                <div class="space-y-2"><textarea id="subNote" placeholder="Note (Optional)..." class="w-full p-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 outline-none transition-colors text-base" rows="2"></textarea></div>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200/50 btn-hover flex justify-center items-center gap-2 text-lg mt-4"><i class="fa-solid fa-save"></i> Save Data</button>
+        </form>
+      </div>
+
+      <div id="view-report" class="hidden fade-in pt-2 space-y-4">
+        <div class="grid grid-cols-2 gap-4 sticky top-0 bg-white/90 backdrop-blur p-3 -mx-3 z-20 rounded-b-2xl border-b border-slate-100">
+           <div><label class="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">Timeframe</label><div class="relative"><select id="filterTime" onchange="toggleCustomDate()" class="appearance-none w-full text-base p-2.5 pl-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm outline-none font-medium focus:border-blue-400 focus:bg-white transition-colors"><option value="all">All Time</option><option value="30">Next 30 Days</option><option value="90">Next 3 Months</option><option value="180">Next 6 Months</option><option value="custom">Custom...</option></select><i class="fa-solid fa-chevron-down absolute right-3 top-3.5 text-xs text-slate-400 pointer-events-none"></i></div></div>
+           <div><label class="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">Action Type</label><div class="relative"><select id="filterAction" onchange="renderReport()" class="appearance-none w-full text-base p-2.5 pl-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm outline-none font-medium focus:border-blue-400 focus:bg-white transition-colors"><option value="all">All Types</option><option value="Sticker">ติด Sticker</option><option value="Transfer">ส่งต่อห้องยา</option><option value="Separate">แยกเก็บ</option><option value="ContactWH">ติดต่อคลัง</option><option value="ReturnWH">คืนคลัง</option></select><i class="fa-solid fa-chevron-down absolute right-3 top-3.5 text-xs text-slate-400 pointer-events-none"></i></div></div>
+        </div>
+        <div id="customDateContainer" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200 flex gap-2 items-center fade-in"><input type="number" id="customNumber" placeholder="Qty" oninput="renderReport()" class="flex-1 p-2 text-base rounded-lg border border-slate-300 outline-none text-center focus:border-blue-400"><select id="customUnit" onchange="renderReport()" class="flex-1 p-2 text-base rounded-lg border border-slate-300 outline-none bg-white focus:border-blue-400"><option value="days">Days</option><option value="months">Months</option></select><span class="text-xs text-slate-400 whitespace-nowrap font-medium">from now</span></div>
+        <div id="reportList" class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-24 min-h-[300px]"></div>
+        <div id="paginationControls" class="flex justify-between items-center pt-4 pb-24 hidden"><button onclick="prevPage()" id="btnPrev" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-base font-bold disabled:opacity-50 hover:bg-slate-50">Previous</button><span id="pageIndicator" class="text-sm font-bold text-slate-400">Page 1</span><button onclick="nextPage()" id="btnNext" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-base font-bold disabled:opacity-50 hover:bg-slate-50">Next</button></div>
+      </div>
+      <div class="h-10"></div>
+    </div>
+    <button id="backToTop" onclick="scrollToTop()" class="back-to-top w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-400/30 flex items-center justify-center hover:scale-110 active:scale-90"><i class="fa-solid fa-arrow-up text-xl"></i></button>
+
+    <div id="manageModal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-bg p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md md:max-w-lg h-[85vh] flex flex-col overflow-hidden transform transition-all scale-100">
+            <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-5 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
+                <div class="relative z-10">
+                  <h3 class="font-medium text-blue-200 text-sm flex items-center gap-2"><i class="fa-solid fa-pen-to-square"></i> Manage Item</h3>
+                  <p class="text-xl font-bold text-white mt-1 leading-tight drop-shadow-sm" id="manageDrugName">Drug Name</p>
+                </div>
+                <button onclick="closeManageModal()" class="relative z-10 w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 hover:rotate-90 transition-all"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto flex-1 space-y-5 scroll-smooth">
+                <input type="hidden" id="manageRowIndex"><input type="hidden" id="manageMaxQty">
+                <input type="hidden" id="manageOriginalAction">
+                
+                <div class="bg-slate-50 p-4 rounded-3xl border border-slate-200 text-center relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)]">
+                    <div class="absolute top-3 right-3 bg-white text-slate-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-200 shadow-sm uppercase">TAB</div>
+                    <label class="block text-base font-bold text-slate-400 uppercase mb-3 tracking-wide">Manage Quantity</label>
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <button type="button" onclick="adjustManageQty(-1)" class="w-12 h-12 rounded-full border-2 border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 flex items-center justify-center group active:scale-95"><i class="fa-solid fa-minus text-lg"></i></button>
+                        <div class="flex-1 max-w-[100px] border-b-2 border-blue-200 hover:border-blue-400 transition-colors"><input type="number" id="manageQty" class="big-qty-input w-full outline-none" placeholder="0"></div>
+                        <button type="button" onclick="adjustManageQty(1)" class="w-12 h-12 rounded-full border-2 border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 flex items-center justify-center group active:scale-95"><i class="fa-solid fa-plus text-lg"></i></button>
+                        <button type="button" onclick="setAllQty()" class="w-12 h-12 rounded-full border-2 border-blue-100 text-blue-500 bg-white hover:bg-blue-50 transition-all duration-200 flex items-center justify-center font-bold text-xs active:scale-95 shadow-sm">ALL</button>
+                    </div>
+                    <div class="text-xs text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-100 inline-flex items-center gap-2">Current: <span id="displayMaxQty" class="font-bold text-slate-700 text-sm">0</span> <span id="manageUnit" class="text-[10px] font-bold text-blue-500 uppercase">UNIT</span><button onclick="editStockQty()" class="text-blue-500 hover:text-blue-700 ml-1"><i class="fa-solid fa-pen-to-square"></i></button></div>
+                </div>
+
+                <div>
+                    <label class="block text-base font-bold text-slate-400 uppercase mb-2 ml-1">New Status</label>
+                    <div class="grid grid-cols-3 gap-3">
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="Sticker" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-orange-300"><i class="fa-solid fa-tags text-lg text-orange-500"></i><span class="text-sm font-bold text-slate-600">Sticker</span></div></label>
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="Transfer" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-blue-300"><i class="fa-solid fa-share-from-square text-lg text-blue-500"></i><span class="text-sm font-bold text-slate-600">ส่งต่อ</span></div></label>
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="Separate" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-red-300"><i class="fa-solid fa-box-open text-lg text-red-500"></i><span class="text-sm font-bold text-slate-600">แยกเก็บ</span></div></label>
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="ContactWH" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-teal-300"><i class="fa-solid fa-phone-volume text-lg text-teal-500"></i><span class="text-sm font-bold text-slate-600">แจ้งคลัง</span></div></label>
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="ReturnWH" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-green-300"><i class="fa-solid fa-truck-ramp-box text-lg text-green-500"></i><span class="text-sm font-bold text-slate-600">คืนคลัง</span></div></label>
+                      <label class="cursor-pointer relative group"><input type="radio" name="manageAction" value="Other" class="action-card-input hidden" onchange="modalToggleSubDetails(this.value)"><div class="action-card p-2.5 rounded-xl border border-slate-200 bg-white text-center h-full flex flex-col items-center justify-center gap-1 group-hover:border-gray-300"><i class="fa-solid fa-ellipsis text-lg text-gray-500"></i><span class="text-sm font-bold text-slate-600">อื่นๆ</span></div></label>
+                    </div>
+                </div>
+
+                <div id="modalDynamicArea" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 hidden fade-in">
+                    <label class="block text-base font-bold text-slate-500 mb-2" id="modalDynamicLabel">Details</label>
+                    <div class="bg-white p-2.5 border border-slate-200 rounded-xl space-y-2">
+                      <select id="modalTransfer" class="dynamic-input hidden w-full p-3 rounded-lg bg-slate-50 outline-none text-base"><option value="" disabled selected>-- เลือกปลายทาง --</option><option value="IPD MED">IPD MED</option><option value="IPD SURG">IPD SURG</option><option value="OPD SURG">OPD SURG</option><option value="ER">ER</option></select>
+                      <textarea id="modalSubNote" placeholder="Note (Optional)..." class="w-full p-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white outline-none transition-colors text-base" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-100 bg-white flex gap-4 shrink-0 pb-8">
+                <button onclick="confirmDelete()" class="w-14 h-14 flex items-center justify-center rounded-2xl border border-red-100 text-red-500 hover:bg-red-50 hover:scale-105 transition-transform"><i class="fa-solid fa-trash-can text-xl"></i></button>
+                <button onclick="submitManagement()" class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-blue-200 btn-hover text-lg">Confirm Update</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center backdrop-blur-sm fade-in">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center w-80 transform scale-100 animate-bounce-in">
+            <div class="relative mb-6"><div class="custom-loader"></div></div>
+            <h2 class="text-slate-800 font-bold text-xl">Processing...</h2>
+            <p class="text-slate-400 text-base mt-2">Please wait a moment</p>
+        </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script> 
+  <script>
+     if ('serviceWorker' in navigator) {
+       window.addEventListener('load', () => {
+         navigator.serviceWorker.register('sw.js');
+       });
+     }
+  </script>
 </body>
 </html>
